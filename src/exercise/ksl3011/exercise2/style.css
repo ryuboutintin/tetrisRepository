@@ -103,6 +103,58 @@ body {
 }
 .ctrl-btn--new:hover { background: var(--accent-dim); color: var(--accent); }
 
+/* ── 검색창 ── */
+.sidebar-search {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sidebar-search input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 5px 10px;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.12s;
+}
+.sidebar-search input:focus { border-color: var(--accent); }
+.sidebar-search input::placeholder { color: var(--text-muted); }
+
+/* ── 태그 필터 ── */
+.tag-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.tag-filter.hidden { display: none; }
+
+.tag-chip {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, border-color 0.1s, color 0.1s;
+}
+.tag-chip:hover { background: var(--hover); }
+.tag-chip.active {
+  background: var(--accent-dim);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 500;
+}
+
 /* ── 메모 목록 ── */
 .memo-list {
   flex: 1;
@@ -122,6 +174,8 @@ body {
   background: var(--active-bg);
   border-left-color: var(--active-line);
 }
+.memo-item--trash { cursor: default; }
+.memo-item--trash:hover { background: transparent; }
 
 .item-header {
   display: flex;
@@ -156,6 +210,27 @@ body {
   line-height: 1.4;
 }
 
+/* 휴지통 항목 내 액션 버튼 */
+.trash-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.trash-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-sub);
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--r);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, color 0.1s;
+}
+.trash-btn:hover { background: var(--hover); color: var(--text); }
+.trash-btn--danger:hover { background: var(--danger-dim); color: var(--danger); border-color: var(--danger); }
+
 .empty-msg {
   padding: 40px 20px;
   text-align: center;
@@ -164,6 +239,35 @@ body {
   line-height: 1.8;
 }
 .empty-msg.hidden { display: none; }
+
+/* ── 사이드바 하단 ── */
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.footer-btn {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: var(--r);
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, color 0.1s;
+  white-space: nowrap;
+}
+.footer-btn:hover { background: var(--hover); color: var(--text); }
+.footer-btn.active { color: var(--accent); }
+
+.footer-divider {
+  flex: 1;
+}
 
 /* ── 에디터 영역 ── */
 .editor {
@@ -237,7 +341,7 @@ body {
 }
 .write-content::placeholder { color: var(--text-muted); }
 
-/* ── 푸터 ── */
+/* ── 에디터 푸터 ── */
 .write-footer {
   display: flex;
   align-items: center;
@@ -260,7 +364,6 @@ body {
   font-size: 14px;
   color: var(--text-muted);
   flex-shrink: 0;
-  line-height: 1;
 }
 
 .tag-input {
@@ -275,12 +378,69 @@ body {
 }
 .tag-input::placeholder { color: var(--text-muted); }
 
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* 자동 저장 상태 */
+.save-status {
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+.save-status.saving { color: var(--text-muted); }
+.save-status.saved  { color: var(--accent); }
+
 .action-row {
   display: flex;
   align-items: center;
   gap: 4px;
-  flex-shrink: 0;
 }
+
+/* 인라인 삭제 확인 */
+.del-confirm {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.del-confirm.hidden { display: none; }
+
+.del-confirm__text {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.act-cancel {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-sub);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: var(--r);
+  transition: background 0.1s;
+}
+.act-cancel:hover { background: var(--hover); }
+
+.act-confirm-del {
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 4px 10px;
+  border-radius: var(--r);
+  transition: opacity 0.12s;
+}
+.act-confirm-del:hover { opacity: 0.85; }
 
 .act-delete {
   border: none;
@@ -292,7 +452,6 @@ body {
   padding: 5px 10px;
   border-radius: var(--r);
   transition: color 0.12s, background 0.12s;
-  letter-spacing: 0.1px;
 }
 .act-delete:hover { color: var(--danger); background: var(--danger-dim); }
 
@@ -303,7 +462,6 @@ body {
   cursor: pointer;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: 0.1px;
   font-family: inherit;
   padding: 5px 16px;
   border-radius: var(--r);
