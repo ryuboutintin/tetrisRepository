@@ -4,15 +4,15 @@ from typing import Optional, List
 
 
 class MemoCreate(BaseModel):
-    content: str
-    title: Optional[str] = None
-    tags: Optional[List[str]] = Field(default_factory=list)
+    content: str = Field(..., min_length=1, max_length=50000)
+    title: Optional[str] = Field(None, max_length=200)
+    tags: Optional[List[str]] = Field(default_factory=list, max_length=10)
 
 
 class MemoUpdate(BaseModel):
-    content: Optional[str] = None
-    title: Optional[str] = None
-    tags: Optional[List[str]] = None
+    content: Optional[str] = Field(None, min_length=1, max_length=50000)
+    title: Optional[str] = Field(None, max_length=200)
+    tags: Optional[List[str]] = Field(None, max_length=10)
 
 
 class Memo(BaseModel):
@@ -22,3 +22,5 @@ class Memo(BaseModel):
     tags: List[str] = Field(default_factory=list)
     created_at: datetime
     updated_at: datetime
+    is_deleted: bool = False
+    deleted_at: Optional[datetime] = None
