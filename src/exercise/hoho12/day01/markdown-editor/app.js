@@ -106,19 +106,81 @@ function insertLinePrefix(prefix) {
 
 document.getElementById('btn-bold').addEventListener('click', () => insertAround('**', '**'));
 document.getElementById('btn-italic').addEventListener('click', () => insertAround('*', '*'));
+document.getElementById('btn-strike').addEventListener('click', () => insertAround('~~', '~~'));
 document.getElementById('btn-h1').addEventListener('click', () => insertLinePrefix('# '));
 document.getElementById('btn-h2').addEventListener('click', () => insertLinePrefix('## '));
+document.getElementById('btn-h3').addEventListener('click', () => insertLinePrefix('### '));
 document.getElementById('btn-ul').addEventListener('click', () => insertLinePrefix('- '));
+document.getElementById('btn-ol').addEventListener('click', () => insertOrderedList());
+document.getElementById('btn-quote').addEventListener('click', () => insertLinePrefix('> '));
 document.getElementById('btn-code').addEventListener('click', () => insertAround('`', '`'));
-document.getElementById('btn-link').addEventListener('click', () => {
+document.getElementById('btn-codeblock').addEventListener('click', () => insertCodeBlock());
+document.getElementById('btn-link').addEventListener('click', () => insertLink());
+document.getElementById('btn-image').addEventListener('click', () => insertImage());
+document.getElementById('btn-hr').addEventListener('click', () => insertHr());
+
+function insertLink() {
   const { selectionStart: s, selectionEnd: e, value } = editor;
   const selected = value.slice(s, e) || '링크 텍스트';
   const replacement = `[${selected}](url)`;
   editor.setRangeText(replacement, s, e, 'end');
+  // 'url' 부분을 자동 선택해 바로 입력 가능하게
+  const urlStart = s + selected.length + 3;
+  editor.setSelectionRange(urlStart, urlStart + 3);
   editor.focus();
   render();
   scheduleSave();
-});
+}
+
+function insertImage() {
+  const { selectionStart: s, selectionEnd: e, value } = editor;
+  const alt = value.slice(s, e) || '이미지 설명';
+  const replacement = `![${alt}](url)`;
+  editor.setRangeText(replacement, s, e, 'end');
+  const urlStart = s + alt.length + 4;
+  editor.setSelectionRange(urlStart, urlStart + 3);
+  editor.focus();
+  render();
+  scheduleSave();
+}
+
+function insertCodeBlock() {
+  const { selectionStart: s, selectionEnd: e, value } = editor;
+  const selected = value.slice(s, e);
+  const needsNewline = s > 0 && value[s - 1] !== '\n';
+  const prefix = needsNewline ? '\n' : '';
+  const replacement = `${prefix}\`\`\`\n${selected || ''}\n\`\`\`\n`;
+  editor.setRangeText(replacement, s, e, 'end');
+  // 언어 입력 위치로 커서 이동 (``` 바로 뒤)
+  const langPos = s + prefix.length + 3;
+  editor.setSelectionRange(langPos, langPos);
+  editor.focus();
+  render();
+  scheduleSave();
+}
+
+function insertOrderedList() {
+  const { selectionStart: s, selectionEnd: e, value } = editor;
+  const lineStart = value.lastIndexOf('\n', s - 1) + 1;
+  const lineEnd = value.indexOf('\n', e);
+  const end = lineEnd === -1 ? value.length : lineEnd;
+  const lines = value.slice(lineStart, end).split('\n');
+  const prefixed = lines.map((l, i) => `${i + 1}. ${l}`).join('\n');
+  editor.setRangeText(prefixed, lineStart, end, 'end');
+  editor.focus();
+  render();
+  scheduleSave();
+}
+
+function insertHr() {
+  const { selectionStart: s, selectionEnd: e, value } = editor;
+  const needsNewline = s > 0 && value[s - 1] !== '\n';
+  const replacement = `${needsNewline ? '\n' : ''}\n---\n\n`;
+  editor.setRangeText(replacement, s, e, 'end');
+  editor.focus();
+  render();
+  scheduleSave();
+}
 
 // ─── 초기화 버튼 ─────────────────────────────────────────────────
 document.getElementById('btn-clear').addEventListener('click', () => {
@@ -130,23 +192,30 @@ document.getElementById('btn-clear').addEventListener('click', () => {
 
 // ─── 키보드 단축키 ───────────────────────────────────────────────
 editor.addEventListener('keydown', e => {
+  const ctrl = e.ctrlKey || e.metaKey;
+
   if (e.key === 'Tab') {
     e.preventDefault();
     insertAround('  ', '');
     return;
   }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
-    e.preventDefault();
-    insertAround('**', '**');
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 'i') {
-    e.preventDefault();
-    insertAround('*', '*');
-  }
-  if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-    e.preventDefault();
-    clearTimeout(saveTimer);
-    save();
+
+  if (!ctrl) return;
+
+  switch (e.key.toLowerCase()) {
+    case 'b': e.preventDefault(); insertAround('**', '**'); break;
+    case 'i': e.preventDefault(); insertAround('*', '*'); break;
+    case 'k': e.preventDefault(); insertLink(); break;
+    case 'e': e.preventDefault(); insertCodeBlock(); break;
+    case 'q': e.preventDefault(); insertLinePrefix('> '); break;
+    case 's':
+      e.preventDefault();
+      if (e.shiftKey) { insertAround('~~', '~~'); }
+      else { clearTimeout(saveTimer); save(); }
+      break;
+    case 'o':
+      if (e.shiftKey) { e.preventDefault(); insertOrderedList(); }
+      break;
   }
 });
 
