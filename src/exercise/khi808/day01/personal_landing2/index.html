@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khi808 — Personal Page</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text: #1a1a2e;
+      --muted: #6c757d;
+      --accent: #4361ee;
+      --accent-light: #e8ecff;
+      --border: #e9ecef;
+      --radius: 12px;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Layout ── */
+    main {
+      flex: 1;
+      max-width: 680px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    section { margin-bottom: 48px; }
+
+    /* ── Hero ── */
+    .hero {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 48px;
+    }
+
+    .avatar {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: 2rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      user-select: none;
+    }
+
+    .hero-text h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      line-height: 1.2;
+    }
+
+    .hero-text .tagline {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* ── Section title ── */
+    h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    /* ── About ── */
+    .about p {
+      font-size: 0.975rem;
+      color: #333;
+      line-height: 1.75;
+    }
+
+    /* ── Skills ── */
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      list-style: none;
+    }
+
+    .skill-list li {
+      background: var(--accent-light);
+      color: var(--accent);
+      font-size: 0.825rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 999px;
+      transition: background 0.15s, color 0.15s;
+      cursor: default;
+    }
+
+    .skill-list li:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Contact ── */
+    .contact-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .contact-list li {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .contact-list .icon {
+      width: 20px;
+      color: var(--accent);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .contact-list a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 0.925rem;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .contact-list a:hover {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      .hero { flex-direction: column; align-items: flex-start; gap: 16px; }
+    }
+
+    /* ── Fade-in animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero, section {
+      animation: fadeUp 0.5s ease both;
+    }
+
+    section:nth-of-type(1) { animation-delay: 0.05s; }
+    section:nth-of-type(2) { animation-delay: 0.10s; }
+    section:nth-of-type(3) { animation-delay: 0.15s; }
+  </style>
+</head>
+<body>
+  <main>
+    <!-- Hero -->
+    <div class="hero">
+      <div class="avatar" id="avatar">K</div>
+      <div class="hero-text">
+        <h1 id="name">Khi808</h1>
+        <p class="tagline" id="tagline">코드로 문제를 풀고, 기술로 가치를 만드는 개발자</p>
+      </div>
+    </div>
+
+    <!-- About -->
+    <section class="about">
+      <h2>About</h2>
+      <p id="about">
+        안녕하세요! 저는 새로운 기술을 탐구하며 실용적인 소프트웨어를 만드는 것을 좋아하는 개발자입니다.
+        사용자 경험을 중심에 두고, 읽기 좋고 유지보수하기 쉬운 코드를 지향합니다.
+        현재는 웹 풀스택과 AI 활용 개발에 관심을 갖고 공부 중입니다.
+      </p>
+    </section>
+
+    <!-- Skills -->
+    <section>
+      <h2>Skills</h2>
+      <ul class="skill-list" id="skills">
+        <li>HTML / CSS</li>
+        <li>JavaScript</li>
+        <li>Python</li>
+        <li>React</li>
+        <li>Node.js</li>
+        <li>Git</li>
+        <li>SQL</li>
+        <li>AI / LLM</li>
+      </ul>
+    </section>
+
+    <!-- Contact -->
+    <section>
+      <h2>Contact</h2>
+      <ul class="contact-list">
+        <li>
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </span>
+          <a href="mailto:kang33574503@gmail.com">kang33574503@gmail.com</a>
+        </li>
+        <li>
+          <span class="icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
+            </svg>
+          </span>
+          <a href="https://github.com/khi808" target="_blank" rel="noopener">github.com/khi808</a>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer>
+    <span id="year"></span> Khi808. Built with plain HTML, CSS &amp; JS.
+  </footer>
+
+  <script>
+    document.getElementById('year').textContent = '© ' + new Date().getFullYear();
+  </script>
+</body>
+</html>

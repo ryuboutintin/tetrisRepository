@@ -1,0 +1,797 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown Editor</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --panel-strong: #eef2f6;
+      --text: #19212a;
+      --muted: #687382;
+      --line: #d8dee7;
+      --accent: #0f766e;
+      --accent-strong: #115e59;
+      --accent-soft: #d9f3ef;
+      --danger: #b42318;
+      --shadow: 0 14px 36px rgba(31, 41, 55, 0.12);
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+    }
+
+    button,
+    textarea,
+    input {
+      font: inherit;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    button:hover {
+      border-color: #aab5c3;
+      background: #f8fafc;
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 180px;
+    }
+
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .status {
+      color: var(--muted);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .actions,
+    .toolbar,
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .icon-button,
+    .mode-button {
+      display: inline-grid;
+      place-items: center;
+      min-width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      padding: 0 10px;
+    }
+
+    .icon-button svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2;
+    }
+
+    .mode-button {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .mode-button.active {
+      border-color: var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+
+    .formatbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 10px 18px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .tool-separator {
+      width: 1px;
+      height: 28px;
+      background: var(--line);
+    }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 1px;
+      background: var(--line);
+    }
+
+    .pane {
+      min-width: 0;
+      min-height: 0;
+      background: var(--panel);
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 42px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .counter {
+      font-weight: 600;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    textarea {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      resize: none;
+      border: 0;
+      outline: 0;
+      padding: 22px;
+      color: var(--text);
+      background: var(--panel);
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.7;
+      tab-size: 2;
+    }
+
+    .preview {
+      overflow: auto;
+      padding: 22px;
+      line-height: 1.7;
+    }
+
+    .preview > :first-child {
+      margin-top: 0;
+    }
+
+    .preview h1,
+    .preview h2,
+    .preview h3 {
+      line-height: 1.25;
+      margin: 1.4em 0 0.55em;
+    }
+
+    .preview h1 {
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+      font-size: 30px;
+    }
+
+    .preview h2 {
+      font-size: 23px;
+    }
+
+    .preview h3 {
+      font-size: 19px;
+    }
+
+    .preview p,
+    .preview ul,
+    .preview ol,
+    .preview blockquote,
+    .preview pre,
+    .preview table {
+      margin: 0 0 16px;
+    }
+
+    .preview a {
+      color: var(--accent-strong);
+      font-weight: 700;
+    }
+
+    .preview code {
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: var(--panel-strong);
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
+    .preview pre {
+      overflow: auto;
+      padding: 16px;
+      border-radius: 8px;
+      background: #16202a;
+      color: #edf3f8;
+    }
+
+    .preview pre code {
+      padding: 0;
+      background: transparent;
+      color: inherit;
+    }
+
+    .preview blockquote {
+      padding: 4px 0 4px 16px;
+      border-left: 4px solid var(--accent);
+      color: #3d4855;
+      background: #f7fbfa;
+    }
+
+    .preview table {
+      width: 100%;
+      border-collapse: collapse;
+      display: block;
+      overflow-x: auto;
+    }
+
+    .preview th,
+    .preview td {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      text-align: left;
+    }
+
+    .preview th {
+      background: #f2f5f8;
+    }
+
+    .preview hr {
+      border: 0;
+      border-top: 1px solid var(--line);
+      margin: 24px 0;
+    }
+
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      z-index: 10;
+      max-width: min(360px, calc(100vw - 36px));
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #17212b;
+      color: white;
+      box-shadow: var(--shadow);
+      font-size: 14px;
+      opacity: 0;
+      transform: translateY(12px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 860px) {
+      .topbar,
+      .formatbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace.preview-only .editor-pane,
+      .workspace.editor-only .preview-pane {
+        display: none;
+      }
+    }
+
+    @media (min-width: 861px) {
+      .workspace.editor-only {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace.preview-only {
+        grid-template-columns: 1fr;
+      }
+
+      .workspace.editor-only .preview-pane,
+      .workspace.preview-only .editor-pane {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div>
+          <h1>Markdown Editor</h1>
+          <div class="status" id="saveStatus">자동 저장 준비됨</div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="view-toggle" aria-label="보기 모드">
+          <button class="mode-button active" type="button" data-view="split">분할</button>
+          <button class="mode-button" type="button" data-view="editor">편집</button>
+          <button class="mode-button" type="button" data-view="preview">미리보기</button>
+        </div>
+        <button class="icon-button" type="button" id="copyHtml" title="HTML 복사" aria-label="HTML 복사">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" id="downloadMd" title="마크다운 다운로드" aria-label="마크다운 다운로드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <path d="M7 10l5 5 5-5"></path>
+            <path d="M12 15V3"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" id="clearDoc" title="문서 비우기" aria-label="문서 비우기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 6h18"></path>
+            <path d="M8 6V4h8v2"></path>
+            <path d="M19 6l-1 14H6L5 6"></path>
+            <path d="M10 11v5"></path>
+            <path d="M14 11v5"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="formatbar" aria-label="서식 도구">
+      <div class="toolbar">
+        <button class="icon-button" type="button" data-wrap="**|**" title="굵게" aria-label="굵게"><strong>B</strong></button>
+        <button class="icon-button" type="button" data-wrap="*|*" title="기울임" aria-label="기울임"><em>I</em></button>
+        <button class="icon-button" type="button" data-wrap="`|`" title="인라인 코드" aria-label="인라인 코드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M16 18l6-6-6-6"></path>
+            <path d="M8 6l-6 6 6 6"></path>
+          </svg>
+        </button>
+        <div class="tool-separator"></div>
+        <button class="icon-button" type="button" data-prefix="# " title="제목" aria-label="제목">H1</button>
+        <button class="icon-button" type="button" data-prefix="- " title="목록" aria-label="목록">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M8 6h13"></path>
+            <path d="M8 12h13"></path>
+            <path d="M8 18h13"></path>
+            <path d="M3 6h.01"></path>
+            <path d="M3 12h.01"></path>
+            <path d="M3 18h.01"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-prefix="> " title="인용" aria-label="인용">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 21c3 0 7-1 7-8V5H3v8h4c0 4-2 6-4 8z"></path>
+            <path d="M14 21c3 0 7-1 7-8V5h-7v8h4c0 4-2 6-4 8z"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-insert="[링크 텍스트](https://example.com)" title="링크" aria-label="링크">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-insert="![이미지 설명](https://placehold.co/800x420)" title="이미지" aria-label="이미지">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="status" id="docStats">0 글자 · 0 단어</div>
+    </section>
+
+    <main class="workspace" id="workspace">
+      <section class="pane editor-pane" aria-label="마크다운 편집 영역">
+        <div class="pane-header">
+          <span>Markdown</span>
+          <span class="counter" id="lineCount">1 줄</span>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </section>
+      <section class="pane preview-pane" aria-label="미리보기 영역">
+        <div class="pane-header">
+          <span>Preview</span>
+          <span class="counter">실시간 렌더링</span>
+        </div>
+        <article class="preview" id="preview"></article>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    const editor = document.querySelector("#editor");
+    const preview = document.querySelector("#preview");
+    const workspace = document.querySelector("#workspace");
+    const saveStatus = document.querySelector("#saveStatus");
+    const docStats = document.querySelector("#docStats");
+    const lineCount = document.querySelector("#lineCount");
+    const toast = document.querySelector("#toast");
+    const storageKey = "plain-markdown-editor-content";
+
+    const starter = `# 새 문서
+
+마크다운을 입력하면 오른쪽에서 바로 미리볼 수 있습니다.
+
+## 지원 문법
+
+- **굵게**, *기울임*, \`코드\`
+- [링크](https://example.com)
+- 인용문과 코드 블록
+- 표
+
+> 작성 내용은 브라우저에 자동 저장됩니다.
+
+\`\`\`js
+const message = "Hello Markdown";
+console.log(message);
+\`\`\`
+
+| 항목 | 상태 |
+| --- | --- |
+| 편집기 | 준비됨 |
+| 미리보기 | 준비됨 |
+`;
+
+    editor.value = localStorage.getItem(storageKey) || starter;
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function inlineMarkdown(value) {
+      let html = escapeHtml(value);
+      html = html.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, '<img src="$2" alt="$1">');
+      html = html.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
+      html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+      return html;
+    }
+
+    function isTableStart(lines, index) {
+      return Boolean(
+        lines[index] &&
+        lines[index + 1] &&
+        lines[index].includes("|") &&
+        /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(lines[index + 1])
+      );
+    }
+
+    function renderTable(rows) {
+      const cells = rows.map((row) =>
+        row.trim().replace(/^\||\|$/g, "").split("|").map((cell) => inlineMarkdown(cell.trim()))
+      );
+      const head = cells[0] || [];
+      const body = cells.slice(2);
+      return `<table><thead><tr>${head.map((cell) => `<th>${cell}</th>`).join("")}</tr></thead><tbody>${body
+        .map((row) => `<tr>${row.map((cell) => `<td>${cell}</td>`).join("")}</tr>`)
+        .join("")}</tbody></table>`;
+    }
+
+    function markdownToHtml(markdown) {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const html = [];
+      let paragraph = [];
+      let list = null;
+      let quote = [];
+      let code = null;
+
+      function flushParagraph() {
+        if (paragraph.length) {
+          html.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
+          paragraph = [];
+        }
+      }
+
+      function flushList() {
+        if (list) {
+          html.push(`<${list.type}>${list.items.map((item) => `<li>${inlineMarkdown(item)}</li>`).join("")}</${list.type}>`);
+          list = null;
+        }
+      }
+
+      function flushQuote() {
+        if (quote.length) {
+          html.push(`<blockquote>${quote.map((line) => `<p>${inlineMarkdown(line)}</p>`).join("")}</blockquote>`);
+          quote = [];
+        }
+      }
+
+      for (let i = 0; i < lines.length; i += 1) {
+        const line = lines[i];
+
+        if (code) {
+          if (/^```/.test(line)) {
+            html.push(`<pre><code>${escapeHtml(code.lines.join("\n"))}</code></pre>`);
+            code = null;
+          } else {
+            code.lines.push(line);
+          }
+          continue;
+        }
+
+        if (/^```/.test(line)) {
+          flushParagraph();
+          flushList();
+          flushQuote();
+          code = { lines: [] };
+          continue;
+        }
+
+        if (isTableStart(lines, i)) {
+          flushParagraph();
+          flushList();
+          flushQuote();
+          const rows = [lines[i], lines[i + 1]];
+          i += 2;
+          while (i < lines.length && lines[i].includes("|") && lines[i].trim()) {
+            rows.push(lines[i]);
+            i += 1;
+          }
+          i -= 1;
+          html.push(renderTable(rows));
+          continue;
+        }
+
+        if (!line.trim()) {
+          flushParagraph();
+          flushList();
+          flushQuote();
+          continue;
+        }
+
+        const heading = /^(#{1,6})\s+(.+)$/.exec(line);
+        if (heading) {
+          flushParagraph();
+          flushList();
+          flushQuote();
+          const level = heading[1].length;
+          html.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
+          continue;
+        }
+
+        if (/^---+$/.test(line.trim())) {
+          flushParagraph();
+          flushList();
+          flushQuote();
+          html.push("<hr>");
+          continue;
+        }
+
+        const quoteMatch = /^>\s?(.*)$/.exec(line);
+        if (quoteMatch) {
+          flushParagraph();
+          flushList();
+          quote.push(quoteMatch[1]);
+          continue;
+        }
+
+        const unordered = /^\s*[-*]\s+(.+)$/.exec(line);
+        const ordered = /^\s*\d+\.\s+(.+)$/.exec(line);
+        if (unordered || ordered) {
+          flushParagraph();
+          flushQuote();
+          const type = unordered ? "ul" : "ol";
+          if (!list || list.type !== type) flushList();
+          if (!list) list = { type, items: [] };
+          list.items.push((unordered || ordered)[1]);
+          continue;
+        }
+
+        flushList();
+        flushQuote();
+        paragraph.push(line.trim());
+      }
+
+      if (code) html.push(`<pre><code>${escapeHtml(code.lines.join("\n"))}</code></pre>`);
+      flushParagraph();
+      flushList();
+      flushQuote();
+      return html.join("\n");
+    }
+
+    function updateStats() {
+      const text = editor.value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const lines = text ? text.split("\n").length : 1;
+      docStats.textContent = `${text.length.toLocaleString()} 글자 · ${words.toLocaleString()} 단어`;
+      lineCount.textContent = `${lines.toLocaleString()} 줄`;
+    }
+
+    function render() {
+      preview.innerHTML = markdownToHtml(editor.value);
+      updateStats();
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("visible");
+      window.clearTimeout(showToast.timer);
+      showToast.timer = window.setTimeout(() => toast.classList.remove("visible"), 1800);
+    }
+
+    function save() {
+      localStorage.setItem(storageKey, editor.value);
+      saveStatus.textContent = `자동 저장됨 ${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`;
+    }
+
+    function applyFormat(button) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end);
+      let replacement = "";
+      let cursorStart = start;
+      let cursorEnd = end;
+
+      if (button.dataset.wrap) {
+        const [before, after] = button.dataset.wrap.split("|");
+        replacement = `${before}${selected || "텍스트"}${after}`;
+        cursorStart = start + before.length;
+        cursorEnd = cursorStart + (selected || "텍스트").length;
+      }
+
+      if (button.dataset.prefix) {
+        const lineStart = editor.value.lastIndexOf("\n", start - 1) + 1;
+        editor.setRangeText(button.dataset.prefix, lineStart, lineStart, "end");
+        editor.focus();
+        render();
+        save();
+        return;
+      }
+
+      if (button.dataset.insert) {
+        replacement = button.dataset.insert;
+        cursorStart = start;
+        cursorEnd = start + replacement.length;
+      }
+
+      editor.setRangeText(replacement, start, end, "select");
+      editor.setSelectionRange(cursorStart, cursorEnd);
+      editor.focus();
+      render();
+      save();
+    }
+
+    document.querySelectorAll("[data-wrap], [data-prefix], [data-insert]").forEach((button) => {
+      button.addEventListener("click", () => applyFormat(button));
+    });
+
+    document.querySelectorAll("[data-view]").forEach((button) => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-view]").forEach((item) => item.classList.remove("active"));
+        button.classList.add("active");
+        workspace.classList.remove("editor-only", "preview-only");
+        if (button.dataset.view === "editor") workspace.classList.add("editor-only");
+        if (button.dataset.view === "preview") workspace.classList.add("preview-only");
+      });
+    });
+
+    document.querySelector("#copyHtml").addEventListener("click", async () => {
+      const html = preview.innerHTML;
+      try {
+        await navigator.clipboard.writeText(html);
+        showToast("HTML이 클립보드에 복사되었습니다.");
+      } catch {
+        showToast("브라우저에서 클립보드 복사를 허용하지 않았습니다.");
+      }
+    });
+
+    document.querySelector("#downloadMd").addEventListener("click", () => {
+      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "document.md";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.querySelector("#clearDoc").addEventListener("click", () => {
+      if (!window.confirm("문서를 모두 비울까요?")) return;
+      editor.value = "";
+      render();
+      save();
+      editor.focus();
+    });
+
+    editor.addEventListener("input", () => {
+      render();
+      save();
+    });
+
+    editor.addEventListener("keydown", (event) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        editor.setRangeText("  ", editor.selectionStart, editor.selectionEnd, "end");
+        render();
+        save();
+      }
+    });
+
+    render();
+  </script>
+</body>
+</html>

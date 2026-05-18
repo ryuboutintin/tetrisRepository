@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+  <!-- Marked.js (마크다운 파싱) -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body class="light">
+
+  <!-- Title -->
+  <header class="title-bar">
+    <div class="title-left">
+      <span class="material-icons">edit_note</span>
+      <span class="title-text">Markdown Editor</span>
+    </div>
+    <button class="icon-btn" id="themeToggle" title="테마 전환">
+      <span class="material-icons" id="themeIcon">dark_mode</span>
+    </button>
+  </header>
+
+  <!-- MenuBar -->
+  <nav class="menu-bar">
+    <div class="menu-group">
+      <button class="menu-btn" data-action="h1" title="H1 제목"><span class="material-icons">title</span><span>H1</span></button>
+      <button class="menu-btn" data-action="h2" title="H2 제목"><b>H2</b></button>
+      <button class="menu-btn" data-action="h3" title="H3 제목"><small><b>H3</b></small></button>
+      <button class="menu-btn" data-action="bold" title="굵게"><span class="material-icons">format_bold</span></button>
+      <button class="menu-btn" data-action="italic" title="기울임"><span class="material-icons">format_italic</span></button>
+      <button class="menu-btn" data-action="strikethrough" title="취소선"><span class="material-icons">strikethrough_s</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="menu-group">
+      <button class="menu-btn" data-action="quote" title="인용"><span class="material-icons">format_quote</span></button>
+      <button class="menu-btn" data-action="code" title="인라인 코드"><span class="material-icons">code</span></button>
+      <button class="menu-btn" data-action="codeblock" title="코드 블록"><span class="material-icons">integration_instructions</span></button>
+      <button class="menu-btn" data-action="link" title="링크"><span class="material-icons">link</span></button>
+      <button class="menu-btn" data-action="ul" title="순서없는 목록"><span class="material-icons">format_list_bulleted</span></button>
+      <button class="menu-btn" data-action="ol" title="순서있는 목록"><span class="material-icons">format_list_numbered</span></button>
+      <button class="menu-btn" data-action="table" title="표"><span class="material-icons">table_chart</span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="menu-group">
+      <button class="menu-btn danger" id="clearBtn" title="초기화"><span class="material-icons">delete</span><span>초기화</span></button>
+    </div>
+  </nav>
+
+  <!-- Content -->
+  <main class="content">
+    <div class="pane editor-pane">
+      <div class="pane-header">
+        <span class="material-icons">edit</span> 편집
+      </div>
+      <textarea id="editor" spellcheck="false" placeholder="마크다운을 입력하세요..."></textarea>
+    </div>
+
+    <div class="pane-divider"></div>
+
+    <div class="pane preview-pane">
+      <div class="pane-header">
+        <span class="material-icons">visibility</span> 미리보기
+      </div>
+      <div id="preview"></div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="markdown-editor.css" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- 툴바 -->
+  <div class="toolbar">
+    <span class="toolbar-title">MD Editor</span>
+    <div class="toolbar-sep"></div>
+
+    <button class="tb-btn" data-action="h1" title="제목 1">H1</button>
+    <button class="tb-btn" data-action="h2" title="제목 2">H2</button>
+    <button class="tb-btn" data-action="h3" title="제목 3">H3</button>
+    <div class="toolbar-sep"></div>
+    <button class="tb-btn" data-action="bold"   title="굵게">B</button>
+    <button class="tb-btn" data-action="italic" title="기울임" style="font-style:italic">I</button>
+    <button class="tb-btn" data-action="strike" title="취소선">~~</button>
+    <div class="toolbar-sep"></div>
+    <button class="tb-btn" data-action="code"      title="인라인 코드">`c`</button>
+    <button class="tb-btn" data-action="codeblock" title="코드 블록">```</button>
+    <button class="tb-btn" data-action="quote"     title="인용">❝</button>
+    <div class="toolbar-sep"></div>
+    <button class="tb-btn" data-action="ul"   title="순서 없는 목록">• 목록</button>
+    <button class="tb-btn" data-action="ol"   title="순서 있는 목록">1. 목록</button>
+    <button class="tb-btn" data-action="link" title="링크">🔗</button>
+    <button class="tb-btn" data-action="hr"   title="수평선">―</button>
+
+    <div class="toolbar-right">
+      <button class="view-btn" id="btn-split"   onclick="setView('split')">분할</button>
+      <button class="view-btn" id="btn-edit"    onclick="setView('edit')">편집</button>
+      <button class="view-btn" id="btn-preview" onclick="setView('preview')">미리보기</button>
+      <button class="theme-toggle" id="themeToggle" title="다크/라이트 모드 전환">🌙</button>
+    </div>
+  </div>
+
+  <!-- 에디터 + 미리보기 -->
+  <div class="editor-wrap" id="editorWrap">
+    <div class="pane">
+      <div class="pane-header">Markdown</div>
+      <textarea id="editor" spellcheck="false" placeholder="여기에 마크다운을 입력하세요..."></textarea>
+    </div>
+    <div class="pane-divider"></div>
+    <div class="pane">
+      <div class="pane-header">Preview</div>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <!-- 상태바 -->
+  <div class="status-bar">
+    <span id="statusText">0 글자 · 0 줄</span>
+    <span id="saveIndicator" class="save-indicator hidden">저장됨 ✓</span>
+  </div>
+
+  <script src="markdown-editor.js"></script>
+</body>
+</html>
