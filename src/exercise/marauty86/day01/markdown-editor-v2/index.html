@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Markdown Editor v2</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Marked.js for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/lib/marked.umd.min.js"></script>
+    <!-- DOMPurify for security -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <svg viewBox="0 0 16 16" width="24" height="24" fill="currentColor"><path d="M14.85 3H1.15C.52 3 0 3.52 0 4.15v7.69c0 .63.52 1.15 1.15 1.15h13.69c.63 0 1.15-.52 1.15-1.15V4.15c0-.63-.52-1.15-1.15-1.15zM9 11H7V8L5.5 9.92 4 8v3H2V5h2l1.5 2L7 5h2v6zm2.99.5L10.5 9H11V5h2v4h.5l-1.51 2.5z"></path></svg>
+            <h1>Markdown Editor v2</h1>
+        </div>
+        <div class="actions">
+            <span id="save-status" class="status-badge">저장 완료</span>
+            <button id="clear-btn" class="btn-secondary">초기화</button>
+        </div>
+    </header>
+
+    <main class="editor-container">
+        <section class="pane editor-pane">
+            <div class="pane-label">EDITOR</div>
+            <textarea id="markdown-input" spellcheck="false" placeholder="이곳에 마크다운을 입력하세요..."></textarea>
+        </section>
+        
+        <section class="pane preview-pane">
+            <div class="pane-label">PREVIEW</div>
+            <div id="html-output" class="markdown-body"></div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

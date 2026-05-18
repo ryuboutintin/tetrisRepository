@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d10;
+      --surface:  #16161c;
+      --surface2: #1e1e26;
+      --border:   #2b2b38;
+      --accent:   #6c63ff;
+      --accent2:  #a78bfa;
+      --text:     #ededf0;
+      --muted:    #7e7e96;
+      --green:    #4ade80;
+      --red:      #f87171;
+      --yellow:   #fbbf24;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--accent2);
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+
+    .header-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .memo-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .api-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 10px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      transition: background .3s;
+    }
+    .status-dot.loading { background: var(--yellow); animation: pulse .8s infinite; }
+    .status-dot.error   { background: var(--red); }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+
+    /* ── Workspace ── */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .sidebar-top {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .sidebar-label {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+    }
+
+    .btn-new {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 5px 12px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    .btn-new:hover { background: var(--accent2); }
+
+    .search-wrap {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.82rem;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .search-input:focus { border-color: var(--accent); }
+    .search-input::placeholder { color: var(--muted); }
+
+    .memo-list { flex: 1; overflow-y: auto; }
+
+    .memo-item {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      transition: background .1s;
+    }
+    .memo-item:hover { background: var(--surface2); }
+    .memo-item.active {
+      background: var(--surface2);
+      border-left-color: var(--accent);
+    }
+
+    .memo-item-title {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .memo-item-preview {
+      font-size: 0.75rem;
+      color: var(--muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 4px;
+    }
+
+    .memo-item-date {
+      font-size: 0.68rem;
+      color: var(--muted);
+      opacity: 0.7;
+    }
+
+    .list-msg {
+      padding: 40px 14px;
+      text-align: center;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* ── Editor ── */
+    .editor-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      color: var(--muted);
+      user-select: none;
+    }
+    .empty-icon { font-size: 3.5rem; opacity: 0.3; }
+    .empty-text { font-size: 0.88rem; }
+
+    .editor-toolbar {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all .12s;
+    }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-save {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-save:hover:not(:disabled) { background: var(--accent2); }
+
+    .btn-delete {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--red);
+    }
+    .btn-delete:hover:not(:disabled) {
+      background: rgba(248,113,113,.1);
+      border-color: var(--red);
+    }
+
+    .toolbar-right {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .char-count { color: var(--muted); }
+
+    .editor-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 36px;
+      overflow-y: auto;
+    }
+
+    .title-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 1.6rem;
+      font-weight: 700;
+      width: 100%;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      font-family: inherit;
+    }
+    .title-input::placeholder { color: var(--muted); }
+
+    .content-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 0.95rem;
+      line-height: 1.85;
+      width: 100%;
+      flex: 1;
+      resize: none;
+      min-height: 300px;
+      font-family: inherit;
+    }
+    .content-input::placeholder { color: var(--muted); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.82rem;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .2s;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📝</div>
+    메모장
+  </div>
+  <div class="header-right">
+    <span class="memo-count" id="memoCount"></span>
+    <div class="api-badge">
+      <span class="status-dot" id="statusDot"></span>
+      FastAPI + SQLite
+    </div>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <span class="sidebar-label">메모 목록</span>
+      <button class="btn-new" onclick="newMemo()">+ 새 메모</button>
+    </div>
+    <div class="search-wrap">
+      <input class="search-input" id="searchInput"
+             placeholder="🔍 검색..." oninput="handleSearch()" />
+    </div>
+    <div class="memo-list" id="memoList"></div>
+  </aside>
+
+  <div class="editor-wrap" id="editorWrap">
+    <div class="empty-state">
+      <div class="empty-icon">📄</div>
+      <div class="empty-text">메모를 선택하거나 새 메모를 만드세요</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = '/memos';
+  let memos     = [];
+  let currentId = null;
+  let searchTimer = null;
+
+  /* ── 상태 표시 ── */
+  function setStatus(state) {
+    const dot = document.getElementById('statusDot');
+    dot.className = 'status-dot' + (state !== 'ok' ? ` ${state}` : '');
+  }
+
+  /* ── API ── */
+  async function apiFetch(path, options = {}) {
+    setStatus('loading');
+    try {
+      const res = await fetch(path, {
+        headers: { 'Content-Type': 'application/json' },
+        ...options,
+      });
+      if (res.status === 204) { setStatus('ok'); return null; }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || '서버 오류가 발생했습니다.');
+      }
+      setStatus('ok');
+      return res.json();
+    } catch (e) {
+      setStatus('error');
+      throw e;
+    }
+  }
+
+  async function fetchAll(search = '') {
+    const url = search ? `${API}?search=${encodeURIComponent(search)}` : API;
+    memos = await apiFetch(url);
+    renderList();
+  }
+
+  /* ── 검색 (디바운스) ── */
+  function handleSearch() {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = document.getElementById('searchInput').value.trim();
+      fetchAll(q).catch(e => toast(e.message));
+    }, 300);
+  }
+
+  /* ── 렌더링 ── */
+  function renderList() {
+    const el = document.getElementById('memoList');
+    document.getElementById('memoCount').textContent =
+      memos.length ? `메모 ${memos.length}개` : '';
+
+    if (!memos.length) {
+      const q = document.getElementById('searchInput').value.trim();
+      el.innerHTML = `<div class="list-msg">${q ? '검색 결과가 없습니다.' : '메모가 없습니다.\n새 메모를 만들어 보세요.'}</div>`;
+      return;
+    }
+
+    el.innerHTML = memos.map(m => `
+      <div class="memo-item ${m.id === currentId ? 'active' : ''}"
+           onclick="selectMemo(${m.id})">
+        <div class="memo-item-title">${esc(m.title)}</div>
+        <div class="memo-item-preview">${esc(m.content) || '내용 없음'}</div>
+        <div class="memo-item-date">${fmtDate(m.updated_at)}</div>
+      </div>
+    `).join('');
+  }
+
+  function showEmptyState() {
+    document.getElementById('editorWrap').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <div class="empty-text">메모를 선택하거나 새 메모를 만드세요</div>
+      </div>`;
+  }
+
+  function showEditor(title = '', content = '', isNew = false) {
+    document.getElementById('editorWrap').innerHTML = `
+      <div class="editor-toolbar">
+        <button class="btn btn-save" id="btnSave" onclick="handleSave()">💾 저장</button>
+        ${!isNew
+          ? `<button class="btn btn-delete" onclick="handleDelete()">🗑 삭제</button>`
+          : ''}
+        <div class="toolbar-right">
+          <span class="char-count" id="charCount">${content.length}자</span>
+          <span>Ctrl + S</span>
+        </div>
+      </div>
+      <div class="editor-body">
+        <input id="titleInput" class="title-input"
+               value="${esc(title)}" placeholder="제목을 입력하세요" />
+        <textarea id="contentInput" class="content-input"
+                  placeholder="내용을 입력하세요..." oninput="updateCharCount()">${esc(content)}</textarea>
+      </div>`;
+    document.getElementById('titleInput').focus();
+  }
+
+  function updateCharCount() {
+    const el = document.getElementById('charCount');
+    if (el) el.textContent = (document.getElementById('contentInput')?.value.length ?? 0) + '자';
+  }
+
+  /* ── 핸들러 ── */
+  function newMemo() {
+    currentId = null;
+    renderList();
+    showEditor('', '', true);
+  }
+
+  function selectMemo(id) {
+    const memo = memos.find(m => m.id === id);
+    if (!memo) return;
+    currentId = id;
+    renderList();
+    showEditor(memo.title, memo.content, false);
+  }
+
+  async function handleSave() {
+    const title   = document.getElementById('titleInput')?.value?.trim() ?? '';
+    const content = document.getElementById('contentInput')?.value ?? '';
+    if (!title) { toast('제목을 입력해주세요.'); return; }
+
+    const btn = document.getElementById('btnSave');
+    if (btn) btn.disabled = true;
+
+    try {
+      let saved;
+      if (currentId === null) {
+        saved = await apiFetch(API, {
+          method: 'POST',
+          body: JSON.stringify({ title, content }),
+        });
+        currentId = saved.id;
+      } else {
+        saved = await apiFetch(`${API}/${currentId}`, {
+          method: 'PUT',
+          body: JSON.stringify({ title, content }),
+        });
+      }
+      const q = document.getElementById('searchInput').value.trim();
+      await fetchAll(q);
+      showEditor(saved.title, saved.content, false);
+      toast('저장됐습니다. ✓');
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      const b = document.getElementById('btnSave');
+      if (b) b.disabled = false;
+    }
+  }
+
+  async function handleDelete() {
+    if (!confirm('이 메모를 삭제할까요?')) return;
+    try {
+      await apiFetch(`${API}/${currentId}`, { method: 'DELETE' });
+      currentId = null;
+      await fetchAll();
+      showEmptyState();
+      toast('삭제됐습니다.');
+    } catch (e) {
+      toast(e.message);
+    }
+  }
+
+  /* ── 키보드 단축키 ── */
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      e.preventDefault();
+      if (document.getElementById('titleInput')) handleSave();
+    }
+  });
+
+  /* ── 유틸 ── */
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  function esc(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    const p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+  }
+
+  /* ── 초기화 ── */
+  fetchAll().catch(() => toast('서버에 연결할 수 없습니다.'));
+</script>
+</body>
+</html>

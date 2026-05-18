@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<header>
+  <h1>📝 메모장</h1>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <button class="btn-new" onclick="newMemo()">+ 새 메모</button>
+    </div>
+    <div class="memo-list" id="memo-list"></div>
+  </aside>
+
+  <main class="editor-pane">
+    <!-- 선택 전 안내 -->
+    <div class="placeholder-pane" id="placeholder">메모를 선택하거나 새 메모를 만드세요.</div>
+
+    <!-- 뷰 모드 (읽기 전용) -->
+    <div id="view-pane" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+      <div class="pane-toolbar">
+        <span class="view-title" id="view-title"></span>
+        <button class="btn btn-edit" onclick="startEdit()">수정</button>
+        <button class="btn btn-delete" onclick="deleteMemo()">삭제</button>
+      </div>
+      <div class="view-content" id="view-content"></div>
+    </div>
+
+    <!-- 편집 모드 -->
+    <div id="edit-pane" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+      <div class="pane-toolbar">
+        <input class="title-input" id="title-input" type="text" placeholder="제목을 입력하세요" />
+        <button class="btn btn-save" onclick="saveMemo()">저장</button>
+        <button class="btn btn-cancel" onclick="cancelEdit()">취소</button>
+      </div>
+      <textarea class="content-input" id="content-input" placeholder="내용을 입력하세요..."></textarea>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">
+        <span class="logo-icon">✏️</span>
+        <span class="logo-text">메모장</span>
+      </div>
+      <span id="memoCount" class="memo-count">0개의 메모</span>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- 작성 패널 -->
+    <aside class="panel-write">
+      <div class="panel-title" id="formLabel">새 메모</div>
+      <div class="write-form">
+        <div class="field">
+          <label for="titleInput">제목</label>
+          <input id="titleInput" type="text" placeholder="제목을 입력하세요" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="contentInput">내용</label>
+          <textarea id="contentInput" placeholder="내용을 입력하세요..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button id="saveBtn" class="btn-primary" onclick="saveMemo()">
+            <span class="btn-icon">＋</span> 저장하기
+          </button>
+          <button id="cancelBtn" class="btn-ghost" onclick="cancelEdit()" style="display:none">
+            취소
+          </button>
+        </div>
+      </div>
+
+      <!-- 이미지 업로드 (수정 모드일 때만 표시) -->
+      <div id="imageSection" class="image-section" style="display:none">
+        <div class="section-divider"></div>
+        <div class="panel-title">이미지</div>
+        <div id="imagePreviewWrap" class="image-preview-wrap" style="display:none">
+          <img id="imagePreview" src="" alt="첨부 이미지" />
+          <button class="img-remove-btn" onclick="removeImage()" title="이미지 삭제">✕</button>
+        </div>
+        <label class="upload-label" id="uploadLabel">
+          <span class="upload-icon">📎</span>
+          <span>이미지 첨부 (JPG·PNG·GIF·WEBP)</span>
+          <input id="imageInput" type="file" accept=".jpg,.jpeg,.png,.gif,.webp" onchange="uploadImage(event)" style="display:none" />
+        </label>
+      </div>
+    </aside>
+
+    <!-- 메모 목록 -->
+    <section class="panel-list">
+      <div class="list-header">
+        <span class="list-title">전체 메모</span>
+        <input id="searchInput" type="search" placeholder="검색..." oninput="filterMemos()" />
+      </div>
+      <div id="memoList" class="memo-grid"></div>
+    </section>
+  </main>
+
+  <!-- 삭제 확인 다이얼로그 -->
+  <div id="overlay" class="overlay" style="display:none">
+    <div class="dialog">
+      <div class="dialog-icon">🗑️</div>
+      <p class="dialog-msg">이 메모를 삭제할까요?</p>
+      <div class="dialog-actions">
+        <button class="btn-ghost" onclick="closeDialog()">취소</button>
+        <button class="btn-danger" onclick="confirmDelete()">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이미지 라이트박스 -->
+  <div id="lightbox" class="lightbox" style="display:none" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="" />
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
