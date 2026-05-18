@@ -1,0 +1,56 @@
+    1  cd /mnt/c
+    2  ls
+    3  cd tmp
+    4  ct/tmp
+    5  cd /tmp
+    6  ls
+    7  clear
+    8  mkdir ~/work
+    9  cd ~/work
+   10  git config --global user.name"heesung33"
+   11  git config --global user.email"chaeheesung33@gmail.com"
+   12  git config --global pull.rebase false
+   13  git config --global --list
+   14  git config --global user.name"chaeheesung"
+   15  git config --global user.email"chaeheesung33@gmail.com"
+   16  git config --global pull.rebase flase
+   17  git config --global pull.rebase false
+   18  git config --global --list
+   19  ssh-keygen
+   20  git config --global user.name "chaeheesung"
+   21  git config --global user.email chaeheesung33@gmail.com
+   22  git config --global --list
+   23  ssh-keygen
+   24  git config --global user.name "heesung33"
+   25  git config --global --list
+   26  ssh-keygen
+   27  cat ~/.ssh/id_rsa.pub
+   28* 
+   29  cat ~/.ssh/id_rsa.pub
+   30  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   31  ls
+   32  cd kosa-vibecoding-2026-2nd/
+   33  ls
+   34  cd doc
+   35  ls
+   36  cd ..
+   37  ls
+   38  cd src/
+   39  ls
+   40  cd exercise/
+   41  ls
+   42  cd heesung33/
+   43  clear
+   44  ls
+   45  cd day01/
+   46  ls
+   47  cat test.txt 
+   48  clear
+   49  cd ..
+   50  ls
+   51  cd heesung33/
+   52  l
+   53  ls
+   54  cd day01/
+   55  clear
+   56  history > h1.txt
