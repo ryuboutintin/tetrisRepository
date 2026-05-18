@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modern Notepad</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="app-header">
+        <div class="logo">
+            <svg viewBox="0 0 16 16" width="24" height="24" fill="currentColor"><path d="M0 2.5A1.5 1.5 0 0 1 1.5 1h11A1.5 1.5 0 0 1 14 2.5v10.75a.75.75 0 0 1-1.5 0V2.5a.25.25 0 0 0-.25-.25h-11a.25.25 0 0 0-.25.25v12.75a.75.75 0 0 1-1.5 0V2.5zm4 3.75a.75.75 0 0 1 .75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1-.75-.75zM4.75 8a.75.75 0 0 0 0 1.5h5.5a.75.75 0 0 0 0-1.5h-5.5zM4 11.75a.75.75 0 0 1 .75-.75h3.5a.75.75 0 0 1 0 1.5h-3.5a.75.75 0 0 1-.75-.75z"></path></svg>
+            <h1>Modern Notepad</h1>
+        </div>
+        <div class="status" id="status">연결됨</div>
+    </header>
+
+    <main class="container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>내 메모</h2>
+                <button id="new-note-btn" class="btn-primary">+ 새 메모</button>
+            </div>
+            <ul id="note-list" class="note-list">
+                <!-- 메모 목록이 여기에 동적으로 추가됩니다 -->
+            </ul>
+        </aside>
+
+        <section class="editor-section">
+            <div class="editor-header">
+                <input type="text" id="note-title" placeholder="제목을 입력하세요..." autocomplete="off">
+                <div class="actions">
+                    <button id="save-btn" class="btn-success">저장</button>
+                    <button id="delete-btn" class="btn-danger">삭제</button>
+                </div>
+            </div>
+            <textarea id="note-content" placeholder="내용을 입력하세요..."></textarea>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

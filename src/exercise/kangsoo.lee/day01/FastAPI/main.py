@@ -10,7 +10,7 @@ app = FastAPI(title="Memo API")
 
 DB_PATH = os.path.join(os.path.dirname(__file__), "memos.db")
 
-
+# 데이터베이스 연결 함수
 def get_db():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
