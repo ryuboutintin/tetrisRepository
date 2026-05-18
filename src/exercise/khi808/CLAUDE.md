@@ -19,6 +19,22 @@ python3 day01/fibonacci.py
 python3 day01/pi.py
 ```
 
+## memo-api 실행 / 종료
+
+```bash
+# 실행 (hot-reload 포함)
+cd src/exercise/khi808/day01/memo-api
+source $HOME/.local/bin/env
+uv run python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+# 종료
+kill $(lsof -ti:8000)
+```
+
+- 웹 UI → `http://localhost:8000`
+- Swagger 문서 → `http://localhost:8000/docs`
+- `--reload` 제거 시 코드 감시 없이 가볍게 실행
+
 ## Architecture
 
 ### Static Web Pages (`day01/`)
