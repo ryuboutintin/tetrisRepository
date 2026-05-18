@@ -1,0 +1,45 @@
+    1  exiut
+    2  exit
+    3  cd c
+    4  cdc
+    5  lsd
+    6  ls
+    7  mkdir ~/work
+    8  cd ~/work
+    9  git config --global user.name "SS.MOON"
+   10  git config --global user.email canmoon81@gmail.com
+   11  git config --global pull.rebase false
+   12  git config --global --list
+   13  ssh-keygen
+   14  ls ~/.ssh/
+   15  ls ~/.ssh/cat ~/.ssh/id_rsa.pub
+   16  cat ~/.ssh/id_rsa.pub
+   17  ls ~/.ssh/ id_rsa
+   18  ls ~/.ssh/ id_rsa.pub
+   19  cat ~/.ssh/id_rsa.pub
+   20  clear
+   21  cat ~/.ssh/id_rsa.pub
+   22  ssh-keygen
+   23  cat ~/.ssh/id_rsa.pub
+   24  [200~git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   25  ~git clone git@github.com:weable-kosa/ssh_key_vibe_coding.git
+   26  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   27  git clone git@github.com:weable-kosa/ssh_key_vibe_coding.git
+   28  cd kosa-vibecoding-2026-2nd/
+   29  ls
+   30  cd src/
+   31  ls
+   32  cd exercise/
+   33  cd sung00su99/
+   34  cd day01/
+   35  ls
+   36  vi test.text 
+   37  history> hi.txt
+   38  ls
+   39  git checkout hi.txt
+   40  git add hi.txt
+   41  git commit -m 'add history'
+   42  ls
+   43  rm hi.txt
+   44  ls
+   45  history> hi.txt
