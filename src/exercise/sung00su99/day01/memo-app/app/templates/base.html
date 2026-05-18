@@ -8,6 +8,30 @@
   <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body class="bg-gray-50 min-h-screen text-gray-900">
+
   {% block content %}{% endblock %}
+
+  <script>
+    /* ── 공통 인증 유틸 ── */
+    function getToken() { return localStorage.getItem('access_token'); }
+
+    function authHeaders(extra) {
+      return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${getToken()}`, ...extra };
+    }
+
+    function logout() {
+      localStorage.removeItem('access_token');
+      document.cookie = 'token=; path=/; max-age=0';
+      location.href = '/login';
+    }
+
+    /* 쿠키 동기화: localStorage 토큰 → 서버 렌더링용 cookie */
+    (function syncCookie() {
+      const t = getToken();
+      if (t) document.cookie = `token=${t}; path=/; SameSite=Lax`;
+    })();
+  </script>
+
+  {% block scripts %}{% endblock %}
 </body>
 </html>
