@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>김민준 — Developer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&family=Space+Grotesk:wght@300;400;600;700&display=swap');
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #f2ede4;
+      --ink: #1c1c1c;
+      --muted: #7a7268;
+      --accent: #c0441e;
+      --accent2: #3a5f4a;
+      --rule: #d4cec4;
+      --card-bg: #ede8df;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 3rem;
+      background: var(--bg);
+      border-bottom: 1px solid var(--rule);
+    }
+
+    nav .logo {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
+    }
+
+    nav a {
+      text-decoration: none;
+      font-size: 0.8rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: var(--ink);
+    }
+
+    /* HERO */
+    #intro {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      padding-top: 70px;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 5rem 3rem 5rem 3rem;
+      border-right: 1px solid var(--rule);
+    }
+
+    .hero-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .hero-name {
+      font-size: clamp(3.2rem, 7vw, 6rem);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-name span {
+      color: var(--accent);
+    }
+
+    .hero-title {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+    }
+
+    .hero-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 5rem 3rem;
+      gap: 2.5rem;
+    }
+
+    .hero-bio {
+      font-size: 1.15rem;
+      line-height: 1.8;
+      color: var(--ink);
+      max-width: 42ch;
+    }
+
+    .hero-bio strong {
+      color: var(--accent2);
+    }
+
+    .hero-contact {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .hero-contact a {
+      font-size: 0.85rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      transition: color 0.2s;
+    }
+
+    .hero-contact a:hover {
+      color: var(--accent);
+    }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .hero-scroll::after {
+      content: '';
+      width: 1px;
+      height: 40px;
+      background: var(--rule);
+      display: block;
+    }
+
+    /* SECTION SHARED */
+    section {
+      padding: 6rem 3rem;
+      border-top: 1px solid var(--rule);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 4rem;
+    }
+
+    .section-num {
+      font-size: 0.7rem;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    /* SKILLS */
+    #skills {
+      background: var(--card-bg);
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0;
+    }
+
+    .skill-category {
+      padding: 2.5rem 2rem;
+      border: 1px solid var(--rule);
+      margin: -1px 0 0 -1px;
+    }
+
+    .skill-category h3 {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 1.5rem;
+    }
+
+    .skill-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .skill-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.95rem;
+    }
+
+    .skill-list li::after {
+      content: attr(data-level);
+      font-size: 0.7rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .skill-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      margin-top: 0.3rem;
+    }
+
+    .skill-name {
+      min-width: 90px;
+      font-size: 0.92rem;
+    }
+
+    .bar {
+      flex: 1;
+      height: 2px;
+      background: var(--rule);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      background: var(--ink);
+    }
+
+    /* INTERESTS */
+    #interests .interests-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+    }
+
+    .interest-block {
+      position: relative;
+      padding: 2rem 2rem 2rem 3rem;
+    }
+
+    .interest-block::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: var(--accent2);
+    }
+
+    .interest-block:nth-child(2n)::before {
+      background: var(--accent);
+    }
+
+    .interest-block h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .interest-block p {
+      font-size: 0.9rem;
+      line-height: 1.75;
+      color: var(--muted);
+      max-width: 46ch;
+    }
+
+    .interest-tag {
+      display: inline-block;
+      margin-top: 0.8rem;
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent2);
+      border: 1px solid currentColor;
+      padding: 0.15rem 0.6rem;
+      border-radius: 2px;
+    }
+
+    .interest-block:nth-child(2n) .interest-tag {
+      color: var(--accent);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--rule);
+      padding: 2.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    footer p {
+      font-size: 0.78rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    footer .back-top {
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    footer .back-top:hover {
+      color: var(--ink);
+    }
+
+    @media (max-width: 860px) {
+      #intro {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+
+      .hero-left {
+        border-right: none;
+        border-bottom: 1px solid var(--rule);
+        padding: 4rem 1.5rem 3rem;
+      }
+
+      .hero-right {
+        padding: 3rem 1.5rem;
+      }
+
+      nav {
+        padding: 1rem 1.5rem;
+      }
+
+      nav ul {
+        gap: 1.5rem;
+      }
+
+      section {
+        padding: 4rem 1.5rem;
+      }
+
+      .skills-grid {
+        grid-template-columns: 1fr;
+      }
+
+      #interests .interests-wrap {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      footer {
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#intro" class="logo">KMJ</a>
+    <ul>
+      <li><a href="#intro">소개</a></li>
+      <li><a href="#skills">스킬</a></li>
+      <li><a href="#interests">관심사</a></li>
+    </ul>
+  </nav>
+
+  <!-- 소개 -->
+  <section id="intro" style="border-top: none; padding: 0; position: relative;">
+    <div class="hero-left">
+      <p class="hero-label">Frontend Developer · Seoul</p>
+      <h1 class="hero-name">김<span>민</span>준</h1>
+      <p class="hero-title">웹을 만드는 사람 / 가끔 기타를 치는 사람</p>
+    </div>
+    <div class="hero-right">
+      <p class="hero-bio">
+        사용자가 실제로 <strong>쓰기 좋은 인터페이스</strong>를 만드는 것에 관심이 많습니다.
+        코드가 깔끔한 것도 중요하지만, 결국 화면 앞에 앉은 사람이 편해야 한다고 생각합니다.
+        주로 React와 TypeScript로 작업하고, 최근엔 접근성과 웹 성능에 꽂혀 있습니다.
+      </p>
+      <div class="hero-contact">
+        <a href="mailto:minjun@example.com">minjun@example.com</a>
+        <a href="#">github.com/minjun-kim</a>
+        <a href="#">linkedin.com/in/minjun-kim</a>
+      </div>
+    </div>
+    <div class="hero-scroll">scroll</div>
+  </section>
+
+  <!-- 스킬 -->
+  <section id="skills">
+    <div class="section-header">
+      <span class="section-num">02 — Skills</span>
+      <h2 class="section-title">주요 기술</h2>
+    </div>
+
+    <div class="skills-grid">
+      <div class="skill-category">
+        <h3>Frontend</h3>
+        <ul class="skill-list">
+          <li>
+            <span class="skill-name">React</span>
+            <div class="bar"><div class="bar-fill" style="width: 90%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">TypeScript</span>
+            <div class="bar"><div class="bar-fill" style="width: 80%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">HTML / CSS</span>
+            <div class="bar"><div class="bar-fill" style="width: 95%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">Next.js</span>
+            <div class="bar"><div class="bar-fill" style="width: 70%"></div></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="skill-category">
+        <h3>Backend &amp; DB</h3>
+        <ul class="skill-list">
+          <li>
+            <span class="skill-name">Node.js</span>
+            <div class="bar"><div class="bar-fill" style="width: 65%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">Python</span>
+            <div class="bar"><div class="bar-fill" style="width: 60%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">PostgreSQL</span>
+            <div class="bar"><div class="bar-fill" style="width: 55%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">REST / GraphQL</span>
+            <div class="bar"><div class="bar-fill" style="width: 70%"></div></div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="skill-category">
+        <h3>Tools &amp; Etc</h3>
+        <ul class="skill-list">
+          <li>
+            <span class="skill-name">Git</span>
+            <div class="bar"><div class="bar-fill" style="width: 88%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">Figma</span>
+            <div class="bar"><div class="bar-fill" style="width: 75%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">Docker</span>
+            <div class="bar"><div class="bar-fill" style="width: 50%"></div></div>
+          </li>
+          <li>
+            <span class="skill-name">Storybook</span>
+            <div class="bar"><div class="bar-fill" style="width: 68%"></div></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 관심사 -->
+  <section id="interests">
+    <div class="section-header">
+      <span class="section-num">03 — Interests</span>
+      <h2 class="section-title">관심사</h2>
+    </div>
+
+    <div class="interests-wrap">
+      <div class="interest-block">
+        <h3>음악 &amp; 홈 레코딩</h3>
+        <p>
+          퇴근 후 기타를 잡는 게 하루의 마무리입니다. 요즘은 Logic Pro로
+          직접 트랙을 쌓는 재미에 빠져 있고, 음향 처리에 관심이 생겨
+          DSP 공부를 조금씩 하고 있습니다.
+        </p>
+        <span class="interest-tag">Indie Folk / Post-Rock</span>
+      </div>
+
+      <div class="interest-block">
+        <h3>클라이밍</h3>
+        <p>
+          볼더링을 시작한 지 2년쯤 됐습니다. 문제를 풀 때의 집중감이
+          코딩이랑 비슷하다는 걸 알고 나서 더 좋아졌습니다.
+          현재 목표는 V5 완등.
+        </p>
+        <span class="interest-tag">Bouldering</span>
+      </div>
+
+      <div class="interest-block">
+        <h3>SF &amp; 영화</h3>
+        <p>
+          테드 창의 단편과 빌뇌브 감독 영화를 좋아합니다. 기술이 인간에게
+          어떤 의미인지를 다루는 이야기에 유독 끌립니다.
+          가끔 letterboxd에 짧은 감상을 남깁니다.
+        </p>
+        <span class="interest-tag">Sci-Fi</span>
+      </div>
+
+      <div class="interest-block">
+        <h3>커피</h3>
+        <p>
+          V60 드립을 즐깁니다. 원두는 주로 에티오피아 내추럴.
+          카페 투어보다는 집에서 조용히 내려 마시는 걸 선호하는 편입니다.
+          원두 구독 서비스를 비교하는 게 소소한 취미입니다.
+        </p>
+        <span class="interest-tag">Pour-over</span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 김민준 — 서울</p>
+    <a href="#intro" class="back-top">↑ 상단으로</a>
+  </footer>
+
+</body>
+</html>

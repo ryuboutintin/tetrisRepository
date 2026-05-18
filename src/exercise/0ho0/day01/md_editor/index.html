@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>마크다운 에디터</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Markdown Editor</p>
+          <h1>마크다운 에디터</h1>
+        </div>
+        <div class="actions">
+          <label class="file-button" for="fileInput">불러오기</label>
+          <input id="fileInput" type="file" accept=".md,.markdown,.txt,text/markdown,text/plain" />
+          <button id="copyButton" type="button">복사</button>
+          <button id="downloadButton" type="button">다운로드</button>
+        </div>
+      </header>
+
+      <section class="toolbar" aria-label="서식 도구">
+        <button type="button" data-insert="heading">H1</button>
+        <button type="button" data-insert="heading2">H2</button>
+        <button type="button" data-insert="heading3">H3</button>
+        <button type="button" data-insert="bold"><strong>B</strong></button>
+        <button type="button" data-insert="italic"><em>I</em></button>
+        <button type="button" data-insert="strike"><s>S</s></button>
+        <button type="button" data-insert="inlineCode">`코드`</button>
+        <button type="button" data-insert="quote">인용</button>
+        <button type="button" data-insert="list">목록</button>
+        <button type="button" data-insert="orderedList">번호</button>
+        <button type="button" data-insert="check">체크</button>
+        <button type="button" data-insert="link">링크</button>
+        <button type="button" data-insert="image">이미지</button>
+        <button type="button" data-insert="code">코드</button>
+        <button type="button" data-insert="table">표</button>
+        <button type="button" data-insert="divider">구분선</button>
+      </section>
+
+      <section class="mode-tabs" aria-label="보기 방식">
+        <button class="active" type="button" data-mode="split">나란히</button>
+        <button type="button" data-mode="write">쓰기</button>
+        <button type="button" data-mode="preview">미리보기</button>
+      </section>
+
+      <section class="workspace split" id="workspace">
+        <label class="pane editor-pane" for="editor">
+          <span class="pane-title">작성</span>
+          <textarea id="editor" spellcheck="false"></textarea>
+        </label>
+        <section class="pane preview-pane" aria-label="미리보기">
+          <div class="pane-title">미리보기</div>
+          <article id="preview" class="preview"></article>
+        </section>
+      </section>
+
+      <footer class="statusbar">
+        <span id="wordCount">0자</span>
+        <span id="saveState">자동 저장됨</span>
+      </footer>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
