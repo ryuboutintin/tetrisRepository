@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Memo</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <!-- Claude crab character -->
+        <svg class="crab" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <!-- left claw -->
+          <ellipse cx="18" cy="58" rx="14" ry="10" fill="#d97757" />
+          <ellipse cx="14" cy="54" rx="6" ry="4" fill="#b85a3e" />
+          <!-- right claw -->
+          <ellipse cx="102" cy="58" rx="14" ry="10" fill="#d97757" />
+          <ellipse cx="106" cy="54" rx="6" ry="4" fill="#b85a3e" />
+          <!-- legs -->
+          <path d="M30 75 Q22 86 18 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M40 80 Q36 92 34 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M90 75 Q98 86 102 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M80 80 Q84 92 86 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <!-- body -->
+          <ellipse cx="60" cy="56" rx="36" ry="26" fill="#e88c6a" />
+          <ellipse cx="60" cy="52" rx="32" ry="20" fill="#f4a988" />
+          <!-- eyes (stalks) -->
+          <line x1="48" y1="40" x2="46" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+          <line x1="72" y1="40" x2="74" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+          <circle cx="46" cy="20" r="6" fill="#fff" />
+          <circle cx="74" cy="20" r="6" fill="#fff" />
+          <circle cx="47" cy="21" r="3" fill="#2d2018" />
+          <circle cx="75" cy="21" r="3" fill="#2d2018" />
+          <circle cx="48" cy="20" r="1" fill="#fff" />
+          <circle cx="76" cy="20" r="1" fill="#fff" />
+          <!-- mouth -->
+          <path d="M54 62 Q60 68 66 62" stroke="#b85a3e" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <!-- cheek blush -->
+          <circle cx="42" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+          <circle cx="78" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+        </svg>
+        <div class="brand-text">
+          <h1>Claude Memo</h1>
+          <p class="tagline">집게로 꾹꾹 적어둔 메모들 🦀</p>
+        </div>
+      </div>
+
+      <button id="newMemoBtn" class="btn btn-primary">
+        <span class="icon">＋</span> 새 메모
+      </button>
+
+      <div class="search-wrap">
+        <input id="searchInput" type="search" placeholder="메모 검색..." />
+      </div>
+
+      <ul id="memoList" class="memo-list" aria-label="메모 목록"></ul>
+
+      <div class="sidebar-footer">
+        <button id="themeToggle" class="btn btn-ghost" title="다크 모드 전환">
+          <span class="theme-icon-light">🌙</span>
+          <span class="theme-icon-dark">☀️</span>
+          <span class="theme-label">테마</span>
+        </button>
+      </div>
+    </aside>
+
+    <main class="editor">
+      <div id="emptyState" class="empty-state">
+        <svg class="crab crab-big" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <ellipse cx="18" cy="58" rx="14" ry="10" fill="#d97757" />
+          <ellipse cx="14" cy="54" rx="6" ry="4" fill="#b85a3e" />
+          <ellipse cx="102" cy="58" rx="14" ry="10" fill="#d97757" />
+          <ellipse cx="106" cy="54" rx="6" ry="4" fill="#b85a3e" />
+          <path d="M30 75 Q22 86 18 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M40 80 Q36 92 34 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M90 75 Q98 86 102 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <path d="M80 80 Q84 92 86 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+          <ellipse cx="60" cy="56" rx="36" ry="26" fill="#e88c6a" />
+          <ellipse cx="60" cy="52" rx="32" ry="20" fill="#f4a988" />
+          <line x1="48" y1="40" x2="46" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+          <line x1="72" y1="40" x2="74" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+          <circle cx="46" cy="20" r="6" fill="#fff" />
+          <circle cx="74" cy="20" r="6" fill="#fff" />
+          <circle cx="47" cy="21" r="3" fill="#2d2018" />
+          <circle cx="75" cy="21" r="3" fill="#2d2018" />
+          <path d="M52 64 Q60 58 68 64" stroke="#b85a3e" stroke-width="2.5" stroke-linecap="round" fill="none" />
+          <circle cx="42" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+          <circle cx="78" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+        </svg>
+        <h2>아직 메모가 없어요</h2>
+        <p>왼쪽에서 <strong>새 메모</strong> 버튼을 눌러 첫 메모를 작성해 보세요.</p>
+      </div>
+
+      <section id="editorPane" class="editor-pane hidden">
+        <header class="editor-header">
+          <input id="titleInput" type="text" placeholder="제목" maxlength="200" />
+          <div class="editor-actions">
+            <span id="savedStatus" class="saved-status"></span>
+            <button id="deleteBtn" class="btn btn-danger">삭제</button>
+            <button id="saveBtn" class="btn btn-primary">저장</button>
+          </div>
+        </header>
+        <textarea id="contentInput" placeholder="여기에 메모를 적어보세요... 🦀"></textarea>
+        <footer class="editor-footer">
+          <span id="metaInfo"></span>
+        </footer>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
