@@ -35,3 +35,11 @@
    35  ls
    36  vi test.text 
    37  history> hi.txt
+   38  ls
+   39  git checkout hi.txt
+   40  git add hi.txt
+   41  git commit -m 'add history'
+   42  ls
+   43  rm hi.txt
+   44  ls
+   45  history> hi.txt
