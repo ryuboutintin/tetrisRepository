@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}메모장{% endblock %}
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">📝 메모장</h1>
+    <span class="text-sm text-gray-400">{{ memos|length }}개</span>
+  </div>
+
+  <!-- 검색 -->
+  <input
+    type="text"
+    name="q"
+    value="{{ q }}"
+    placeholder="제목 또는 내용으로 검색..."
+    class="w-full mb-6 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+    hx-get="/"
+    hx-trigger="keyup changed delay:300ms"
+    hx-target="#memo-list"
+    hx-select="#memo-list"
+    hx-swap="outerHTML"
+  />
+
+  <!-- 메모 목록 -->
+  <div id="memo-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    {% for memo in memos %}
+    <a href="/memos/{{ memo.id }}"
+       class="block bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md hover:border-blue-300 transition">
+      <div class="flex items-start justify-between gap-2">
+        <h2 class="font-semibold truncate">{{ memo.title }}</h2>
+        {% if memo.is_pinned %}
+        <span class="text-yellow-500 text-sm flex-shrink-0" title="고정됨">📌</span>
+        {% endif %}
+      </div>
+      <p class="text-gray-500 text-sm mt-1 line-clamp-2">{{ memo.content }}</p>
+      <p class="text-gray-400 text-xs mt-3">
+        {{ memo.created_at.strftime('%Y-%m-%d %H:%M') }}
+      </p>
+    </a>
+    {% else %}
+    <div class="col-span-2 text-center py-20 text-gray-400">
+      <p class="text-4xl mb-3">📭</p>
+      <p>메모가 없습니다. 아래 버튼으로 새 메모를 작성하세요.</p>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- 플로팅 새 메모 버튼 -->
+<button
+  onclick="document.getElementById('modal').classList.remove('hidden')"
+  class="fixed bottom-8 right-8 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg text-3xl flex items-center justify-center hover:bg-blue-700 transition"
+  title="새 메모"
+>+</button>
+
+<!-- 새 메모 모달 -->
+<div id="modal" class="hidden fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+    <h2 class="text-lg font-bold mb-4">새 메모 작성</h2>
+    <form id="create-form">
+      <input id="new-title" type="text" placeholder="제목" required
+        class="w-full mb-3 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      <textarea id="new-content" placeholder="내용을 입력하세요..." rows="6" required
+        class="w-full mb-4 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"></textarea>
+      <div class="flex gap-2 justify-end">
+        <button type="button" onclick="closeModal()"
+          class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">취소</button>
+        <button type="submit"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">저장</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('new-title').value = '';
+  document.getElementById('new-content').value = '';
+}
+
+document.getElementById('create-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const title = document.getElementById('new-title').value.trim();
+  const content = document.getElementById('new-content').value.trim();
+  if (!title || !content) return;
+
+  const res = await fetch('/api/v1/memos/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, content }),
+  });
+
+  if (res.ok) {
+    location.reload();
+  } else {
+    alert('저장 실패. 다시 시도해주세요.');
+  }
+});
+
+// 모달 외부 클릭 시 닫기
+document.getElementById('modal').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeModal();
+});
+</script>
+{% endblock %}
