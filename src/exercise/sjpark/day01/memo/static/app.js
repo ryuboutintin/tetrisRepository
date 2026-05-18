@@ -1,9 +1,109 @@
-const API = '';
+// ── 인증 ────────────────────────────────────────────────────────────
+let currentTab = 'login';
+
+function getToken() { return localStorage.getItem('memo_token'); }
+function setToken(t) { localStorage.setItem('memo_token', t); }
+function clearToken() { localStorage.removeItem('memo_token'); }
+
+function authHeaders(isForm = false) {
+  const h = { Authorization: `Bearer ${getToken()}` };
+  if (!isForm) h['Content-Type'] = 'application/json';
+  return h;
+}
+
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, { ...options, headers: { ...authHeaders(), ...(options.headers || {}) } });
+  if (res.status === 401) { logout(); return null; }
+  return res;
+}
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  document.getElementById('auth-submit-btn').textContent = tab === 'login' ? '로그인' : '회원가입';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-username').value = '';
+  document.getElementById('auth-password').value = '';
+}
+
+async function submitAuth(e) {
+  e.preventDefault();
+  const username = document.getElementById('auth-username').value.trim();
+  const password = document.getElementById('auth-password').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.style.display = 'none';
+
+  try {
+    if (currentTab === 'register') {
+      const res = await fetch('/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      if (!res.ok) { const d = await res.json(); throw new Error(d.detail); }
+      switchTab('login');
+      showToast('회원가입 완료! 로그인해주세요.');
+      return;
+    }
+
+    // 로그인
+    const res = await fetch('/auth/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ username, password }),
+    });
+    if (!res.ok) { const d = await res.json(); throw new Error(d.detail); }
+    const data = await res.json();
+    setToken(data.access_token);
+    showApp(username);
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  }
+}
+
+function showApp(username) {
+  document.getElementById('auth-overlay').style.display = 'none';
+  document.getElementById('header-username').textContent = username;
+  fetchMemos();
+}
+
+function logout() {
+  clearToken();
+  currentId = null;
+  memos = [];
+  document.getElementById('auth-overlay').style.display = 'flex';
+  document.getElementById('view-pane').style.display = 'none';
+  document.getElementById('edit-pane').style.display = 'none';
+  document.getElementById('placeholder').style.display = 'flex';
+  document.getElementById('memo-list').innerHTML = '';
+  document.getElementById('header-username').textContent = '';
+  switchTab('login');
+}
+
+// ── 초기화 ───────────────────────────────────────────────────────────
+(function init() {
+  const token = getToken();
+  if (!token) return; // 오버레이 표시 유지
+
+  // 토큰이 있으면 사용자 정보 확인 후 앱 표시
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if (payload.exp * 1000 < Date.now()) { clearToken(); return; }
+    showApp(payload.sub);
+  } catch {
+    clearToken();
+  }
+})();
+
+// ── 메모 ─────────────────────────────────────────────────────────────
 let memos = [];
 let currentId = null;
 
 async function fetchMemos() {
-  const res = await fetch(`${API}/memos`);
+  const res = await apiFetch('/memos');
+  if (!res) return;
   memos = await res.json();
   renderList();
 }
@@ -17,12 +117,12 @@ function renderList() {
   list.innerHTML = memos.map(m => `
     <div class="memo-item ${m.id === currentId ? 'active' : ''}" onclick="selectMemo(${m.id})">
       <div class="item-title">${escHtml(m.title) || '(제목 없음)'}</div>
+      ${m.content ? `<div class="item-preview">${escHtml(m.content)}</div>` : ''}
       <div class="item-date">${formatDate(m.updated_at)}</div>
     </div>
   `).join('');
 }
 
-// 메모 클릭 → 뷰 모드
 function selectMemo(id) {
   const memo = memos.find(m => m.id === id);
   if (!memo) return;
@@ -40,7 +140,6 @@ function showViewPane(memo) {
   document.getElementById('view-content').textContent = memo.content;
 }
 
-// 수정 버튼 → 편집 모드
 function startEdit() {
   const memo = memos.find(m => m.id === currentId);
   if (!memo) return;
@@ -52,7 +151,6 @@ function startEdit() {
   document.getElementById('title-input').focus();
 }
 
-// 새 메모 → 바로 편집 모드
 function newMemo() {
   currentId = null;
   document.getElementById('placeholder').style.display = 'none';
@@ -65,7 +163,6 @@ function newMemo() {
   renderList();
 }
 
-// 취소 → 기존 메모면 뷰 모드 복귀, 새 메모면 placeholder
 function cancelEdit() {
   if (currentId !== null) {
     const memo = memos.find(m => m.id === currentId);
@@ -82,19 +179,19 @@ async function saveMemo() {
 
   let saved;
   if (currentId === null) {
-    const res = await fetch(`${API}/memos`, {
+    const res = await apiFetch('/memos', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, content }),
     });
+    if (!res) return;
     saved = await res.json();
     currentId = saved.id;
   } else {
-    const res = await fetch(`${API}/memos/${currentId}`, {
+    const res = await apiFetch(`/memos/${currentId}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ title, content }),
     });
+    if (!res) return;
     saved = await res.json();
   }
 
@@ -106,7 +203,7 @@ async function saveMemo() {
 async function deleteMemo() {
   if (!currentId) return;
   if (!confirm('이 메모를 삭제하시겠습니까?')) return;
-  await fetch(`${API}/memos/${currentId}`, { method: 'DELETE' });
+  await apiFetch(`/memos/${currentId}`, { method: 'DELETE' });
   currentId = null;
   document.getElementById('view-pane').style.display = 'none';
   document.getElementById('edit-pane').style.display = 'none';
@@ -115,6 +212,7 @@ async function deleteMemo() {
   showToast('삭제했습니다.');
 }
 
+// ── 유틸 ─────────────────────────────────────────────────────────────
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -130,5 +228,3 @@ function formatDate(iso) {
 function escHtml(s) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
-
-fetchMemos();

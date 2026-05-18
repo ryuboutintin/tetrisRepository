@@ -8,32 +8,101 @@
 </head>
 <body>
     <div class="container">
-        <h1>📝 메모장</h1>
+        <h1>메모장</h1>
 
-        <!-- 메모 작성/수정 폼 -->
-        <div class="form-section">
-            <h2 id="form-title">새 메모 작성</h2>
-            <form id="memo-form">
-                <input type="hidden" id="memo-id">
+        <!-- 인증 섹션 -->
+        <div id="auth-section" class="auth-section">
+            <div class="auth-tabs">
+                <button id="tab-login" class="tab active" onclick="showTab('login')">로그인</button>
+                <button id="tab-register" class="tab" onclick="showTab('register')">회원가입</button>
+            </div>
+            <form id="login-form" class="auth-form">
                 <div class="form-group">
-                    <label for="title">제목</label>
-                    <input type="text" id="title" placeholder="메모 제목을 입력하세요" required>
+                    <label for="login-username">사용자명</label>
+                    <input type="text" id="login-username" placeholder="사용자명" required>
                 </div>
                 <div class="form-group">
-                    <label for="content">내용</label>
-                    <textarea id="content" rows="5" placeholder="메모 내용을 입력하세요" required></textarea>
+                    <label for="login-password">비밀번호</label>
+                    <input type="password" id="login-password" placeholder="비밀번호" required>
                 </div>
-                <div class="form-buttons">
-                    <button type="submit" id="submit-btn">저장</button>
-                    <button type="button" id="cancel-btn" class="btn-cancel" style="display:none;">취소</button>
+                <button type="submit">로그인</button>
+            </form>
+            <form id="register-form" class="auth-form" style="display:none;">
+                <div class="form-group">
+                    <label for="reg-username">사용자명</label>
+                    <input type="text" id="reg-username" placeholder="사용자명" required>
                 </div>
+                <div class="form-group">
+                    <label for="reg-password">비밀번호</label>
+                    <input type="password" id="reg-password" placeholder="비밀번호" required>
+                </div>
+                <button type="submit">회원가입</button>
             </form>
         </div>
 
-        <!-- 메모 목록 -->
-        <div class="list-section">
-            <h2>메모 목록</h2>
-            <div id="memo-list"></div>
+        <!-- 메모 앱 (로그인 후 표시) -->
+        <div id="app-section" style="display:none;">
+            <div class="user-bar">
+                <span id="user-info"></span>
+                <button onclick="logout()" class="btn-logout">로그아웃</button>
+            </div>
+
+            <!-- 메모 작성/수정 폼 -->
+            <div class="form-section">
+                <h2 id="form-title">새 메모 작성</h2>
+                <form id="memo-form">
+                    <input type="hidden" id="memo-id">
+                    <div class="form-group">
+                        <label for="title">제목</label>
+                        <input type="text" id="title" placeholder="메모 제목을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content">내용</label>
+                        <textarea id="content" rows="5" placeholder="메모 내용을 입력하세요" required></textarea>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group form-half">
+                            <label for="category">카테고리</label>
+                            <select id="category">
+                                <option value="일반">일반</option>
+                                <option value="업무">업무</option>
+                                <option value="개인">개인</option>
+                                <option value="아이디어">아이디어</option>
+                                <option value="할일">할일</option>
+                            </select>
+                        </div>
+                        <div class="form-group form-half">
+                            <label for="tags">태그 (쉼표로 구분)</label>
+                            <input type="text" id="tags" placeholder="예: python, fastapi, 학습">
+                        </div>
+                    </div>
+                    <div class="form-buttons">
+                        <button type="submit" id="submit-btn">저장</button>
+                        <button type="button" id="cancel-btn" class="btn-cancel" style="display:none;">취소</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- 필터 -->
+            <div class="filter-section">
+                <label for="filter-category">카테고리 필터:</label>
+                <select id="filter-category" onchange="loadMemos()">
+                    <option value="">전체</option>
+                    <option value="일반">일반</option>
+                    <option value="업무">업무</option>
+                    <option value="개인">개인</option>
+                    <option value="아이디어">아이디어</option>
+                    <option value="할일">할일</option>
+                </select>
+                <label for="filter-tag">태그 필터:</label>
+                <input type="text" id="filter-tag" placeholder="태그명" oninput="loadMemos()">
+            </div>
+
+            <!-- 메모 목록 -->
+            <div class="list-section">
+                <h2>메모 목록</h2>
+                <div id="memo-list"></div>
+            </div>
         </div>
     </div>
 
