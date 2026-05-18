@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모장</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>메모장</h1>
+
+        <form id="memo-form">
+            <input type="text" id="title" placeholder="제목" required>
+            <textarea id="content" placeholder="내용" rows="4"></textarea>
+            <input type="text" id="tags" placeholder="태그 (콤마로 구분: work,idea,todo)">
+            <button type="submit">저장</button>
+        </form>
+
+        <div id="memo-list"></div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
