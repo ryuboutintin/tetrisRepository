@@ -1,0 +1,31 @@
+    1  wsl -l -v
+    2  exit
+    3  mkdir ~/work
+    4  cd ~/work
+    5  git config --global user.name "ryuboutin"
+    6  git config --global user.email 
+    7  git config --global user.email "rsh@iquest.co.kr"
+    8  git config --global pull.rebase false
+    9  git config --global --list
+   10  clear
+   11  ssh-keygen
+   12  ls ~/.ssh/
+   13  cat ~/.ssh/id_rsa.pri
+   14  cat ~/.ssh/id_rsa.pub
+   15  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   16  ls
+   17  cd kosa-vibecoding-2026-2nd
+   18  cd doc
+   19  cd src/exercise
+   20  ls
+   21  cd src/exercise
+   22  cd ..
+   23  cd src/exercise
+   24  cd ryuboutintin
+   25  cd day01
+   26  cat text.txt
+   27  history
+   28  history ? h1.txt
+   29  ls
+   30  history? h1.txt
+   31  history > h1.txt

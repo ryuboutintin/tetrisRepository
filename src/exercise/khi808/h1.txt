@@ -1,0 +1,35 @@
+    1  clear
+    2  cat / ect/*release*
+    3  cat /etc/*release*
+    4  lsb_release -a
+    5  exit
+    6  clear
+    7  ls
+    8  exit
+    9  mkdir ~/work
+   10  cd ~/work
+   11  git config --global user.name "khi808"
+   12  git config --global user.email "khi805@naver.com"
+   13  git config --global pull.rebase false
+   14  git config --global --list
+   15  ssh-keygen
+   16  ls ~/.ssh/
+   17  cat ~/.ssg/id_rsa.pub
+   18  cat ~/.ssh/id_rsa.pub
+   19  cat ~/.ssh/id_rsa
+   20  ssh-keygen
+   21  cat ~/.ssh/id_rsa.pub
+   22  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git 
+   23  ls
+   24  cd doc
+   25  cd kosa-vibecoding-2026-2nd
+   26  ls -la
+   27  history
+   28  git pull --no-edit
+   29  cd doc
+   30  cd ..
+   31  cd src/exercise/khi808
+   32  history > hi.txt
+   33  ls -la
+   34  rm hi.txt
+   35  history > h1.txt
