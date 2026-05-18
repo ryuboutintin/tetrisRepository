@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ﾟ✧ 메모장 ✧ﾟ</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #fff0f5;
+      min-height: 100vh;
+      padding: 36px 16px 60px;
+      background-image:
+        radial-gradient(circle at 10% 20%, #ffd6e7 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, #fce4ff 0%, transparent 40%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext y='20' font-size='14' opacity='0.07'%3E♡%3C/text%3E%3Ctext x='30' y='50' font-size='10' opacity='0.07'%3E★%3C/text%3E%3C/svg%3E");
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* 헤더 */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header .deco-top {
+      font-size: 22px;
+      letter-spacing: 6px;
+      color: #ff69b4;
+      margin-bottom: 6px;
+    }
+
+    h1 {
+      font-size: 38px;
+      font-weight: 800;
+      color: #ff1493;
+      text-shadow: 3px 3px 0 #ffb7d5, 5px 5px 0 #ffd6e8;
+      letter-spacing: 2px;
+      margin-bottom: 6px;
+    }
+
+    .header .sub {
+      font-size: 13px;
+      color: #ff69b4;
+      letter-spacing: 3px;
+    }
+
+    /* 마크다운 렌더링 */
+    .memo-content { font-size: 13px; color: #c06090; line-height: 1.8; margin-bottom: 14px; }
+    .memo-content h1, .memo-content h2, .memo-content h3 { color: #b5004d; font-weight: 800; margin: 8px 0 4px; }
+    .memo-content h1 { font-size: 18px; }
+    .memo-content h2 { font-size: 15px; }
+    .memo-content h3 { font-size: 13px; }
+    .memo-content p { margin-bottom: 6px; }
+    .memo-content ul, .memo-content ol { padding-left: 20px; margin-bottom: 6px; }
+    .memo-content li { margin-bottom: 2px; }
+    .memo-content strong { color: #ff1493; font-weight: 800; }
+    .memo-content em { color: #da70d6; font-style: italic; }
+    .memo-content code { background: #fff0f8; border: 1px solid #ffb7d5; border-radius: 6px; padding: 1px 6px; font-size: 12px; color: #b5004d; }
+    .memo-content pre { background: #fff0f8; border: 2px solid #ffb7d5; border-radius: 12px; padding: 12px; overflow-x: auto; margin-bottom: 8px; }
+    .memo-content pre code { background: none; border: none; padding: 0; }
+    .memo-content blockquote { border-left: 3px solid #ff69b4; padding-left: 12px; color: #da70d6; margin: 6px 0; }
+    .memo-content a { color: #ff1493; text-decoration: underline; }
+    .memo-content hr { border: none; border-top: 2px dashed #ffb7d5; margin: 10px 0; }
+    .memo-content table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
+    .memo-content th { background: #fff0f8; color: #b5004d; border: 1px solid #ffb7d5; padding: 6px 10px; }
+    .memo-content td { border: 1px solid #ffb7d5; padding: 5px 10px; }
+
+    .header .deco-bottom {
+      font-size: 18px;
+      letter-spacing: 4px;
+      color: #ffb7d5;
+      margin-top: 6px;
+    }
+
+    /* 카드 공통 */
+    .card {
+      background: #fff;
+      border-radius: 24px;
+      border: 2.5px solid #ffb7d5;
+      box-shadow: 4px 4px 0 #ffb7d5, 6px 6px 0 #ffd6e8;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, #ff69b4, #ff1493, #da70d6, #ff69b4);
+      background-size: 200% 100%;
+      animation: shimmer 2s linear infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 0% 0%; }
+      100% { background-position: 200% 0%; }
+    }
+
+    /* 입력 폼 */
+    .form-card {
+      padding: 26px 24px;
+      margin-bottom: 28px;
+    }
+
+    .form-label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #ff1493;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .form-card input,
+    .form-card textarea,
+    .edit-form input,
+    .edit-form textarea {
+      width: 100%;
+      background: #fff5f9;
+      border: 2px solid #ffb7d5;
+      border-radius: 14px;
+      padding: 11px 16px;
+      font-size: 14px;
+      color: #b5004d;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit;
+      caret-color: #ff1493;
+    }
+
+    .form-card input::placeholder,
+    .form-card textarea::placeholder,
+    .edit-form input::placeholder,
+    .edit-form textarea::placeholder { color: #ffaacf; }
+
+    .form-card input:focus,
+    .form-card textarea:focus,
+    .edit-form input:focus,
+    .edit-form textarea:focus {
+      border-color: #ff1493;
+      box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.12);
+      background: #fff;
+    }
+
+    .form-card input { margin-bottom: 10px; }
+    .form-card textarea,
+    .edit-form textarea { height: 100px; resize: vertical; }
+    .edit-form input { margin-bottom: 10px; }
+
+    /* 버튼 */
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+      justify-content: flex-end;
+    }
+
+    button {
+      padding: 9px 22px;
+      border: none;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+      letter-spacing: 0.5px;
+    }
+
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      color: #fff;
+      border: 2px solid #ff1493;
+      box-shadow: 0 4px 0 #c0006e, 0 6px 12px rgba(255,20,147,0.3);
+    }
+
+    .btn-primary:hover { box-shadow: 0 6px 0 #c0006e, 0 8px 18px rgba(255,20,147,0.4); }
+    .btn-primary:active { box-shadow: 0 2px 0 #c0006e; }
+
+    .btn-cancel {
+      background: #fff;
+      color: #ffaacf;
+      border: 2px solid #ffb7d5;
+      box-shadow: 0 4px 0 #ffb7d5;
+    }
+
+    .btn-cancel:active { box-shadow: 0 2px 0 #ffb7d5; }
+
+    .btn-edit {
+      background: #fff0f8;
+      color: #ff1493;
+      border: 2px solid #ffb7d5;
+      padding: 7px 16px;
+      font-size: 12px;
+      box-shadow: 0 3px 0 #ffb7d5;
+    }
+
+    .btn-edit:active { box-shadow: 0 1px 0 #ffb7d5; }
+
+    .btn-delete {
+      background: #fff0f8;
+      color: #da70d6;
+      border: 2px solid #e8b4f0;
+      padding: 7px 16px;
+      font-size: 12px;
+      box-shadow: 0 3px 0 #e8b4f0;
+    }
+
+    .btn-delete:active { box-shadow: 0 1px 0 #e8b4f0; }
+
+    /* 메모 카운트 */
+    .count-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+      padding: 0 4px;
+    }
+
+    .count-text {
+      font-size: 12px;
+      color: #ff69b4;
+      font-weight: 700;
+    }
+
+    /* 메모 리스트 */
+    .memo-list { display: flex; flex-direction: column; gap: 16px; }
+
+    .memo-card {
+      padding: 20px 22px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .memo-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 6px 8px 0 #ffb7d5, 8px 10px 0 #ffd6e8;
+    }
+
+    .memo-card.editing {
+      border-color: #ff1493;
+      box-shadow: 4px 4px 0 #ff1493;
+    }
+
+    .memo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .memo-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #b5004d;
+    }
+
+    .memo-title::before { content: '♡ '; color: #ff69b4; }
+
+    .memo-date {
+      font-size: 11px;
+      color: #ffaacf;
+      white-space: nowrap;
+      margin-left: 10px;
+      background: #fff0f8;
+      padding: 3px 10px;
+      border-radius: 99px;
+      border: 1px solid #ffb7d5;
+      flex-shrink: 0;
+    }
+
+    .memo-content {
+      font-size: 13px;
+      color: #c06090;
+      white-space: pre-wrap;
+      line-height: 1.8;
+      margin-bottom: 14px;
+    }
+
+    .memo-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* 빈 상태 */
+    .empty {
+      text-align: center;
+      padding: 56px 0;
+    }
+
+    .empty-icon {
+      font-size: 52px;
+      display: block;
+      margin-bottom: 14px;
+      animation: bounce 1.8s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    .empty p {
+      color: #ffaacf;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 2;
+    }
+
+    /* 에러 */
+    .error-msg {
+      background: #fff0f8;
+      color: #ff1493;
+      border: 2px solid #ffb7d5;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    /* 구분선 */
+    .divider {
+      text-align: center;
+      color: #ffb7d5;
+      font-size: 18px;
+      letter-spacing: 6px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <div class="header">
+      <div class="deco-top">✦ ♡ ✦ ♡ ✦</div>
+      <h1>메모장</h1>
+      <div class="sub">～ 귀여운 메모앱 ～</div>
+      <div class="deco-bottom">☆ ★ ☆ ★ ☆</div>
+    </div>
+
+    <!-- 새 메모 작성 -->
+    <div class="form-card card">
+      <div class="form-label">✏️ 새 메모 작성</div>
+      <div v-if="errorMsg" class="error-msg">⚠️ {{ errorMsg }}</div>
+      <input v-model="newMemo.title" placeholder="✦ 제목을 입력해줘 ✦" @keyup.enter="$refs.contentInput.focus()" />
+      <textarea v-model="newMemo.content" placeholder="내용을 적어줘... ♡ (마크다운 지원)" ref="contentInput"></textarea>
+      <div class="btn-row">
+        <button class="btn-primary" @click="createMemo">✨ 저장하기 ✨</button>
+      </div>
+    </div>
+
+    <div class="divider" v-if="memos.length > 0">♡ ♡ ♡</div>
+
+    <!-- 메모 카운트 -->
+    <div class="count-bar" v-if="memos.length > 0">
+      <span class="count-text">🌸 메모 {{ memos.length }}개</span>
+    </div>
+
+    <!-- 메모 목록 -->
+    <div class="memo-list">
+      <div v-if="memos.length === 0" class="empty card">
+        <span class="empty-icon">🎀</span>
+        <p>아직 메모가 없어요~<br>첫 번째 메모를 써봐요 ♡</p>
+      </div>
+
+      <div
+        v-for="memo in memos"
+        :key="memo.id"
+        class="memo-card card"
+        :class="{ editing: editingId === memo.id }"
+      >
+        <!-- 수정 모드 -->
+        <div v-if="editingId === memo.id" class="edit-form">
+          <input v-model="editForm.title" placeholder="제목" />
+          <textarea v-model="editForm.content" placeholder="내용"></textarea>
+          <div class="btn-row">
+            <button class="btn-cancel" @click="cancelEdit">취소</button>
+            <button class="btn-primary" @click="updateMemo(memo.id)">✨ 저장</button>
+          </div>
+        </div>
+
+        <!-- 보기 모드 -->
+        <template v-else>
+          <div class="memo-header">
+            <span class="memo-title">{{ memo.title }}</span>
+            <span class="memo-date">{{ formatDate(memo.updated_at || memo.created_at) }}</span>
+          </div>
+          <div class="memo-content" v-html="renderMd(memo.content)"></div>
+          <div class="memo-actions">
+            <button class="btn-edit" @click="startEdit(memo)">✏️ 수정</button>
+            <button class="btn-delete" @click="deleteMemo(memo.id)">🗑️ 삭제</button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const memos = ref([]);
+        const newMemo = ref({ title: '', content: '' });
+        const editingId = ref(null);
+        const editForm = ref({ title: '', content: '' });
+        const errorMsg = ref('');
+
+        async function fetchMemos() {
+          const res = await fetch(`${API}/memos`);
+          memos.value = await res.json();
+        }
+
+        async function createMemo() {
+          errorMsg.value = '';
+          if (!newMemo.value.title.trim() || !newMemo.value.content.trim()) {
+            errorMsg.value = '제목과 내용을 모두 입력해주세요!';
+            return;
+          }
+          await fetch(`${API}/memos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newMemo.value),
+          });
+          newMemo.value = { title: '', content: '' };
+          await fetchMemos();
+        }
+
+        function startEdit(memo) {
+          editingId.value = memo.id;
+          editForm.value = { title: memo.title, content: memo.content };
+        }
+
+        function cancelEdit() { editingId.value = null; }
+
+        async function updateMemo(id) {
+          if (!editForm.value.title.trim() || !editForm.value.content.trim()) return;
+          await fetch(`${API}/memos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editForm.value),
+          });
+          editingId.value = null;
+          await fetchMemos();
+        }
+
+        function renderMd(text) {
+          return marked.parse(text || '');
+        }
+
+        async function deleteMemo(id) {
+          if (!confirm('이 메모를 삭제할까요? ♡')) return;
+          await fetch(`${API}/memos/${id}`, { method: 'DELETE' });
+          await fetchMemos();
+        }
+
+        function formatDate(dateStr) {
+          if (!dateStr) return '';
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('ko-KR', {
+            month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit',
+          });
+        }
+
+        onMounted(fetchMemos);
+
+        return { memos, newMemo, editingId, editForm, errorMsg, createMemo, startEdit, cancelEdit, updateMemo, deleteMemo, formatDate, renderMd };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>

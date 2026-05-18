@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>memo://app</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --panel: #161b22;
+    --panel-2: #1c2128;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent-dim: #1f6feb;
+    --danger: #f85149;
+    --danger-dim: #da3633;
+    --ok: #3fb950;
+    --warn: #d29922;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); }
+  body {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    padding: 24px 20px 64px;
+  }
+
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  header h1::before { content: "$ "; color: var(--muted); }
+  header .meta { color: var(--muted); font-size: 12px; }
+  header .meta code { color: var(--text); background: var(--panel); padding: 2px 6px; border-radius: 4px; }
+
+  /* status bar */
+  #status {
+    min-height: 28px;
+    margin-bottom: 16px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  #status.loading { color: var(--warn); }
+  #status.error { color: var(--danger); border-color: var(--danger-dim); }
+  #status.ok { color: var(--ok); }
+  #status::before {
+    content: "●";
+    font-size: 10px;
+  }
+
+  /* create form */
+  .create-form {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .create-form h2 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .create-form h2::before { content: "// "; color: var(--accent); }
+
+  .field { margin-bottom: 10px; }
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+  input[type="text"], textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    outline: none;
+    resize: vertical;
+  }
+  input[type="text"]:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.15);
+  }
+  textarea { min-height: 80px; }
+
+  .actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+  button {
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--panel-2);
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.1s, border-color 0.1s;
+  }
+  button:hover:not(:disabled) { background: var(--border); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  button.primary { background: var(--accent-dim); border-color: var(--accent-dim); color: white; }
+  button.primary:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+  button.danger { color: var(--danger); border-color: var(--danger-dim); }
+  button.danger:hover:not(:disabled) { background: var(--danger-dim); color: white; }
+
+  /* memo grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 140px;
+  }
+  .card .id {
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .card .title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    word-break: break-word;
+  }
+  .card .content {
+    flex: 1;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 13px;
+    opacity: 0.9;
+  }
+  .card .ts {
+    font-size: 11px;
+    color: var(--muted);
+    border-top: 1px dashed var(--border);
+    padding-top: 8px;
+  }
+  .card .card-actions {
+    display: flex;
+    gap: 6px;
+    justify-content: flex-end;
+  }
+  .card.editing { border-color: var(--accent); }
+
+  .empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--muted);
+    padding: 48px 16px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+  .empty code { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>memo</h1>
+    <span class="meta">API: <code id="api-url">http://localhost:8000</code></span>
+  </header>
+
+  <div id="status">idle</div>
+
+  <section class="create-form">
+    <h2>new memo</h2>
+    <form id="create-form">
+      <div class="field">
+        <label for="title">title</label>
+        <input id="title" name="title" type="text" required maxlength="200" placeholder="제목을 입력하세요" />
+      </div>
+      <div class="field">
+        <label for="content">content</label>
+        <textarea id="content" name="content" placeholder="내용을 입력하세요"></textarea>
+      </div>
+      <div class="actions">
+        <button type="reset">reset</button>
+        <button type="submit" class="primary">save</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <div id="grid" class="grid"></div>
+  </section>
+</div>
+
+<script>
+  const API = "http://localhost:8000";
+
+  const statusEl = document.getElementById("status");
+  const gridEl = document.getElementById("grid");
+  const createForm = document.getElementById("create-form");
+  const titleInput = document.getElementById("title");
+  const contentInput = document.getElementById("content");
+
+  function setStatus(msg, kind) {
+    statusEl.textContent = msg;
+    statusEl.className = kind || "";
+  }
+
+  function fmtDate(iso) {
+    try {
+      const d = new Date(iso);
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+    } catch {
+      return iso;
+    }
+  }
+
+  function escape(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+    }[c]));
+  }
+
+  async function api(path, options) {
+    const res = await fetch(API + path, {
+      headers: { "Content-Type": "application/json" },
+      ...options,
+    });
+    if (!res.ok) {
+      let detail = res.statusText;
+      try { const j = await res.json(); detail = j.detail || detail; } catch {}
+      throw new Error(`HTTP ${res.status}: ${detail}`);
+    }
+    if (res.status === 204) return null;
+    return res.json();
+  }
+
+  async function loadMemos() {
+    setStatus("loading memos...", "loading");
+    try {
+      const memos = await api("/memos");
+      renderMemos(memos);
+      setStatus(`ok — ${memos.length} memo(s)`, "ok");
+    } catch (e) {
+      gridEl.innerHTML = "";
+      setStatus(`error: ${e.message}`, "error");
+    }
+  }
+
+  function renderMemos(memos) {
+    gridEl.innerHTML = "";
+    if (!memos.length) {
+      const empty = document.createElement("div");
+      empty.className = "empty";
+      empty.innerHTML = `no memos yet. try <code>POST /memos</code> above.`;
+      gridEl.appendChild(empty);
+      return;
+    }
+    // newest first
+    memos.slice().sort((a, b) => b.id - a.id).forEach((m) => {
+      gridEl.appendChild(renderCard(m));
+    });
+  }
+
+  function renderCard(memo) {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.dataset.id = memo.id;
+    card.innerHTML = `
+      <div class="id">#${memo.id}</div>
+      <div class="title">${escape(memo.title)}</div>
+      <div class="content">${escape(memo.content)}</div>
+      <div class="ts">created_at: ${escape(fmtDate(memo.created_at))}</div>
+      <div class="card-actions">
+        <button data-act="edit">edit</button>
+        <button data-act="delete" class="danger">delete</button>
+      </div>
+    `;
+    card.querySelector('[data-act="edit"]').addEventListener("click", () => enterEdit(card, memo));
+    card.querySelector('[data-act="delete"]').addEventListener("click", () => deleteMemo(memo));
+    return card;
+  }
+
+  function enterEdit(card, memo) {
+    card.classList.add("editing");
+    card.innerHTML = `
+      <div class="id">#${memo.id} (editing)</div>
+      <div class="field">
+        <label>title</label>
+        <input type="text" class="edit-title" value="${escape(memo.title)}" maxlength="200" />
+      </div>
+      <div class="field" style="flex:1">
+        <label>content</label>
+        <textarea class="edit-content">${escape(memo.content)}</textarea>
+      </div>
+      <div class="card-actions">
+        <button data-act="cancel">cancel</button>
+        <button data-act="save" class="primary">save</button>
+      </div>
+    `;
+    const titleEl = card.querySelector(".edit-title");
+    const contentEl = card.querySelector(".edit-content");
+    titleEl.focus();
+    card.querySelector('[data-act="cancel"]').addEventListener("click", loadMemos);
+    card.querySelector('[data-act="save"]').addEventListener("click", async () => {
+      const title = titleEl.value.trim();
+      const content = contentEl.value;
+      if (!title) { titleEl.focus(); return; }
+      setStatus(`updating #${memo.id}...`, "loading");
+      try {
+        await api(`/memos/${memo.id}`, {
+          method: "PUT",
+          body: JSON.stringify({ title, content }),
+        });
+        await loadMemos();
+      } catch (e) {
+        setStatus(`error: ${e.message}`, "error");
+      }
+    });
+  }
+
+  async function deleteMemo(memo) {
+    if (!confirm(`#${memo.id} "${memo.title}" 메모를 삭제할까요?`)) return;
+    setStatus(`deleting #${memo.id}...`, "loading");
+    try {
+      await api(`/memos/${memo.id}`, { method: "DELETE" });
+      await loadMemos();
+    } catch (e) {
+      setStatus(`error: ${e.message}`, "error");
+    }
+  }
+
+  createForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = titleInput.value.trim();
+    const content = contentInput.value;
+    if (!title) { titleInput.focus(); return; }
+    setStatus("creating memo...", "loading");
+    const submitBtn = createForm.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+    try {
+      await api("/memos", {
+        method: "POST",
+        body: JSON.stringify({ title, content }),
+      });
+      createForm.reset();
+      titleInput.focus();
+      await loadMemos();
+    } catch (e) {
+      setStatus(`error: ${e.message}`, "error");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  loadMemos();
+</script>
+</body>
+</html>
