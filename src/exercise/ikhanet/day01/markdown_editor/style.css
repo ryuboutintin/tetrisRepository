@@ -1,0 +1,539 @@
+/* ──────────────────────────────────────────────
+   THE MIDNIGHT PRESS — Editorial Markdown Editor
+   ────────────────────────────────────────────── */
+
+:root {
+  --bg:           #0e0c0a;
+  --bg-editor:    #141210;
+  --bg-preview:   #0a0908;
+  --bg-header:    #0b0907;
+  --bg-toolbar:   #100e0c;
+  --bg-statusbar: #0b0907;
+
+  --text:         #e8dfd0;
+  --text-dim:     #9c8e7e;
+  --text-faint:   #4a3f34;
+
+  --gold:         #c9a96e;
+  --gold-dim:     #7a6040;
+  --gold-bright:  #dfc08a;
+
+  --rule:         #2a2520;
+  --rule-strong:  #3d342a;
+
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-sc:      'Playfair Display SC', Georgia, serif;
+  --font-mono:    'Courier Prime', 'Courier New', monospace;
+  --font-body:    'Lora', Georgia, serif;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--rule-strong); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--gold-dim); }
+
+
+/* ──────────────────────────────────────────────
+   MASTHEAD
+   ────────────────────────────────────────────── */
+
+.header {
+  background: var(--bg-header);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--rule);
+}
+
+.masthead {
+  padding: 0 2rem;
+}
+
+.masthead-rule-top {
+  height: 3px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gold-dim) 15%,
+    var(--gold) 50%,
+    var(--gold-dim) 85%,
+    transparent 100%
+  );
+  margin-bottom: 1px;
+}
+
+.masthead-rule-bottom {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--rule-strong) 15%,
+    var(--rule-strong) 85%,
+    transparent 100%
+  );
+  margin-top: 2px;
+  margin-bottom: 0;
+}
+
+.masthead-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+}
+
+.masthead-left,
+.masthead-right {
+  flex: 1;
+  font-family: var(--font-sc);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: var(--text-dim);
+}
+
+.masthead-right {
+  text-align: right;
+}
+
+.masthead-center {
+  text-align: center;
+}
+
+.masthead-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  line-height: 1;
+  font-style: italic;
+}
+
+.masthead-subtitle {
+  font-family: var(--font-sc);
+  font-size: 0.55rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  margin-top: 2px;
+  text-transform: uppercase;
+}
+
+/* ── SAVE STATUS ── */
+.save-status {
+  font-family: var(--font-sc);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  color: var(--text-faint);
+  transition: color 0.4s ease, opacity 0.4s ease;
+}
+
+.save-status.saved {
+  color: var(--gold-dim);
+}
+
+.save-status.saving {
+  color: var(--text-dim);
+}
+
+
+/* ──────────────────────────────────────────────
+   TOOLBAR
+   ────────────────────────────────────────────── */
+
+.toolbar {
+  background: var(--bg-toolbar);
+  border-top: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.4rem 1.5rem;
+}
+
+.toolbar-group {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.toolbar-sep {
+  width: 1px;
+  height: 18px;
+  background: var(--rule-strong);
+  margin: 0 0.4rem;
+}
+
+.tool-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-dim);
+  font-family: var(--font-sc);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+.tool-btn strong {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.tool-btn em {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.tool-btn--heading {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.tool-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold-dim);
+  background: rgba(201, 169, 110, 0.06);
+}
+
+.tool-btn:active {
+  background: rgba(201, 169, 110, 0.12);
+  transform: translateY(1px);
+}
+
+
+/* ──────────────────────────────────────────────
+   WORKSPACE — SPLIT PANES
+   ────────────────────────────────────────────── */
+
+.workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.pane {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+
+.pane-editor {
+  flex: 1;
+  background: var(--bg-editor);
+}
+
+.pane-preview {
+  flex: 1;
+  background: var(--bg-preview);
+  border-left: 1px solid var(--rule);
+}
+
+.pane-label {
+  font-family: var(--font-sc);
+  font-size: 0.55rem;
+  letter-spacing: 0.3em;
+  color: var(--text-faint);
+  padding: 0.5rem 1.8rem 0.3rem;
+  border-bottom: 1px solid var(--rule);
+  user-select: none;
+}
+
+/* ── EDITOR TEXTAREA ── */
+#editor {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  line-height: 1.9;
+  padding: 1.5rem 2rem 2rem;
+  caret-color: var(--gold);
+  -webkit-font-smoothing: antialiased;
+}
+
+#editor::placeholder {
+  color: var(--text-faint);
+  font-style: italic;
+}
+
+/* ── DIVIDER / RESIZER ── */
+.divider {
+  width: 5px;
+  cursor: col-resize;
+  background: var(--rule);
+  flex-shrink: 0;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.divider::after {
+  content: '';
+  position: absolute;
+  inset: 0 -4px;
+}
+
+.divider:hover,
+.divider.dragging {
+  background: var(--gold-dim);
+}
+
+/* ── PREVIEW AREA ── */
+#preview {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1.5rem 2.5rem 3rem;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.85;
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── PREVIEW TYPOGRAPHY ── */
+
+#preview h1,
+#preview h2,
+#preview h3,
+#preview h4,
+#preview h5,
+#preview h6 {
+  font-family: var(--font-display);
+  color: var(--text);
+  margin-top: 2em;
+  margin-bottom: 0.5em;
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+#preview h1 {
+  font-size: 2.2rem;
+  font-style: italic;
+  letter-spacing: -0.01em;
+  padding-bottom: 0.4em;
+  border-bottom: 1px solid var(--rule-strong);
+  margin-top: 0.5em;
+}
+
+#preview h2 {
+  font-size: 1.5rem;
+  font-style: italic;
+  color: var(--gold);
+}
+
+#preview h3 {
+  font-size: 1.15rem;
+  font-variant: small-caps;
+  font-style: normal;
+  letter-spacing: 0.1em;
+  color: var(--text-dim);
+}
+
+#preview h4, #preview h5, #preview h6 {
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--text-dim);
+}
+
+#preview p {
+  margin-bottom: 1.2em;
+}
+
+#preview strong {
+  font-weight: 700;
+  color: var(--text);
+}
+
+#preview em {
+  font-style: italic;
+  color: var(--text);
+}
+
+#preview a {
+  color: var(--gold);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold-dim);
+  transition: color 0.2s, border-color 0.2s;
+}
+
+#preview a:hover {
+  color: var(--gold-bright);
+  border-color: var(--gold);
+}
+
+#preview blockquote {
+  margin: 1.5em 0;
+  padding: 0.8em 1.5em;
+  border-left: 3px solid var(--gold);
+  background: rgba(201, 169, 110, 0.04);
+  color: var(--text-dim);
+  font-style: italic;
+}
+
+#preview blockquote p { margin-bottom: 0; }
+
+#preview code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--rule-strong);
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  color: var(--gold-bright);
+}
+
+#preview pre {
+  margin: 1.5em 0;
+  border-radius: 3px;
+  border: 1px solid var(--rule-strong);
+  overflow-x: auto;
+}
+
+#preview pre code {
+  background: transparent;
+  border: none;
+  padding: 1.2em 1.5em;
+  display: block;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+#preview hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--gold-dim) 30%,
+    var(--gold-dim) 70%,
+    transparent
+  );
+  margin: 2em 0;
+}
+
+#preview ul, #preview ol {
+  padding-left: 1.5em;
+  margin-bottom: 1.2em;
+}
+
+#preview li {
+  margin-bottom: 0.3em;
+}
+
+#preview ul li::marker {
+  color: var(--gold-dim);
+}
+
+#preview ol li::marker {
+  color: var(--gold-dim);
+  font-family: var(--font-display);
+}
+
+#preview table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 0.9em;
+}
+
+#preview th {
+  font-family: var(--font-sc);
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  color: var(--gold);
+  border-bottom: 2px solid var(--gold-dim);
+  padding: 0.5em 1em;
+  text-align: left;
+  font-weight: 400;
+}
+
+#preview td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.5em 1em;
+  color: var(--text-dim);
+}
+
+#preview tr:last-child td { border-bottom: none; }
+
+#preview img {
+  max-width: 100%;
+  border-radius: 2px;
+  border: 1px solid var(--rule-strong);
+}
+
+
+/* ──────────────────────────────────────────────
+   STATUS BAR
+   ────────────────────────────────────────────── */
+
+.statusbar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 1.8rem;
+  background: var(--bg-statusbar);
+  border-top: 1px solid var(--rule);
+}
+
+.status-item {
+  font-family: var(--font-sc);
+  font-size: 0.58rem;
+  letter-spacing: 0.18em;
+  color: var(--text-faint);
+}
+
+.status-dot {
+  color: var(--text-faint);
+  font-size: 0.7rem;
+}
+
+.status-spacer {
+  flex: 1;
+}
+
+.status-hint {
+  opacity: 0.5;
+}
+
+/* ── SAVE FLASH ANIMATION ── */
+@keyframes saveFlash {
+  0%   { color: var(--gold); }
+  100% { color: var(--text-faint); }
+}
+
+.save-status.flash {
+  animation: saveFlash 1.5s ease forwards;
+}
