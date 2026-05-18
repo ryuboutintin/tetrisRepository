@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <style>
+    /* ── Variables ── */
+    :root {
+      --bg:          #f0f2f5;
+      --surface:     #ffffff;
+      --border:      #d1d5db;
+      --text:        #111827;
+      --text-muted:  #6b7280;
+      --accent:      #4f46e5;
+      --btn-bg:      #f3f4f6;
+      --btn-hover:   #e5e7eb;
+      --code-color:  #db2777;
+      --header-h:    58px;
+      --tab-h:       40px;
+      --status-h:    32px;
+    }
+    [data-theme="dark"] {
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --border:     #334155;
+      --text:       #e2e8f0;
+      --text-muted: #94a3b8;
+      --accent:     #818cf8;
+      --btn-bg:     #1e293b;
+      --btn-hover:  #334155;
+      --code-color: #f472b6;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      height: var(--header-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .logo {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent);
+      white-space: nowrap;
+      margin-right: 6px;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      flex: 1;
+      flex-wrap: nowrap;
+      overflow: hidden;
+    }
+
+    .sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 5px;
+      flex-shrink: 0;
+    }
+
+    .tb {
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      padding: 7px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.875rem;
+      font-weight: 600;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.12s;
+      font-family: inherit;
+      line-height: 1;
+    }
+    .tb:hover { background: var(--btn-hover); }
+
+    /* ── Insert buttons (link / image) — visually distinct ── */
+    .tb-insert {
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 13px;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 0.875rem;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background 0.12s, border-color 0.12s;
+      font-family: inherit;
+      line-height: 1;
+    }
+    .tb-insert:hover {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Theme toggle ── */
+    .theme-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+      background: var(--btn-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 4px 12px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+      transition: background 0.12s;
+    }
+    .theme-btn:hover { background: var(--btn-hover); }
+
+    /* ── Mobile tabs ── */
+    .mobile-tabs {
+      display: none;
+      height: var(--tab-h);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .mobile-tabs button {
+      flex: 1;
+      height: 100%;
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .mobile-tabs button.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Split area ── */
+    .workspace {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .pane + .pane { border-left: 1px solid var(--border); }
+
+    .pane-label {
+      padding: 5px 16px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    /* ── Textarea ── */
+    #editor {
+      flex: 1;
+      padding: 20px;
+      background: var(--surface);
+      color: var(--text);
+      font-family: 'Fira Code', 'Cascadia Code', Consolas, monospace;
+      font-size: 0.9rem;
+      line-height: 1.75;
+      border: none;
+      outline: none;
+      resize: none;
+      tab-size: 2;
+    }
+    #editor::placeholder { color: var(--text-muted); }
+
+    /* ── Preview ── */
+    #preview {
+      flex: 1;
+      padding: 20px 24px;
+      background: var(--surface);
+      overflow-y: auto;
+      font-size: 0.95rem;
+      line-height: 1.8;
+    }
+
+    /* Markdown styles */
+    #preview h1,#preview h2,#preview h3,
+    #preview h4,#preview h5,#preview h6 {
+      margin: 1.2em 0 0.4em;
+      line-height: 1.3;
+      font-weight: 700;
+    }
+    #preview h1 { font-size: 1.75em; border-bottom: 2px solid var(--border); padding-bottom: 0.3em; }
+    #preview h2 { font-size: 1.35em; border-bottom: 1px solid var(--border); padding-bottom: 0.2em; }
+    #preview h3 { font-size: 1.1em; }
+    #preview p  { margin: 0.7em 0; }
+    #preview ul, #preview ol { padding-left: 1.6em; margin: 0.4em 0; }
+    #preview li { margin: 0.2em 0; }
+    #preview a  { color: var(--accent); }
+    #preview hr { border: none; border-top: 2px solid var(--border); margin: 1.5em 0; }
+    #preview img { max-width: 100%; border-radius: 8px; }
+
+    #preview blockquote {
+      border-left: 4px solid var(--accent);
+      padding: 6px 16px;
+      margin: 1em 0;
+      color: var(--text-muted);
+      background: var(--btn-bg);
+      border-radius: 0 8px 8px 0;
+    }
+
+    #preview code {
+      background: var(--btn-bg);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Fira Code', Consolas, monospace;
+      font-size: 0.85em;
+      color: var(--code-color);
+    }
+
+    #preview pre {
+      background: var(--btn-bg);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 1em 0;
+      border: 1px solid var(--border);
+    }
+    #preview pre code {
+      background: transparent;
+      padding: 0;
+      color: var(--text);
+      font-size: 0.875rem;
+    }
+
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 0.9em;
+    }
+    #preview th, #preview td {
+      border: 1px solid var(--border);
+      padding: 8px 12px;
+    }
+    #preview th { background: var(--btn-bg); font-weight: 600; }
+    #preview tr:nth-child(even) td { background: var(--btn-bg); }
+
+    /* Task list checkbox */
+    #preview input[type="checkbox"] {
+      margin-right: 6px;
+      accent-color: var(--accent);
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      height: var(--status-h);
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 0 14px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .status-bar .spacer { flex: 1; }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 10px;
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      transition: all 0.12s;
+    }
+    .copy-btn:hover { background: var(--btn-hover); color: var(--text); }
+    .copy-btn.ok { color: #22c55e; border-color: #22c55e; }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+      .toolbar .sep,
+      .toolbar .tb[data-hide-mobile],
+      .toolbar .tb-insert[data-hide-mobile] { display: none; }
+      .mobile-tabs { display: flex; }
+      .pane-label  { display: none; }
+      .pane.hidden { display: none; }
+      .pane + .pane { border-left: none; }
+    }
+
+    /* ── Fade-in ── */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .workspace { animation: fadeIn 0.3s ease; }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <span class="logo">✦ MD Editor</span>
+    <div class="toolbar">
+      <button class="tb" data-action="h" id="headingBtn" title="클릭할 때마다 H1 → H2 → H3 → 본문 순으로 변경">H</button>
+      <span class="sep"></span>
+      <button class="tb" data-action="bold"><b>B</b></button>
+      <button class="tb" data-action="italic"><i>I</i></button>
+      <button class="tb" data-action="strike" data-hide-mobile=""><s>S</s></button>
+      <button class="tb" data-action="code">`c`</button>
+      <span class="sep"></span>
+      <button class="tb" data-action="codeblock" data-hide-mobile="">```</button>
+      <button class="tb" data-action="quote">❝</button>
+      <button class="tb" data-action="hr" data-hide-mobile="">—</button>
+      <span class="sep"></span>
+      <button class="tb" data-action="ul">• 목록</button>
+      <button class="tb" data-action="ol" data-hide-mobile="">1. 목록</button>
+      <button class="tb" data-action="task" data-hide-mobile="">☑ 할일</button>
+      <span class="sep"></span>
+      <button class="tb-insert" data-action="link" title="링크 삽입 (선택 텍스트에 적용)">🔗 링크</button>
+      <button class="tb-insert" data-action="image" data-hide-mobile="" title="이미지 삽입">🖼 이미지</button>
+    </div>
+    <button class="theme-btn" id="themeBtn">🌙 다크모드</button>
+  </header>
+
+  <!-- Mobile tabs -->
+  <div class="mobile-tabs">
+    <button id="tab-edit" class="active" onclick="switchTab('edit')">편집</button>
+    <button id="tab-preview" onclick="switchTab('preview')">미리보기</button>
+  </div>
+
+  <!-- Split editor -->
+  <div class="workspace">
+    <div class="pane" id="pane-edit">
+      <div class="pane-label">편집</div>
+      <textarea id="editor" spellcheck="false" placeholder="여기에 마크다운을 입력하세요..."></textarea>
+    </div>
+    <div class="pane" id="pane-preview">
+      <div class="pane-label">미리보기</div>
+      <div id="preview"></div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span id="stat-words">단어: 0</span>
+    <span id="stat-chars">글자: 0</span>
+    <span id="stat-lines">줄: 0</span>
+    <span class="spacer"></span>
+    <button class="copy-btn" id="copyMd">마크다운 복사</button>
+    <button class="copy-btn" id="copyHtml">HTML 복사</button>
+  </div>
+
+  <script>
+    /* ── marked setup ── */
+    marked.setOptions({ breaks: true, gfm: true });
+
+    const editor  = document.getElementById('editor');
+    const preview = document.getElementById('preview');
+
+    /* ── Default content ── */
+    editor.value = `# 마크다운 에디터에 오신 것을 환영합니다!
+
+## 텍스트 서식
+
+**굵은 텍스트**, *기울임*, ~~취소선~~, \`인라인 코드\`
+
+## 목록
+
+- 사과
+- 바나나
+  - 필리핀산
+  - 에콰도르산
+
+1. 첫 번째
+2. 두 번째
+3. 세 번째
+
+## 체크리스트
+
+- [x] HTML / CSS 완성
+- [x] 마크다운 파서 연동
+- [x] 다크모드 구현
+- [ ] 배포하기
+
+## 코드 블록
+
+\`\`\`javascript
+function greet(name) {
+  return \`안녕하세요, \${name}님!\`;
+}
+console.log(greet('세상'));
+\`\`\`
+
+## 인용문
+
+> 좋은 코드는 그 자체가 최고의 문서다.
+> — 스티브 맥코넬
+
+## 표
+
+| 이름 | 역할 | 언어 |
+|------|------|------|
+| Alice | 프론트엔드 | React |
+| Bob  | 백엔드 | Python |
+| Carol | 풀스택 | TypeScript |
+
+---
+
+[링크 예시](https://example.com)
+`;
+
+    /* ── Render ── */
+    function render() {
+      preview.innerHTML = marked.parse(editor.value);
+      updateStats();
+    }
+
+    function updateStats() {
+      const txt   = editor.value;
+      const words = txt.trim() ? txt.trim().split(/\s+/).length : 0;
+      document.getElementById('stat-words').textContent = `단어: ${words}`;
+      document.getElementById('stat-chars').textContent = `글자: ${txt.length}`;
+      document.getElementById('stat-lines').textContent = `줄: ${txt.split('\n').length}`;
+    }
+
+    editor.addEventListener('input', render);
+
+    /* ── Keyboard shortcuts ── */
+    editor.addEventListener('keydown', e => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        insertRaw('  ');
+        render();
+      }
+      if (e.ctrlKey || e.metaKey) {
+        if (e.key === 'b') { e.preventDefault(); wrap('**', '**'); render(); }
+        if (e.key === 'i') { e.preventDefault(); wrap('*',  '*');  render(); }
+      }
+    });
+
+    /* ── Toolbar ── */
+    document.querySelectorAll('[data-action]').forEach(btn =>
+      btn.addEventListener('click', () => { doAction(btn.dataset.action); editor.focus(); render(); })
+    );
+
+    function doAction(action) {
+      switch (action) {
+        case 'h': {
+          const pos  = editor.selectionStart;
+          const val  = editor.value;
+          const ls   = val.lastIndexOf('\n', pos - 1) + 1;
+          const le   = val.indexOf('\n', pos);
+          const end  = le === -1 ? val.length : le;
+          const line = val.slice(ls, end);
+          const m    = line.match(/^(#{1,3}) /);
+          let next;
+          if (!m)              next = '# '   + line;
+          else if (m[1] === '#')   next = '## '  + line.slice(2);
+          else if (m[1] === '##')  next = '### ' + line.slice(3);
+          else                 next = line.slice(4);
+          editor.setRangeText(next, ls, end, 'end');
+          document.getElementById('headingBtn').textContent =
+            next.startsWith('### ') ? 'H3' :
+            next.startsWith('## ')  ? 'H2' :
+            next.startsWith('# ')   ? 'H1' : 'H';
+          break;
+        }
+        case 'bold':      wrap('**', '**');    break;
+        case 'italic':    wrap('*', '*');      break;
+        case 'strike':    wrap('~~', '~~');    break;
+        case 'code':      wrap('`', '`');      break;
+        case 'codeblock': wrap('\n```\n', '\n```\n'); break;
+        case 'quote':     prefixLine('> ');    break;
+        case 'hr':        insertRaw('\n\n---\n\n'); break;
+        case 'ul':        prefixLine('- ');    break;
+        case 'ol':        prefixLine('1. ');   break;
+        case 'task':      prefixLine('- [ ] '); break;
+        case 'link': {
+          const s = editor.selectionStart, e = editor.selectionEnd;
+          const sel = editor.value.slice(s, e);
+          if (sel) {
+            editor.setRangeText(`[${sel}](URL)`, s, e, 'end');
+          } else {
+            insertRaw('[링크텍스트](URL)');
+          }
+          break;
+        }
+        case 'image':
+          insertRaw('![대체텍스트](이미지URL)');
+          break;
+      }
+    }
+
+    /* Wrap selected text (or placeholder) with before/after strings */
+    function wrap(before, after) {
+      const s = editor.selectionStart;
+      const e = editor.selectionEnd;
+      const sel = editor.value.slice(s, e) || '텍스트';
+      editor.setRangeText(before + sel + after, s, e, 'select');
+    }
+
+    /* Prefix the current line */
+    function prefixLine(prefix) {
+      const pos  = editor.selectionStart;
+      const val  = editor.value;
+      const line = val.lastIndexOf('\n', pos - 1) + 1;
+      editor.setRangeText(prefix, line, line, 'end');
+    }
+
+    /* Insert raw text at cursor */
+    function insertRaw(text) {
+      const pos = editor.selectionStart;
+      editor.setRangeText(text, pos, pos, 'end');
+    }
+
+    /* ── Dark mode ── */
+    const themeBtn = document.getElementById('themeBtn');
+    const html     = document.documentElement;
+    setTheme(localStorage.getItem('md-theme') || 'dark');
+
+    themeBtn.addEventListener('click', () =>
+      setTheme(html.dataset.theme === 'dark' ? 'light' : 'dark')
+    );
+
+    function setTheme(t) {
+      html.dataset.theme = t;
+      themeBtn.textContent = t === 'dark' ? '☀️ 라이트모드' : '🌙 다크모드';
+      localStorage.setItem('md-theme', t);
+    }
+
+    /* ── Mobile tabs ── */
+    function switchTab(tab) {
+      document.getElementById('pane-edit').classList.toggle('hidden', tab !== 'edit');
+      document.getElementById('pane-preview').classList.toggle('hidden', tab !== 'preview');
+      document.getElementById('tab-edit').classList.toggle('active', tab === 'edit');
+      document.getElementById('tab-preview').classList.toggle('active', tab === 'preview');
+    }
+
+    /* ── Copy buttons ── */
+    function flashCopy(btn, label) {
+      const orig = btn.textContent;
+      btn.textContent = '✓ 복사됨';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('ok'); }, 1500);
+    }
+
+    document.getElementById('copyMd').addEventListener('click', function() {
+      navigator.clipboard.writeText(editor.value).then(() => flashCopy(this));
+    });
+    document.getElementById('copyHtml').addEventListener('click', function() {
+      navigator.clipboard.writeText(preview.innerHTML).then(() => flashCopy(this));
+    });
+
+    /* ── Init ── */
+    render();
+  </script>
+</body>
+</html>
