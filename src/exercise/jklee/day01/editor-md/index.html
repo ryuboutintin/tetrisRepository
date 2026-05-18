@@ -74,6 +74,64 @@
       font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
     }
 
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 12px;
+      background: var(--bg-elev);
+      border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar .sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 32px;
+      height: 30px;
+      padding: 0 10px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .toolbar button:hover {
+      background: var(--bg-deep);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .toolbar button:active { transform: translateY(1px); }
+
+    .toolbar button.bold   { font-weight: 700; }
+    .toolbar button.italic { font-style: italic; }
+
+    .toolbar button.danger:hover {
+      border-color: #e06c75;
+      color: #e06c75;
+    }
+
     .panes {
       flex: 1 1 auto;
       display: grid;
@@ -237,6 +295,22 @@
       <div class="meta" id="meta">0 chars · 0 words</div>
     </header>
 
+    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+      <div class="group">
+        <button type="button" class="bold"   data-action="bold"    title="굵게 (Ctrl/Cmd+B)">B</button>
+        <button type="button" class="italic" data-action="italic"  title="기울임 (Ctrl/Cmd+I)">I</button>
+        <button type="button"                data-action="heading" title="제목">H</button>
+        <button type="button"                data-action="list"    title="리스트">• 리스트</button>
+        <button type="button"                data-action="link"    title="링크">🔗 링크</button>
+        <button type="button"                data-action="code"    title="코드">&lt;/&gt; 코드</button>
+      </div>
+      <div class="group">
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-action="download" title="현재 내용을 .md로 저장">⬇ 다운로드 (.md)</button>
+        <button type="button" class="danger" data-action="reset" title="내용 비우기">🗑 초기화</button>
+      </div>
+    </div>
+
     <main class="panes">
       <section class="pane">
         <div class="pane-header">
@@ -297,14 +371,14 @@ console.log(fib(10));
 Happy hacking. 🚀
 `;
 
+    const STORAGE_KEY = "jklee:editor-md:content";
+
     const editor = document.getElementById("editor");
     const preview = document.getElementById("preview");
     const meta = document.getElementById("meta");
+    const toolbar = document.querySelector(".toolbar");
 
-    marked.setOptions({
-      gfm: true,
-      breaks: true,
-    });
+    marked.setOptions({ gfm: true, breaks: true });
 
     function render() {
       const src = editor.value;
@@ -312,21 +386,130 @@ Happy hacking. 🚀
       const chars = src.length;
       const words = src.trim() ? src.trim().split(/\s+/).length : 0;
       meta.textContent = `${chars} chars · ${words} words`;
+      try { localStorage.setItem(STORAGE_KEY, src); } catch (_) {}
     }
 
-    editor.value = sample;
+    // --- Cursor helpers ---
+    function wrapSelection(before, after, placeholder = "") {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || placeholder;
+      const text = before + selected + after;
+      editor.setRangeText(text, start, end, "select");
+      // Position selection to highlight the inserted text region
+      editor.selectionStart = start + before.length;
+      editor.selectionEnd = start + before.length + selected.length;
+      editor.focus();
+      render();
+    }
+
+    function prependLines(prefix) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const v = editor.value;
+      const lineStart = v.lastIndexOf("\n", start - 1) + 1;
+      const block = v.slice(lineStart, end) || "";
+      const replaced = block
+        .split("\n")
+        .map((l) => prefix + l)
+        .join("\n");
+      editor.setRangeText(replaced, lineStart, end, "end");
+      editor.focus();
+      render();
+    }
+
+    function insertLink() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || "텍스트";
+      const text = `[${selected}](https://)`;
+      editor.setRangeText(text, start, end, "end");
+      // Place cursor inside the URL parens
+      const cursor = start + text.length - 1;
+      editor.selectionStart = editor.selectionEnd = cursor;
+      editor.focus();
+      render();
+    }
+
+    function insertCode() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end);
+      if (selected.includes("\n")) {
+        const text = "```\n" + selected + "\n```";
+        editor.setRangeText(text, start, end, "end");
+      } else {
+        wrapSelection("`", "`", "code");
+        return;
+      }
+      editor.focus();
+      render();
+    }
+
+    const actions = {
+      bold:    () => wrapSelection("**", "**", "굵게"),
+      italic:  () => wrapSelection("*",  "*",  "기울임"),
+      heading: () => prependLines("## "),
+      list:    () => prependLines("- "),
+      link:    () => insertLink(),
+      code:    () => insertCode(),
+      download: () => downloadMd(),
+      reset:    () => resetEditor(),
+    };
+
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const fn = actions[btn.dataset.action];
+      if (fn) fn();
+    });
+
+    // --- Download .md ---
+    function downloadMd() {
+      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      a.href = url;
+      a.download = `note-${ts}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Reset ---
+    function resetEditor() {
+      if (!confirm("작성한 내용을 모두 지울까요? 이 동작은 되돌릴 수 없습니다.")) return;
+      editor.value = "";
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      editor.focus();
+      render();
+    }
+
+    // --- Init: load from storage, fallback to sample ---
+    let initial;
+    try { initial = localStorage.getItem(STORAGE_KEY); } catch (_) { initial = null; }
+    editor.value = initial != null ? initial : sample;
     render();
+
     editor.addEventListener("input", render);
 
-    // Tab key inserts two spaces instead of changing focus
+    // Tab inserts two spaces; Cmd/Ctrl+B / +I shortcuts
     editor.addEventListener("keydown", (e) => {
       if (e.key === "Tab") {
         e.preventDefault();
         const s = editor.selectionStart;
         const eEnd = editor.selectionEnd;
-        editor.value = editor.value.slice(0, s) + "  " + editor.value.slice(eEnd);
-        editor.selectionStart = editor.selectionEnd = s + 2;
+        editor.setRangeText("  ", s, eEnd, "end");
         render();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+        const k = e.key.toLowerCase();
+        if (k === "b") { e.preventDefault(); actions.bold(); }
+        else if (k === "i") { e.preventDefault(); actions.italic(); }
+        else if (k === "s") { e.preventDefault(); downloadMd(); }
       }
     });
   </script>
