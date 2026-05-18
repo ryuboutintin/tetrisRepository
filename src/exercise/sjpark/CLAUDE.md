@@ -31,7 +31,18 @@ sjpark/
   - 이 구조를 변경하면 모바일 탭이 동작하지 않음
 - **에디터 테마**: Catppuccin Mocha (`--ed-bg: #1e1e2e`)
 
+## 작업 범위 규칙
+
+- **수정 대상**: `src/exercise/sjpark/` 디렉토리 안의 파일만 변경한다.
+- 다른 참가자 폴더(`src/exercise/<다른 사용자>/`)는 절대 수정하지 않는다.
+- 스테이징 시 `git add -A` 대신 `git add src/exercise/sjpark/...` 처럼 명시적 경로를 사용한다.
+
 ## Git 규칙
 
 - **머지 방식**: rebase 금지, 항상 `--no-rebase` 머지 사용
-- **push 전**: 반드시 `git pull --no-rebase --no-edit` 선행
+- **commit & push 순서**: push 또는 commit 전에 **반드시** 아래 순서를 지킨다.
+  1. `git pull --no-rebase origin main` — 먼저 최신 상태를 받아온다.
+  2. 충돌이 있으면 merge 커밋 안에서 해결한다.
+  3. `git add src/exercise/sjpark/<변경된 파일>` — 명시적 경로로 스테이징한다.
+  4. `git commit -m "<메시지>"`
+  5. `git push origin main`
