@@ -1,0 +1,49 @@
+    1  cat /etc/*release
+    2  lsb_replease -a
+    3  xeyes
+    4  lsb_release -a
+    5  exit
+    6  lsb_release -a
+    7  exit
+    8  cd/ mnt
+    9  cd..
+   10  cd,,
+   11  exit
+   12  mkdir ~/work
+   13  cd ~/work
+   14  git config --global user.name "yuuny05"
+   15  git config --global user.email soyunlee882@gmail.com
+   16  git config --global pull.rebase false
+   17  git config --global --list
+   18  ssh-keygen
+   19  ssh-keygen -t ed25519
+   20  ssh-keygen
+   21  ls ~./ssh
+   22  ls ~ ./ssh
+   23  cat ~/ .ssh/id_rsa.pub
+   24  cat ~/.ssh/id_rsa.pub
+   25  ls ~/ .ssh
+   26  cat ~/.ssh/id_rsa.pub
+   27  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   28  ls
+   29  cd kosa-vibecoding-2026-2nd/
+   30  cd doc
+   31  ls
+   32  cd src/exercise
+   33  cd src/exercise/
+   34  cd..
+   35  cd src/exercise/
+   36  cd ..
+   37  cd src/exercise/
+   38  ls
+   39  cd yuuny05
+   40  cd day01/
+   41  ls
+   42  cat test.txt
+   43  ls -la
+   44  history
+   45  vi h1.txt
+   46  ls
+   47  vi h1.txt
+   48  ls
+   49  history > h1.txt
