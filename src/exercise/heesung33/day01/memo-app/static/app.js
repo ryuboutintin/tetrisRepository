@@ -1,50 +1,160 @@
 const API_URL = "/memos";
+let token = localStorage.getItem("token");
 
-const memoForm = document.getElementById("memo-form");
-const memoList = document.getElementById("memo-list");
-const formTitle = document.getElementById("form-title");
-const memoIdInput = document.getElementById("memo-id");
-const titleInput = document.getElementById("title");
-const contentInput = document.getElementById("content");
-const submitBtn = document.getElementById("submit-btn");
-const cancelBtn = document.getElementById("cancel-btn");
-
-// 페이지 로드 시 메모 목록 불러오기
-document.addEventListener("DOMContentLoaded", loadMemos);
-
-// 폼 제출 이벤트
-memoForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const title = titleInput.value.trim();
-    const content = contentInput.value.trim();
-
-    if (!title || !content) return;
-
-    const memoId = memoIdInput.value;
-
-    if (memoId) {
-        // 수정 모드
-        await updateMemo(memoId, { title, content });
-    } else {
-        // 생성 모드
-        await createMemo({ title, content });
+// --- 초기화 ---
+document.addEventListener("DOMContentLoaded", () => {
+    if (token) {
+        showApp();
     }
-
-    resetForm();
-    loadMemos();
+    setupAuthForms();
+    setupMemoForm();
 });
 
-// 취소 버튼
-cancelBtn.addEventListener("click", resetForm);
+// --- 인증 ---
+function setupAuthForms() {
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("login-username").value.trim();
+        const password = document.getElementById("login-password").value.trim();
 
-// 메모 목록 불러오기
+        const formData = new URLSearchParams();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        const res = await fetch("/auth/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData,
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            token = data.access_token;
+            localStorage.setItem("token", token);
+            showApp();
+        } else {
+            const err = await res.json();
+            alert(err.detail || "로그인 실패");
+        }
+    });
+
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("reg-username").value.trim();
+        const password = document.getElementById("reg-password").value.trim();
+
+        const res = await fetch("/auth/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, password }),
+        });
+
+        if (res.ok) {
+            alert("회원가입 성공! 로그인해주세요.");
+            showTab("login");
+        } else {
+            const err = await res.json();
+            alert(err.detail || "회원가입 실패");
+        }
+    });
+}
+
+function showTab(tab) {
+    document.getElementById("login-form").style.display = tab === "login" ? "block" : "none";
+    document.getElementById("register-form").style.display = tab === "register" ? "block" : "none";
+    document.getElementById("tab-login").classList.toggle("active", tab === "login");
+    document.getElementById("tab-register").classList.toggle("active", tab === "register");
+}
+
+async function showApp() {
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("app-section").style.display = "block";
+
+    const res = await fetch("/auth/me", { headers: authHeaders() });
+    if (res.ok) {
+        const user = await res.json();
+        document.getElementById("user-info").textContent = `${user.username} 님`;
+    } else {
+        logout();
+        return;
+    }
+    loadMemos();
+}
+
+function logout() {
+    token = null;
+    localStorage.removeItem("token");
+    document.getElementById("auth-section").style.display = "block";
+    document.getElementById("app-section").style.display = "none";
+}
+
+function authHeaders() {
+    return {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+    };
+}
+
+// --- 메모 CRUD ---
+function setupMemoForm() {
+    const memoForm = document.getElementById("memo-form");
+    const cancelBtn = document.getElementById("cancel-btn");
+
+    memoForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const title = document.getElementById("title").value.trim();
+        const content = document.getElementById("content").value.trim();
+        const category = document.getElementById("category").value;
+        const tagsStr = document.getElementById("tags").value.trim();
+        const tags = tagsStr ? tagsStr.split(",").map((t) => t.trim()).filter(Boolean) : [];
+
+        if (!title || !content) return;
+
+        const memoId = document.getElementById("memo-id").value;
+        const data = { title, content, category, tags };
+
+        if (memoId) {
+            await fetch(`${API_URL}/${memoId}`, {
+                method: "PUT",
+                headers: authHeaders(),
+                body: JSON.stringify(data),
+            });
+        } else {
+            await fetch(API_URL, {
+                method: "POST",
+                headers: authHeaders(),
+                body: JSON.stringify(data),
+            });
+        }
+
+        resetForm();
+        loadMemos();
+    });
+
+    cancelBtn.addEventListener("click", resetForm);
+}
+
 async function loadMemos() {
-    const response = await fetch(API_URL);
-    const memos = await response.json();
+    const res = await fetch(API_URL, { headers: authHeaders() });
+    if (!res.ok) return;
+
+    let memos = await res.json();
+
+    // 클라이언트 필터링
+    const filterCategory = document.getElementById("filter-category").value;
+    const filterTag = document.getElementById("filter-tag").value.trim().toLowerCase();
+
+    if (filterCategory) {
+        memos = memos.filter((m) => m.category === filterCategory);
+    }
+    if (filterTag) {
+        memos = memos.filter((m) => m.tags.some((t) => t.name.toLowerCase().includes(filterTag)));
+    }
+
+    const memoList = document.getElementById("memo-list");
 
     if (memos.length === 0) {
-        memoList.innerHTML = '<p class="empty-message">아직 작성된 메모가 없습니다.</p>';
+        memoList.innerHTML = '<p class="empty-message">메모가 없습니다.</p>';
         return;
     }
 
@@ -52,6 +162,10 @@ async function loadMemos() {
         <div class="memo-card">
             <h3>${escapeHtml(memo.title)}</h3>
             <p>${escapeHtml(memo.content)}</p>
+            <div>
+                <span class="category-badge">${escapeHtml(memo.category)}</span>
+                ${memo.tags.map((t) => `<span class="tag-badge">#${escapeHtml(t.name)}</span>`).join("")}
+            </div>
             <div class="meta">
                 작성: ${formatDate(memo.created_at)} | 수정: ${formatDate(memo.updated_at)}
             </div>
@@ -63,67 +177,48 @@ async function loadMemos() {
     `).join("");
 }
 
-// 메모 생성
-async function createMemo(data) {
-    await fetch(API_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-}
-
-// 메모 수정 폼 채우기
 async function editMemo(id) {
-    const response = await fetch(`${API_URL}/${id}`);
-    const memo = await response.json();
+    const res = await fetch(`${API_URL}/${id}`, { headers: authHeaders() });
+    if (!res.ok) return;
+    const memo = await res.json();
 
-    memoIdInput.value = memo.id;
-    titleInput.value = memo.title;
-    contentInput.value = memo.content;
+    document.getElementById("memo-id").value = memo.id;
+    document.getElementById("title").value = memo.title;
+    document.getElementById("content").value = memo.content;
+    document.getElementById("category").value = memo.category;
+    document.getElementById("tags").value = memo.tags.map((t) => t.name).join(", ");
 
-    formTitle.textContent = "메모 수정";
-    submitBtn.textContent = "수정";
-    cancelBtn.style.display = "inline-block";
+    document.getElementById("form-title").textContent = "메모 수정";
+    document.getElementById("submit-btn").textContent = "수정";
+    document.getElementById("cancel-btn").style.display = "inline-block";
 
-    // 폼으로 스크롤
-    memoForm.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("memo-form").scrollIntoView({ behavior: "smooth" });
 }
 
-// 메모 수정 요청
-async function updateMemo(id, data) {
-    await fetch(`${API_URL}/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-    });
-}
-
-// 메모 삭제
 async function deleteMemo(id) {
     if (!confirm("정말 이 메모를 삭제하시겠습니까?")) return;
 
-    await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+    await fetch(`${API_URL}/${id}`, { method: "DELETE", headers: authHeaders() });
     loadMemos();
 }
 
-// 폼 초기화
 function resetForm() {
-    memoIdInput.value = "";
-    titleInput.value = "";
-    contentInput.value = "";
-    formTitle.textContent = "새 메모 작성";
-    submitBtn.textContent = "저장";
-    cancelBtn.style.display = "none";
+    document.getElementById("memo-id").value = "";
+    document.getElementById("title").value = "";
+    document.getElementById("content").value = "";
+    document.getElementById("category").value = "일반";
+    document.getElementById("tags").value = "";
+    document.getElementById("form-title").textContent = "새 메모 작성";
+    document.getElementById("submit-btn").textContent = "저장";
+    document.getElementById("cancel-btn").style.display = "none";
 }
 
-// HTML 이스케이프 (XSS 방지)
 function escapeHtml(text) {
     const div = document.createElement("div");
     div.textContent = text;
     return div.innerHTML;
 }
 
-// 날짜 포맷
 function formatDate(dateStr) {
     const date = new Date(dateStr);
     return date.toLocaleString("ko-KR", {
