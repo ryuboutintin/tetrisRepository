@@ -10,7 +10,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -19,13 +19,47 @@ DB_PATH = BASE_DIR / "memo.db"
 
 
 class MemoCreate(BaseModel):
-    title: str = Field(min_length=1, max_length=100)
-    content: str = Field(default="", max_length=5000)
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "팀 회의 메모",
+                "content": "1. API 설계 검토\n2. 배포 일정 공유",
+            }
+        }
+    )
+
+    title: str = Field(
+        min_length=1,
+        max_length=100,
+        examples=["팀 회의 메모"],
+    )
+    content: str = Field(
+        default="",
+        max_length=5000,
+        examples=["1. API 설계 검토\n2. 배포 일정 공유"],
+    )
 
 
 class MemoUpdate(BaseModel):
-    title: str = Field(min_length=1, max_length=100)
-    content: str = Field(default="", max_length=5000)
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "title": "수정된 회의 메모",
+                "content": "1. Swagger 테스트 완료\n2. UI 연결 확인 필요",
+            }
+        }
+    )
+
+    title: str = Field(
+        min_length=1,
+        max_length=100,
+        examples=["수정된 회의 메모"],
+    )
+    content: str = Field(
+        default="",
+        max_length=5000,
+        examples=["1. Swagger 테스트 완료\n2. UI 연결 확인 필요"],
+    )
 
 
 class Memo(MemoCreate):
@@ -62,7 +96,21 @@ async def lifespan(_: FastAPI) -> AsyncIterator[None]:
     yield
 
 
-app = FastAPI(title="Memo CRUD API", lifespan=lifespan)
+app = FastAPI(
+    title="Memo CRUD API",
+    description=(
+        "간단한 메모 CRUD API입니다. `/docs`의 Swagger UI에서 "
+        "생성, 조회, 수정, 삭제 요청을 직접 실행할 수 있습니다."
+    ),
+    version="1.0.0",
+    lifespan=lifespan,
+    openapi_tags=[
+        {
+            "name": "memos",
+            "description": "메모 생성, 조회, 수정, 삭제 API",
+        }
+    ],
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -78,7 +126,13 @@ def serve_index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
 
 
-@app.get("/api/memos", response_model=list[Memo])
+@app.get(
+    "/api/memos",
+    response_model=list[Memo],
+    tags=["memos"],
+    summary="메모 목록 조회",
+    description="최근 수정된 메모부터 내림차순으로 반환합니다.",
+)
 def list_memos() -> list[Memo]:
     with closing(get_connection()) as connection:
         rows = connection.execute(
@@ -91,7 +145,13 @@ def list_memos() -> list[Memo]:
     return [Memo(**dict(row)) for row in rows]
 
 
-@app.get("/api/memos/{memo_id}", response_model=Memo)
+@app.get(
+    "/api/memos/{memo_id}",
+    response_model=Memo,
+    tags=["memos"],
+    summary="메모 단건 조회",
+    description="메모 ID로 특정 메모를 조회합니다.",
+)
 def get_memo(memo_id: int) -> Memo:
     with closing(get_connection()) as connection:
         row = connection.execute(
@@ -107,7 +167,14 @@ def get_memo(memo_id: int) -> Memo:
     return Memo(**dict(row))
 
 
-@app.post("/api/memos", response_model=Memo, status_code=201)
+@app.post(
+    "/api/memos",
+    response_model=Memo,
+    status_code=201,
+    tags=["memos"],
+    summary="메모 생성",
+    description="제목과 내용을 받아 새 메모를 생성합니다.",
+)
 def create_memo(payload: MemoCreate) -> Memo:
     with closing(get_connection()) as connection:
         cursor = connection.execute(
@@ -130,7 +197,13 @@ def create_memo(payload: MemoCreate) -> Memo:
     return Memo(**dict(row))
 
 
-@app.put("/api/memos/{memo_id}", response_model=Memo)
+@app.put(
+    "/api/memos/{memo_id}",
+    response_model=Memo,
+    tags=["memos"],
+    summary="메모 수정",
+    description="기존 메모의 제목과 내용을 수정합니다.",
+)
 def update_memo(memo_id: int, payload: MemoUpdate) -> Memo:
     with closing(get_connection()) as connection:
         cursor = connection.execute(
@@ -155,7 +228,13 @@ def update_memo(memo_id: int, payload: MemoUpdate) -> Memo:
     return Memo(**dict(row))
 
 
-@app.delete("/api/memos/{memo_id}", status_code=204)
+@app.delete(
+    "/api/memos/{memo_id}",
+    status_code=204,
+    tags=["memos"],
+    summary="메모 삭제",
+    description="메모 ID로 특정 메모를 삭제합니다.",
+)
 def delete_memo(memo_id: int) -> None:
     with closing(get_connection()) as connection:
         cursor = connection.execute(
