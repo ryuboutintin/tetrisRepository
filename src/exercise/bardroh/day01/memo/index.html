@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메모장</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>메모장</h1>
+  </header>
+
+  <main>
+    <aside class="panel-add">
+      <h2>새 메모</h2>
+      <form id="add-form">
+        <input type="text" id="add-title" placeholder="제목" required>
+        <textarea id="add-content" placeholder="내용을 입력하세요" rows="6" required></textarea>
+        <button type="submit" class="btn btn-primary">저장</button>
+      </form>
+    </aside>
+
+    <section class="panel-list">
+      <h2>메모 목록 <span id="memo-count" class="count"></span></h2>
+      <div id="memo-list"></div>
+      <p id="empty-msg" class="empty">저장된 메모가 없습니다.</p>
+    </section>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
