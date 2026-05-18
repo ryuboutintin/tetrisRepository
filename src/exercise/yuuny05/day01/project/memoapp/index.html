@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f0f2f5;
+      min-height: 100vh;
+      padding: 32px 16px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #1a1a2e;
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    /* 입력 폼 */
+    .form-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .form-card h2 {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 14px;
+    }
+
+    .form-card input,
+    .form-card textarea {
+      width: 100%;
+      border: 1px solid #dde1e7;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .form-card input { margin-bottom: 10px; }
+    .form-card textarea { height: 90px; resize: vertical; }
+
+    .form-card input:focus,
+    .form-card textarea:focus { border-color: #4f6ef7; }
+
+    .btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      justify-content: flex-end;
+    }
+
+    button {
+      padding: 8px 18px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    button:hover { opacity: 0.85; }
+
+    .btn-primary { background: #4f6ef7; color: #fff; }
+    .btn-cancel  { background: #e9ecef; color: #333; }
+    .btn-edit    { background: #f0f4ff; color: #4f6ef7; border: 1px solid #c5d0ff; }
+    .btn-delete  { background: #fff0f0; color: #e03e3e; border: 1px solid #ffc5c5; }
+
+    /* 메모 리스트 */
+    .memo-list { display: flex; flex-direction: column; gap: 14px; }
+
+    .memo-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+      transition: box-shadow 0.2s;
+    }
+
+    .memo-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+
+    .memo-card.editing { border: 2px solid #4f6ef7; }
+
+    .memo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .memo-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a2e;
+    }
+
+    .memo-date {
+      font-size: 11px;
+      color: #aaa;
+      white-space: nowrap;
+      margin-left: 12px;
+      padding-top: 3px;
+    }
+
+    .memo-content {
+      font-size: 14px;
+      color: #555;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .memo-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* 수정 인라인 폼 */
+    .edit-form input,
+    .edit-form textarea {
+      width: 100%;
+      border: 1px solid #dde1e7;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 14px;
+      outline: none;
+      font-family: inherit;
+      margin-bottom: 8px;
+    }
+
+    .edit-form textarea { height: 80px; resize: vertical; }
+
+    .edit-form input:focus,
+    .edit-form textarea:focus { border-color: #4f6ef7; }
+
+    /* 빈 상태 */
+    .empty {
+      text-align: center;
+      color: #bbb;
+      padding: 48px 0;
+      font-size: 15px;
+    }
+
+    /* 에러 */
+    .error-msg {
+      background: #fff0f0;
+      color: #c0392b;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container">
+    <h1>📝 메모장</h1>
+
+    <!-- 새 메모 작성 -->
+    <div class="form-card">
+      <h2>새 메모 작성</h2>
+      <div v-if="errorMsg" class="error-msg">{{ errorMsg }}</div>
+      <input v-model="newMemo.title" placeholder="제목" @keyup.enter="$refs.contentInput.focus()" />
+      <textarea v-model="newMemo.content" placeholder="내용을 입력하세요..." ref="contentInput"></textarea>
+      <div class="btn-row">
+        <button class="btn-primary" @click="createMemo">저장</button>
+      </div>
+    </div>
+
+    <!-- 메모 목록 -->
+    <div class="memo-list">
+      <div v-if="memos.length === 0" class="empty">메모가 없습니다. 새 메모를 작성해보세요!</div>
+
+      <div
+        v-for="memo in memos"
+        :key="memo.id"
+        class="memo-card"
+        :class="{ editing: editingId === memo.id }"
+      >
+        <!-- 수정 모드 -->
+        <div v-if="editingId === memo.id" class="edit-form">
+          <input v-model="editForm.title" placeholder="제목" />
+          <textarea v-model="editForm.content" placeholder="내용"></textarea>
+          <div class="btn-row">
+            <button class="btn-cancel" @click="cancelEdit">취소</button>
+            <button class="btn-primary" @click="updateMemo(memo.id)">저장</button>
+          </div>
+        </div>
+
+        <!-- 보기 모드 -->
+        <template v-else>
+          <div class="memo-header">
+            <span class="memo-title">{{ memo.title }}</span>
+            <span class="memo-date">{{ formatDate(memo.updated_at || memo.created_at) }}</span>
+          </div>
+          <div class="memo-content">{{ memo.content }}</div>
+          <div class="memo-actions">
+            <button class="btn-edit" @click="startEdit(memo)">수정</button>
+            <button class="btn-delete" @click="deleteMemo(memo.id)">삭제</button>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = 'http://localhost:8000';
+
+    const { createApp, ref, onMounted } = Vue;
+
+    createApp({
+      setup() {
+        const memos = ref([]);
+        const newMemo = ref({ title: '', content: '' });
+        const editingId = ref(null);
+        const editForm = ref({ title: '', content: '' });
+        const errorMsg = ref('');
+
+        async function fetchMemos() {
+          const res = await fetch(`${API}/memos`);
+          memos.value = await res.json();
+        }
+
+        async function createMemo() {
+          errorMsg.value = '';
+          if (!newMemo.value.title.trim() || !newMemo.value.content.trim()) {
+            errorMsg.value = '제목과 내용을 모두 입력해주세요.';
+            return;
+          }
+          await fetch(`${API}/memos`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newMemo.value),
+          });
+          newMemo.value = { title: '', content: '' };
+          await fetchMemos();
+        }
+
+        function startEdit(memo) {
+          editingId.value = memo.id;
+          editForm.value = { title: memo.title, content: memo.content };
+        }
+
+        function cancelEdit() {
+          editingId.value = null;
+        }
+
+        async function updateMemo(id) {
+          if (!editForm.value.title.trim() || !editForm.value.content.trim()) return;
+          await fetch(`${API}/memos/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(editForm.value),
+          });
+          editingId.value = null;
+          await fetchMemos();
+        }
+
+        async function deleteMemo(id) {
+          if (!confirm('이 메모를 삭제하시겠습니까?')) return;
+          await fetch(`${API}/memos/${id}`, { method: 'DELETE' });
+          await fetchMemos();
+        }
+
+        function formatDate(dateStr) {
+          if (!dateStr) return '';
+          const d = new Date(dateStr);
+          return d.toLocaleDateString('ko-KR', {
+            year: 'numeric', month: '2-digit', day: '2-digit',
+            hour: '2-digit', minute: '2-digit',
+          });
+        }
+
+        onMounted(fetchMemos);
+
+        return { memos, newMemo, editingId, editForm, errorMsg, createMemo, startEdit, cancelEdit, updateMemo, deleteMemo, formatDate };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
