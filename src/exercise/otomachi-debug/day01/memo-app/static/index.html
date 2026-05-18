@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memo App</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- 사이드바 -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="logo">✦ Memo</span>
+        <button class="btn-new" id="btn-new" title="새 메모">+</button>
+      </div>
+      <div class="search-wrap">
+        <input type="text" id="search" class="search" placeholder="메모 검색..." />
+      </div>
+      <ul class="memo-list" id="memo-list"></ul>
+    </aside>
+
+    <!-- 에디터 영역 -->
+    <main class="editor-area" id="editor-area">
+
+      <!-- 메모 선택 전 빈 상태 -->
+      <div class="empty-state" id="empty-state">
+        <p class="empty-icon">📝</p>
+        <p>메모를 선택하거나 <strong>+</strong> 버튼으로 새 메모를 만드세요.</p>
+      </div>
+
+      <!-- 메모 편집 폼 -->
+      <div class="editor" id="editor" style="display:none">
+        <div class="editor-header">
+          <input type="text" id="memo-title" class="title-input" placeholder="제목" />
+          <div class="editor-actions">
+            <button class="btn btn-ghost" id="btn-cancel">취소</button>
+            <button class="btn btn-primary" id="btn-save">저장</button>
+            <button class="btn btn-danger" id="btn-delete">삭제</button>
+          </div>
+        </div>
+        <textarea id="memo-content" class="content-input" placeholder="내용을 입력하세요..."></textarea>
+        <div class="editor-footer">
+          <span id="memo-meta"></span>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
