@@ -1,0 +1,95 @@
+    1  exit
+    2  lsb_release -a
+    3  xeyes
+    4  mkdir ~/work
+    5  cd ~/work
+    6  git config --global user.name "yjh"
+    7  git config --globall user.email 
+    8  git config --globall user.email "dbswnsgur@gmail.com"
+    9  git config --global user.email "dbswnsgur03@gmail.com"
+   10  git config --global pull.rebase false
+   11  git config --global --list
+   12  ssh-keygen
+   13  ls ~/.ssh/
+   14  cat ~/.ssh/id_rsa
+   15  cat ~/.ssh/id_rsa.pub
+   16  ssh-keygen
+   17  cat ~/.ssh/id_rsa.pub
+   18  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   19  ls
+   20  cd kosa-vibecoding-2026-2nd
+   21  cd odc
+   22  ls
+   23  cd doc
+   24  cd ..
+   25  cd src/exercise
+   26  ls
+   27  cd dbswnsgur
+   28  ls
+   29  cd day01
+   30  ls
+   31  cat test.txt
+   32  history > h1.txt
+   33  history
+   34  ls
+   35  vi test.txt
+   36  git add h1.txt
+   37  git commit -m 'add history'
+   38  ls
+   39  rm h1.txt
+   40  ls
+   41  git checkout h1.txt
+   42  ls
+   43  git pull --no-edit
+   44  git push 
+   45  git pull --no-edit
+   46  git push
+   47  git pull --no-edit
+   48  git push
+   49  git pull --no-edit
+   50  ls
+   51  git fetch
+   52  git pull --no-edit
+   53  node -v
+   54  cd work/
+   55  cd ..
+   56  cd ../
+   57  cd `/work
+   58  cd ~/work
+   59  ls
+   60  sudo apt update && sudo apt upgrade –y
+   61  sudo apt update && sudo apt upgrade y
+   62  sudo apt update && sudo apt upgrade
+   63  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh
+   64  export NVM_DIR="$HOME/.nvm"
+   65  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash # nvm 설치
+   66  export NVM_DIR="$HOME/.nvm"
+   67  source "$NVM_DIR/nvm.sh
+node -v
+node -v # v24.x 확인
+
+   68  node -v # v24.x 확인
+   69  node -v
+   70  export NVM_DIR="$HOME/.nvm
+npm install -g @google/gemini-cli # gemini cli 설치
+   71  npm install -g @google/gemini-cli # gemini cli 설치
+   72  nvm install --lts # node 설치
+   73  curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash # nvm 설치
+   74  export NVM_DIR="$HOME/.nvm"
+   75  source "$NVM_DIR/nvm.sh"
+   76  nvm install --lts # node 설치
+   77  node -v # v24.x 확인
+   78  npm install -g @google/gemini-cli # gemini cli 설치
+   79  history
+   80  cd src/exercise
+   81  cd cd kosa-vibecoding-2026-2nd
+   82  cd kosa-vibecoding-2026-2nd
+   83  ls
+   84  cd src/exercise/dbswnsgur/day01
+   85  ls
+   86  gemini
+   87  ls
+   88  history
+   89  cd ./
+   90  hisotry > fibonacci/fibonacci.txt
+   91  history > fibonacci.txt
