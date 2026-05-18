@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자기소개 에디터</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f11;
+      --surface: #1a1a1f;
+      --surface2: #222228;
+      --border: #2a2a32;
+      --accent: #7c6ff7;
+      --accent-soft: #a89df9;
+      --accent-glow: rgba(124,111,247,0.25);
+      --text: #f0f0f4;
+      --text-muted: #8e8ea0;
+      --green: #4ade80;
+      --red: #f87171;
+      --yellow: #fbbf24;
+      --radius: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    header h1 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-soft);
+      letter-spacing: 0.5px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 7px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover { color: var(--text); border-color: var(--accent); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent-soft); }
+
+    /* ── Layout ── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      height: calc(100vh - 53px);
+    }
+
+    /* ── Editor Panel ── */
+    .editor-panel {
+      width: 380px;
+      min-width: 320px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      padding: 14px 20px 8px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-group {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .field-group:last-child { border-bottom: none; }
+
+    label {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    input[type="text"],
+    input[type="url"],
+    textarea,
+    select {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.88rem;
+      padding: 9px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea { resize: vertical; line-height: 1.5; font-family: 'Fira Code', 'Courier New', monospace; }
+
+    /* ── Markdown mini-editor ── */
+    .md-editor-wrap {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+
+    .md-editor-wrap:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .md-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2px;
+      padding: 6px 8px;
+      background: var(--surface2);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .md-toolbar button {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 5px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 7px;
+      transition: all 0.12s;
+      line-height: 1.4;
+    }
+
+    .md-toolbar button:hover {
+      background: var(--border);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .md-toolbar .sep {
+      width: 1px;
+      background: var(--border);
+      margin: 2px 4px;
+      align-self: stretch;
+    }
+
+    .md-editor-wrap textarea {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+    }
+
+    .md-editor-wrap textarea:focus {
+      border: none;
+      box-shadow: none;
+    }
+
+    .md-footer {
+      display: flex;
+      justify-content: flex-end;
+      padding: 4px 10px;
+      background: var(--surface2);
+      border-top: 1px solid var(--border);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      gap: 12px;
+    }
+
+    .md-footer span { color: var(--accent-soft); }
+
+    /* bio 탭 */
+    .md-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface2);
+    }
+
+    .md-tab {
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      transition: all 0.12s;
+    }
+
+    .md-tab:hover { color: var(--text); }
+    .md-tab.active { color: var(--accent-soft); border-bottom-color: var(--accent); }
+
+    .md-bio-preview {
+      display: none;
+      padding: 12px 14px;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-muted);
+      min-height: 100px;
+      background: var(--bg);
+    }
+
+    .md-bio-preview.visible { display: block; }
+
+    /* bio 미리보기 안 마크다운 스타일 */
+    .md-bio-preview strong { color: var(--text); }
+    .md-bio-preview em { font-style: italic; color: var(--accent-soft); }
+    .md-bio-preview code {
+      background: rgba(124,111,247,0.15);
+      color: var(--accent-soft);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.85em;
+    }
+    .md-bio-preview ul, .md-bio-preview ol { padding-left: 1.4em; margin: 4px 0; }
+    .md-bio-preview li { margin: 2px 0; }
+    .md-bio-preview blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 10px;
+      margin: 6px 0;
+      opacity: 0.8;
+    }
+    .md-bio-preview p { margin: 0.4em 0; }
+    .md-bio-preview p:first-child { margin-top: 0; }
+    .md-bio-preview a { color: var(--accent-soft); }
+
+    .field-row { display: flex; gap: 10px; }
+    .field-row > * { flex: 1; }
+
+    /* Avatar upload */
+    .avatar-picker {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .avatar-preview {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: var(--surface2);
+      border: 2px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      cursor: pointer;
+      overflow: hidden;
+      flex-shrink: 0;
+      transition: border-color 0.15s;
+    }
+
+    .avatar-preview:hover { border-color: var(--accent); }
+    .avatar-preview img { width: 100%; height: 100%; object-fit: cover; }
+
+    .avatar-input-wrap { flex: 1; }
+
+    /* Skill tags */
+    .tag-input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tag-input-row input { flex: 1; }
+
+    .tag-add-btn {
+      padding: 9px 14px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--accent-soft);
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background 0.15s;
+    }
+
+    .tag-add-btn:hover { background: var(--border); }
+
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(124,111,247,0.15);
+      color: var(--accent-soft);
+      border: 1px solid rgba(124,111,247,0.3);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .tag .remove-tag {
+      cursor: pointer;
+      opacity: 0.6;
+      font-size: 0.7rem;
+      line-height: 1;
+    }
+
+    .tag .remove-tag:hover { opacity: 1; color: var(--red); }
+
+    /* Links */
+    .link-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .link-icon {
+      font-size: 1.1rem;
+      width: 28px;
+      text-align: center;
+      flex-shrink: 0;
+    }
+
+    /* Color picker */
+    .color-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .color-swatch {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: #fff; transform: scale(1.1); }
+
+    /* ── Preview Panel ── */
+    .preview-panel {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 20px;
+      background: var(--bg);
+    }
+
+    /* ── Profile Card ── */
+    .profile-card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    .card-banner {
+      height: 100px;
+      background: var(--accent);
+      position: relative;
+    }
+
+    .card-avatar {
+      position: absolute;
+      bottom: -36px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      overflow: hidden;
+    }
+
+    .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .card-body {
+      padding: 48px 32px 28px;
+      text-align: center;
+    }
+
+    .card-name {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .card-role {
+      font-size: 0.88rem;
+      color: var(--accent-soft);
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .card-location {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .card-bio {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    /* Markdown rendered inside card-bio */
+    .card-bio p { margin: 0.5em 0; }
+    .card-bio p:first-child { margin-top: 0; }
+    .card-bio p:last-child  { margin-bottom: 0; }
+    .card-bio strong { color: var(--text); font-weight: 600; }
+    .card-bio em { font-style: italic; }
+    .card-bio del { text-decoration: line-through; opacity: 0.6; }
+    .card-bio a { color: var(--accent-soft); text-decoration: none; }
+    .card-bio a:hover { text-decoration: underline; }
+    .card-bio code {
+      background: rgba(124,111,247,0.15);
+      color: var(--accent-soft);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85em;
+    }
+    .card-bio pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      margin: 0.6em 0;
+      text-align: left;
+    }
+    .card-bio pre code { background: none; padding: 0; color: var(--text-muted); }
+    .card-bio ul, .card-bio ol {
+      padding-left: 1.4em;
+      margin: 0.4em 0;
+      text-align: left;
+    }
+    .card-bio li { margin: 0.2em 0; }
+    .card-bio blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 10px;
+      margin: 0.5em 0;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+    .card-bio h1, .card-bio h2, .card-bio h3 {
+      color: var(--text);
+      font-weight: 600;
+      margin: 0.6em 0 0.2em;
+    }
+    .card-bio h1 { font-size: 1.1em; }
+    .card-bio h2 { font-size: 1em; }
+    .card-bio h3 { font-size: 0.95em; }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .card-tag {
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      background: rgba(124,111,247,0.15);
+      color: var(--accent-soft);
+      border: 1px solid rgba(124,111,247,0.25);
+    }
+
+    .card-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .card-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+
+    .stat { text-align: center; }
+
+    .stat-value {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .card-links {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .card-link {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+
+    .card-link:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    .card-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.78rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* Export modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 90%;
+      max-width: 560px;
+      padding: 28px;
+    }
+
+    .modal h2 {
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: var(--accent-soft);
+    }
+
+    .modal pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      font-size: 0.8rem;
+      overflow: auto;
+      max-height: 300px;
+      color: var(--text-muted);
+      white-space: pre-wrap;
+    }
+
+    .modal-actions {
+      margin-top: 16px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>✏ 자기소개 에디터</h1>
+  <div class="header-actions">
+    <button class="btn btn-ghost" onclick="resetForm()">초기화</button>
+    <button class="btn btn-primary" onclick="showExport()">HTML 내보내기</button>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <!-- ── 편집 패널 ── -->
+  <div class="editor-panel">
+
+    <div class="section-title">기본 정보</div>
+
+    <div class="field-group">
+      <label>프로필 사진</label>
+      <div class="avatar-picker">
+        <div class="avatar-preview" id="avatarPreview" onclick="document.getElementById('avatarFile').click()">
+          <span id="avatarEmoji">👤</span>
+        </div>
+        <div class="avatar-input-wrap">
+          <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="handleAvatar(event)">
+          <label>이름</label>
+          <input type="text" id="name" value="김민준" oninput="render()" placeholder="이름을 입력하세요" />
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div>
+          <label>직책 / 역할</label>
+          <input type="text" id="role" value="Frontend Developer" oninput="render()" placeholder="개발자, 디자이너..." />
+        </div>
+        <div>
+          <label>위치</label>
+          <input type="text" id="location" value="서울, 대한민국 🇰🇷" oninput="render()" placeholder="도시, 국가" />
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>소개 <span style="font-weight:400;color:var(--accent-soft);font-size:0.7rem;">마크다운 지원</span></label>
+      <div class="md-editor-wrap">
+        <!-- 탭 -->
+        <div class="md-tabs">
+          <button class="md-tab active" id="tabEdit" onclick="switchBioTab('edit')">편집</button>
+          <button class="md-tab" id="tabPreview" onclick="switchBioTab('preview')">미리보기</button>
+        </div>
+        <!-- 편집: 툴바 + textarea -->
+        <div id="bioEditPane">
+          <div class="md-toolbar">
+            <button onclick="bioInsert('**','**')"><b>B</b></button>
+            <button onclick="bioInsert('*','*')"><i>I</i></button>
+            <button onclick="bioInsert('~~','~~')"><s>S</s></button>
+            <button onclick="bioInsert('`','`')">코드</button>
+            <div class="sep"></div>
+            <button onclick="bioLine('## ')">H2</button>
+            <button onclick="bioLine('### ')">H3</button>
+            <div class="sep"></div>
+            <button onclick="bioLine('- ')">• 목록</button>
+            <button onclick="bioLine('1. ')">1. 목록</button>
+            <button onclick="bioLine('> ')">" 인용</button>
+            <div class="sep"></div>
+            <button onclick="bioInsert('[','](url)')">링크</button>
+          </div>
+          <textarea id="bio" rows="5" oninput="render();updateBioStats()"
+            placeholder="**굵게**, *기울임*, `코드`, - 목록 등 마크다운을 사용할 수 있어요.">좋은 코드와 좋은 커피를 사랑하는 개발자입니다.
+
+사용자 경험을 중심으로 생각하며, 매일 조금씩 성장하는 것을 즐깁니다.
+
+- **React** / TypeScript 전문
+- 오픈소스 기여 중 🌱</textarea>
+        </div>
+        <!-- 미리보기 -->
+        <div class="md-bio-preview" id="bioPreviewPane"></div>
+        <!-- 하단 -->
+        <div class="md-footer">
+          글자 <span id="bioChars">0</span> &nbsp;|&nbsp; 단어 <span id="bioWords">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>상태</label>
+      <div class="field-row">
+        <select id="statusType" onchange="render()">
+          <option value="green">구직 중</option>
+          <option value="yellow">프리랜서 가능</option>
+          <option value="red">바쁨</option>
+          <option value="none">상태 숨기기</option>
+        </select>
+        <input type="text" id="statusText" value="새로운 기회를 찾고 있어요" oninput="render()" placeholder="상태 메시지" />
+      </div>
+    </div>
+
+    <div class="section-title">통계</div>
+
+    <div class="field-group">
+      <div class="field-row">
+        <div>
+          <label>프로젝트 수</label>
+          <input type="text" id="stat1val" value="24" oninput="render()" />
+        </div>
+        <div>
+          <label>레이블</label>
+          <input type="text" id="stat1label" value="Projects" oninput="render()" />
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-row">
+        <div>
+          <label>경력 (년)</label>
+          <input type="text" id="stat2val" value="3+" oninput="render()" />
+        </div>
+        <div>
+          <label>레이블</label>
+          <input type="text" id="stat2label" value="Years Exp" oninput="render()" />
+        </div>
+      </div>
+    </div>
+    <div class="field-group">
+      <div class="field-row">
+        <div>
+          <label>기여 수</label>
+          <input type="text" id="stat3val" value="1.2k" oninput="render()" />
+        </div>
+        <div>
+          <label>레이블</label>
+          <input type="text" id="stat3label" value="Commits" oninput="render()" />
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">기술 스택</div>
+
+    <div class="field-group">
+      <div class="tag-input-row">
+        <input type="text" id="skillInput" placeholder="예: React, Python..." onkeydown="handleTagKey(event)" />
+        <button class="tag-add-btn" onclick="addTag()">+</button>
+      </div>
+      <div class="tags-list" id="tagsList"></div>
+    </div>
+
+    <div class="section-title">링크</div>
+
+    <div class="field-group">
+      <div class="link-row">
+        <span class="link-icon">🐙</span>
+        <input type="url" id="github" oninput="render()" placeholder="https://github.com/username" />
+      </div>
+      <div class="link-row">
+        <span class="link-icon">💼</span>
+        <input type="url" id="linkedin" oninput="render()" placeholder="https://linkedin.com/in/username" />
+      </div>
+      <div class="link-row">
+        <span class="link-icon">🌐</span>
+        <input type="url" id="website" oninput="render()" placeholder="https://yoursite.com" />
+      </div>
+    </div>
+
+    <div class="section-title">테마 색상</div>
+
+    <div class="field-group">
+      <div class="color-row" id="colorPicker"></div>
+    </div>
+
+  </div>
+
+  <!-- ── 미리보기 패널 ── -->
+  <div class="preview-panel">
+    <div class="profile-card" id="profileCard">
+      <div class="card-banner" id="cardBanner">
+        <div class="card-avatar" id="cardAvatar">
+          <span id="cardAvatarInner">👤</span>
+        </div>
+      </div>
+      <div class="card-body">
+        <div id="cardStatus" class="card-status"></div>
+        <div class="card-name" id="cardName">김민준</div>
+        <div class="card-role" id="cardRole">Frontend Developer</div>
+        <div class="card-location" id="cardLocation">📍 서울, 대한민국 🇰🇷</div>
+        <div class="card-bio" id="cardBio"></div>
+        <div class="card-tags" id="cardTags"></div>
+        <div class="card-divider"></div>
+        <div class="card-stats" id="cardStats"></div>
+        <div class="card-links" id="cardLinks"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Export Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="hideExport(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>HTML 내보내기</h2>
+    <pre id="exportCode"></pre>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="hideExport()">닫기</button>
+      <button class="btn btn-primary" onclick="copyExport()">복사</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Markdown Parser ──
+  function parseMarkdown(md) {
+    let html = md
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Fenced code blocks
+    html = html.replace(/```(\w*)\n?([\s\S]*?)```/g, (_, lang, code) =>
+      `<pre><code>${code.trim()}</code></pre>`
+    );
+
+    // Inline code
+    html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Headings
+    html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+    html = html.replace(/^## (.+)$/gm,  '<h2>$1</h2>');
+    html = html.replace(/^# (.+)$/gm,   '<h1>$1</h1>');
+
+    // Blockquote
+    html = html.replace(/^&gt; (.+)$/gm, '<blockquote>$1</blockquote>');
+
+    // HR
+    html = html.replace(/^---+$/gm, '<hr>');
+
+    // Bold, italic, strikethrough
+    html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+    html = html.replace(/\*\*(.+?)\*\*/g,     '<strong>$1</strong>');
+    html = html.replace(/\*(.+?)\*/g,         '<em>$1</em>');
+    html = html.replace(/~~(.+?)~~/g,         '<del>$1</del>');
+
+    // Links
+    html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    // Unordered lists
+    html = html.replace(/((?:^[-*+] .+\n?)+)/gm, match => {
+      const items = match.trim().split('\n')
+        .map(l => `<li>${l.replace(/^[-*+] /, '')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    });
+
+    // Ordered lists
+    html = html.replace(/((?:^\d+\. .+\n?)+)/gm, match => {
+      const items = match.trim().split('\n')
+        .map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    });
+
+    // Paragraphs (double newline)
+    html = html.replace(/\n{2,}/g, '</p><p>');
+    html = '<p>' + html + '</p>';
+
+    // Clean block-level elements from inside <p>
+    html = html.replace(/<p>(\s*<(?:h[1-3]|ul|ol|pre|blockquote|hr)[^>]*>)/g, '$1');
+    html = html.replace(/(<\/(?:h[1-3]|ul|ol|pre|blockquote|hr)>)\s*<\/p>/g, '$1');
+    html = html.replace(/<p>\s*<\/p>/g, '');
+
+    // Single newline → <br>
+    html = html.replace(/([^>])\n([^<])/g, '$1<br>$2');
+
+    return html;
+  }
+
+  // ── Bio 탭 전환 ──
+  function switchBioTab(tab) {
+    const editPane    = document.getElementById('bioEditPane');
+    const previewPane = document.getElementById('bioPreviewPane');
+    const tabEdit     = document.getElementById('tabEdit');
+    const tabPreview  = document.getElementById('tabPreview');
+
+    if (tab === 'edit') {
+      editPane.style.display    = 'block';
+      previewPane.classList.remove('visible');
+      tabEdit.classList.add('active');
+      tabPreview.classList.remove('active');
+      document.getElementById('bio').focus();
+    } else {
+      editPane.style.display    = 'none';
+      previewPane.classList.add('visible');
+      tabEdit.classList.remove('active');
+      tabPreview.classList.add('active');
+      const bio = document.getElementById('bio').value;
+      previewPane.innerHTML = bio.trim() ? parseMarkdown(bio) : '<span style="opacity:0.4">내용 없음</span>';
+    }
+  }
+
+  // ── Bio toolbar helpers ──
+  function bioInsert(before, after) {
+    const ta = document.getElementById('bio');
+    const start = ta.selectionStart;
+    const end   = ta.selectionEnd;
+    const sel   = ta.value.slice(start, end) || 'text';
+    ta.value = ta.value.slice(0, start) + before + sel + after + ta.value.slice(end);
+    ta.selectionStart = start + before.length;
+    ta.selectionEnd   = start + before.length + sel.length;
+    ta.focus();
+    render();
+    updateBioStats();
+  }
+
+  function bioLine(prefix) {
+    const ta = document.getElementById('bio');
+    const start = ta.selectionStart;
+    const lineStart = ta.value.lastIndexOf('\n', start - 1) + 1;
+    ta.value = ta.value.slice(0, lineStart) + prefix + ta.value.slice(lineStart);
+    ta.selectionStart = ta.selectionEnd = start + prefix.length;
+    ta.focus();
+    render();
+    updateBioStats();
+  }
+
+  function updateBioStats() {
+    const text = document.getElementById('bio').value;
+    document.getElementById('bioChars').textContent = text.length;
+    document.getElementById('bioWords').textContent =
+      text.trim() ? text.trim().split(/\s+/).length : 0;
+  }
+
+  // ── State ──
+  const skills = ['React', 'TypeScript', 'Node.js', 'CSS'];
+  let avatarSrc = null;
+
+  const COLORS = [
+    { name: 'violet',  value: '#7c6ff7' },
+    { name: 'blue',    value: '#3b82f6' },
+    { name: 'cyan',    value: '#06b6d4' },
+    { name: 'green',   value: '#22c55e' },
+    { name: 'yellow',  value: '#eab308' },
+    { name: 'orange',  value: '#f97316' },
+    { name: 'red',     value: '#ef4444' },
+    { name: 'pink',    value: '#ec4899' },
+  ];
+
+  let accentColor = COLORS[0].value;
+
+  // ── Init color picker ──
+  const cp = document.getElementById('colorPicker');
+  COLORS.forEach((c, i) => {
+    const s = document.createElement('div');
+    s.className = 'color-swatch' + (i === 0 ? ' active' : '');
+    s.style.background = c.value;
+    s.title = c.name;
+    s.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(el => el.classList.remove('active'));
+      s.classList.add('active');
+      accentColor = c.value;
+      render();
+    };
+    cp.appendChild(s);
+  });
+
+  // ── Init tags ──
+  renderTags();
+
+  function addTag() {
+    const input = document.getElementById('skillInput');
+    const val = input.value.trim();
+    if (val && !skills.includes(val)) {
+      skills.push(val);
+      renderTags();
+      render();
+    }
+    input.value = '';
+    input.focus();
+  }
+
+  function removeTag(idx) {
+    skills.splice(idx, 1);
+    renderTags();
+    render();
+  }
+
+  function handleTagKey(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addTag(); }
+  }
+
+  function renderTags() {
+    const list = document.getElementById('tagsList');
+    list.innerHTML = skills.map((s, i) =>
+      `<span class="tag">${s}<span class="remove-tag" onclick="removeTag(${i})">✕</span></span>`
+    ).join('');
+  }
+
+  // ── Avatar ──
+  function handleAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      avatarSrc = ev.target.result;
+      document.getElementById('avatarPreview').innerHTML = `<img src="${avatarSrc}" alt="avatar">`;
+      render();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ── Render ──
+  function render() {
+    const name     = document.getElementById('name').value || '이름 없음';
+    const role     = document.getElementById('role').value;
+    const location = document.getElementById('location').value;
+    const bio      = document.getElementById('bio').value;
+    const statusType = document.getElementById('statusType').value;
+    const statusText = document.getElementById('statusText').value;
+    const github   = document.getElementById('github').value;
+    const linkedin = document.getElementById('linkedin').value;
+    const website  = document.getElementById('website').value;
+
+    const s1v = document.getElementById('stat1val').value;
+    const s1l = document.getElementById('stat1label').value;
+    const s2v = document.getElementById('stat2val').value;
+    const s2l = document.getElementById('stat2label').value;
+    const s3v = document.getElementById('stat3val').value;
+    const s3l = document.getElementById('stat3label').value;
+
+    // Accent
+    document.getElementById('cardBanner').style.background =
+      `linear-gradient(135deg, ${accentColor}, ${accentColor}99)`;
+
+    // Avatar
+    const avatarEl = document.getElementById('cardAvatarInner');
+    if (avatarSrc) {
+      avatarEl.outerHTML = `<img id="cardAvatarInner" src="${avatarSrc}" alt="avatar">`;
+    }
+
+    // Status
+    const statusEl = document.getElementById('cardStatus');
+    if (statusType === 'none' || !statusText) {
+      statusEl.style.display = 'none';
+    } else {
+      const colors = { green: '#4ade80', yellow: '#fbbf24', red: '#f87171' };
+      statusEl.style.display = 'inline-flex';
+      statusEl.style.background = colors[statusType] + '22';
+      statusEl.style.color = colors[statusType];
+      statusEl.innerHTML = `<span class="status-dot" style="background:${colors[statusType]}"></span>${statusText}`;
+    }
+
+    document.getElementById('cardName').textContent = name;
+    document.getElementById('cardRole').textContent = role;
+    document.getElementById('cardRole').style.color = accentColor;
+    document.getElementById('cardLocation').textContent = location ? `📍 ${location}` : '';
+    document.getElementById('cardBio').innerHTML = bio.trim() ? parseMarkdown(bio) : '';
+
+    // Tags
+    document.getElementById('cardTags').innerHTML = skills.map(s =>
+      `<span class="card-tag" style="background:${accentColor}22;color:${accentColor};border-color:${accentColor}44">${s}</span>`
+    ).join('');
+
+    // Stats
+    document.getElementById('cardStats').innerHTML = [
+      [s1v, s1l], [s2v, s2l], [s3v, s3l]
+    ].filter(([v]) => v).map(([v, l]) =>
+      `<div class="stat"><div class="stat-value">${v}</div><div class="stat-label">${l}</div></div>`
+    ).join('');
+
+    // Links
+    const links = [
+      { url: github,   icon: '🐙', label: 'GitHub' },
+      { url: linkedin, icon: '💼', label: 'LinkedIn' },
+      { url: website,  icon: '🌐', label: 'Website' },
+    ].filter(l => l.url);
+
+    document.getElementById('cardLinks').innerHTML = links.map(l =>
+      `<a class="card-link" href="${l.url}" target="_blank">${l.icon} ${l.label}</a>`
+    ).join('');
+  }
+
+  function resetForm() {
+    if (!confirm('초기화할까요?')) return;
+    document.getElementById('name').value = '';
+    document.getElementById('role').value = '';
+    document.getElementById('location').value = '';
+    document.getElementById('bio').value = '';
+    document.getElementById('github').value = '';
+    document.getElementById('linkedin').value = '';
+    document.getElementById('website').value = '';
+    skills.length = 0;
+    avatarSrc = null;
+    document.getElementById('avatarPreview').innerHTML = '<span id="avatarEmoji">👤</span>';
+    renderTags();
+    render();
+  }
+
+  // ── Export ──
+  function showExport() {
+    const card = document.getElementById('profileCard').outerHTML;
+    const formatted = card.replace(/></g, '>\n<').replace(/\n\s*\n/g, '\n');
+    document.getElementById('exportCode').textContent = formatted;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+
+  function hideExport(e) {
+    if (!e || e.target === document.getElementById('modalOverlay')) {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+  }
+
+  function copyExport() {
+    navigator.clipboard.writeText(document.getElementById('exportCode').textContent)
+      .then(() => {
+        const btn = event.target;
+        btn.textContent = '복사됨 ✓';
+        setTimeout(() => btn.textContent = '복사', 1500);
+      });
+  }
+
+  // ── Initial render ──
+  render();
+  updateBioStats();
+</script>
+</body>
+</html>
