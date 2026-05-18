@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>Markdown Editor</h1>
+      <p>작성과 미리보기를 한 화면에서 확인하세요.</p>
+    </div>
+    <div class="header-actions">
+      <button id="saveBtn" type="button">저장</button>
+      <button id="clearBtn" type="button" class="ghost">초기화</button>
+    </div>
+  </header>
+
+  <main class="editor-shell">
+    <section class="pane editor-pane" aria-label="마크다운 입력">
+      <div class="pane-toolbar">
+        <div class="format-buttons" aria-label="서식 도구">
+          <button type="button" data-wrap="**" title="굵게">B</button>
+          <button type="button" data-wrap="*" title="기울임">I</button>
+          <button type="button" data-prefix="# " title="제목">H</button>
+          <button type="button" data-prefix="- " title="목록">•</button>
+          <button type="button" data-wrap="`" title="인라인 코드">&lt;/&gt;</button>
+          <button type="button" data-link title="링크">Link</button>
+        </div>
+        <span id="statusText" class="status-text">자동 저장 준비됨</span>
+      </div>
+      <textarea id="markdownInput" spellcheck="false" aria-label="마크다운 텍스트"></textarea>
+    </section>
+
+    <section class="pane preview-pane" aria-label="HTML 미리보기">
+      <div class="pane-toolbar preview-toolbar">
+        <strong>Preview</strong>
+        <span id="counterText" class="status-text">0 글자 · 0 단어</span>
+      </div>
+      <article id="preview" class="preview"></article>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
