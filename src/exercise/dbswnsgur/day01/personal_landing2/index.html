@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>박지현 | 개인 랜딩 페이지</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --border: #2a2a3a;
+      --accent: #7c6af7;
+      --accent-light: #a598ff;
+      --text: #e8e8f0;
+      --muted: #888899;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem 4rem;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 2.5rem;
+      max-width: 680px;
+      width: 100%;
+    }
+
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #f76af0);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 32px rgba(124, 106, 247, 0.35);
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(90deg, var(--accent-light), #f76af0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      margin-top: 0.75rem;
+      font-size: 1.1rem;
+      color: var(--muted);
+    }
+
+    .divider {
+      width: 48px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #f76af0);
+      border-radius: 9999px;
+      margin: 2rem auto;
+    }
+
+    /* ── Cards ── */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(124, 106, 247, 0.18);
+    }
+
+    .card-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .card h2 {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--accent-light);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .card p {
+      font-size: 0.95rem;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+
+    /* ── Skills ── */
+    .skill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.25rem;
+    }
+
+    .skill-tag {
+      background: rgba(124, 106, 247, 0.12);
+      border: 1px solid rgba(124, 106, 247, 0.3);
+      color: var(--accent-light);
+      border-radius: 9999px;
+      padding: 0.3rem 0.85rem;
+      font-size: 0.82rem;
+      font-weight: 500;
+      cursor: default;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .skill-tag:hover {
+      background: rgba(124, 106, 247, 0.25);
+      transform: scale(1.05);
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 3.5rem;
+      color: var(--muted);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    footer a {
+      color: var(--accent-light);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Fade-in animation ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero, .card {
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .card:nth-child(1) { animation-delay: 0.1s; }
+    .card:nth-child(2) { animation-delay: 0.2s; }
+    .card:nth-child(3) { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="avatar">👩‍💻</div>
+    <h1>안녕하세요, <span>박지현</span>입니다</h1>
+    <p class="tagline">데이터를 이야기로 바꾸는 백엔드 개발자</p>
+    <div class="divider"></div>
+  </section>
+
+  <!-- Cards -->
+  <div class="card-grid">
+
+    <!-- 소개 -->
+    <div class="card">
+      <div class="card-icon">🙋</div>
+      <h2>소개</h2>
+      <p>
+        Java/Spring 기반의 백엔드 개발을 주로 해왔으며,
+        최근에는 AI 서비스와 데이터 파이프라인 연동에 관심을 갖고
+        공부하고 있습니다. 읽기 쉬운 코드와 명확한 API 설계를 좋아합니다.
+      </p>
+    </div>
+
+    <!-- 스킬 -->
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h2>주요 스킬</h2>
+      <div class="skill-list">
+        <span class="skill-tag">Java</span>
+        <span class="skill-tag">Spring Boot</span>
+        <span class="skill-tag">Python</span>
+        <span class="skill-tag">SQL</span>
+        <span class="skill-tag">Docker</span>
+        <span class="skill-tag">REST API</span>
+        <span class="skill-tag">Git</span>
+        <span class="skill-tag">AWS</span>
+      </div>
+    </div>
+
+    <!-- 현재 관심사 -->
+    <div class="card">
+      <div class="card-icon">🔭</div>
+      <h2>관심사</h2>
+      <p>
+        LLM API 연동 및 프롬프트 엔지니어링을 탐구 중이고,
+        사이드 프로젝트로 개인 일정 도우미 챗봇을 개발하고 있습니다.
+        클린 아키텍처와 TDD 방법론도 꾸준히 공부 중입니다.
+      </p>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>© 2026 박지현 &nbsp;·&nbsp; <a href="mailto:dbswnsgur03@gmail.com">dbswnsgur03@gmail.com</a></p>
+  </footer>
+
+  <script>
+    // 스킬 태그 클릭 시 펄스 효과
+    document.querySelectorAll('.skill-tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        tag.style.transition = 'none';
+        tag.style.background = 'rgba(124,106,247,0.45)';
+        setTimeout(() => {
+          tag.style.transition = 'background 0.4s';
+          tag.style.background = '';
+        }, 150);
+      });
+    });
+  </script>
+
+</body>
+</html>

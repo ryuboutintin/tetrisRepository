@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f0f13;
+      --surface: #1a1a24;
+      --card: #22222f;
+      --accent: #7c6af7;
+      --accent-light: #a89dff;
+      --text-primary: #f0eff6;
+      --text-secondary: #9896b0;
+      --border: rgba(255, 255, 255, 0.07);
+      --radius: 20px;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+      line-height: 1.6;
+    }
+
+    /* ── 배경 그라디언트 orbs ── */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      width: 500px;
+      height: 500px;
+      top: -100px;
+      left: -150px;
+      background: radial-gradient(circle, rgba(124,106,247,0.25) 0%, transparent 70%);
+    }
+    body::after {
+      width: 400px;
+      height: 400px;
+      bottom: -80px;
+      right: -100px;
+      background: radial-gradient(circle, rgba(99,202,183,0.18) 0%, transparent 70%);
+    }
+
+    /* ── 카드 컨테이너 ── */
+    .card {
+      position: relative;
+      z-index: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      padding: 48px 40px 40px;
+      box-shadow:
+        0 0 0 1px rgba(255,255,255,0.04),
+        0 32px 64px rgba(0,0,0,0.5);
+      text-align: center;
+    }
+
+    /* ── 프로필 사진 ── */
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 28px;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: conic-gradient(
+        from 0deg,
+        var(--accent),
+        #63cab7,
+        #f0a0d0,
+        var(--accent)
+      );
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .avatar-mask {
+      position: relative;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 3px solid var(--bg);
+    }
+
+    .avatar-mask img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 사진이 없을 때 이니셜 표시 */
+    .avatar-initial {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #63cab7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.6rem;
+      font-weight: 700;
+      color: #fff;
+      position: relative;
+      border: 3px solid var(--bg);
+    }
+
+    /* ── 이름 & 직함 ── */
+    .name {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .title {
+      font-size: 0.95rem;
+      color: var(--accent-light);
+      font-weight: 500;
+      margin-top: 4px;
+      margin-bottom: 24px;
+      letter-spacing: 0.3px;
+    }
+
+    /* ── 구분선 ── */
+    .divider {
+      width: 48px;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #63cab7);
+      border-radius: 2px;
+      margin: 0 auto 24px;
+    }
+
+    /* ── 소개 ── */
+    .bio {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+      margin-bottom: 32px;
+      word-break: keep-all;
+    }
+
+    /* ── 스킬 태그 ── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    .tag {
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      font-size: 0.78rem;
+      font-weight: 500;
+      padding: 5px 14px;
+      border-radius: 999px;
+      letter-spacing: 0.2px;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .tag:hover {
+      border-color: var(--accent);
+      color: var(--accent-light);
+    }
+
+    /* ── SNS 링크 ── */
+    .sns-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+    }
+
+    .sns-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sns-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 14px 18px;
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      text-align: left;
+    }
+
+    .sns-link:hover {
+      border-color: var(--accent);
+      background: rgba(124,106,247,0.08);
+      transform: translateX(4px);
+    }
+
+    .sns-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 1.05rem;
+    }
+
+    .sns-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    .sns-link .info {
+      flex: 1;
+    }
+
+    .sns-link .info .platform {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 400;
+      display: block;
+    }
+
+    .sns-link .info .handle {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .sns-link .arrow {
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      transition: color 0.2s;
+    }
+
+    .sns-link:hover .arrow {
+      color: var(--accent-light);
+    }
+
+    /* 각 SNS 색상 */
+    .icon-github  { background: rgba(255,255,255,0.06); color: #e8e8e8; }
+    .icon-linkedin{ background: rgba(10,102,194,0.18); color: #4fa3e3; }
+    .icon-twitter { background: rgba(29,155,240,0.15); color: #1d9bf0; }
+    .icon-email   { background: rgba(255,160,90,0.15); color: #ffb36b; }
+    .icon-blog    { background: rgba(99,202,183,0.15); color: #63cab7; }
+
+    /* ── 하단 여백 ── */
+    .footer-note {
+      margin-top: 32px;
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.15);
+      letter-spacing: 0.3px;
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 480px) {
+      .card { padding: 36px 24px 32px; }
+      .name { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <article class="card">
+
+    <!-- ① 프로필 사진 -->
+    <div class="avatar-wrap">
+      <div class="avatar-ring"></div>
+      <!--
+        사진이 있으면: <div class="avatar-mask"><img src="your-photo.jpg" alt="프로필 사진"></div>
+        사진이 없으면 아래 이니셜 사용
+      -->
+      <div class="avatar-initial">OD</div>
+    </div>
+
+    <!-- 이름 / 직함 -->
+    <h1 class="name">오토마치 디버그</h1>
+    <p class="title">Full-Stack Developer · AI Enthusiast</p>
+
+    <div class="divider"></div>
+
+    <!-- ② 소개 -->
+    <p class="bio">
+      안녕하세요! 코드로 문제를 해결하는 걸 즐기는 개발자입니다.<br>
+      웹과 AI의 교차점에서 사용자 경험을 개선하는 일에 열정을 갖고 있습니다.<br>
+      배움을 나누고, 함께 성장하는 것을 가장 좋아합니다.
+    </p>
+
+    <!-- 스킬 태그 -->
+    <div class="tags">
+      <span class="tag">Python</span>
+      <span class="tag">JavaScript</span>
+      <span class="tag">React</span>
+      <span class="tag">Node.js</span>
+      <span class="tag">AI / ML</span>
+      <span class="tag">AWS</span>
+    </div>
+
+    <!-- ③ SNS 링크 -->
+    <p class="sns-label">Connect with me</p>
+
+    <nav class="sns-list">
+
+      <!-- GitHub -->
+      <a class="sns-link" href="https://github.com/your-id" target="_blank" rel="noopener">
+        <span class="sns-icon icon-github">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303
+              3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
+              0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61
+              C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729
+              1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305
+              3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93
+              0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176
+              0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405
+              1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23
+              3.285-1.23.645 1.653.24 2.873.12 3.176.765.84
+              1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475
+              5.92.42.36.81 1.096.81 2.22 0 1.606-.015
+              2.896-.015 3.286 0 .315.21.69.825.57C20.565
+              22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+          </svg>
+        </span>
+        <span class="info">
+          <span class="platform">GitHub</span>
+          <span class="handle">@your-id</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- LinkedIn -->
+      <a class="sns-link" href="https://linkedin.com/in/your-id" target="_blank" rel="noopener">
+        <span class="sns-icon icon-linkedin">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037
+              -1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046
+              c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37
+              4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0
+              1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782
+              13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0
+              0 .774 0 1.729v20.542C0 23.227.792 24 1.771
+              24h20.451C23.2 24 24 23.227 24 22.271V1.729C24
+              .774 23.2 0 22.222 0h.003z"/>
+          </svg>
+        </span>
+        <span class="info">
+          <span class="platform">LinkedIn</span>
+          <span class="handle">your-name</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- Twitter / X -->
+      <a class="sns-link" href="https://twitter.com/your-id" target="_blank" rel="noopener">
+        <span class="sns-icon icon-twitter">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502
+              11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254
+              2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084
+              4.126H5.117z"/>
+          </svg>
+        </span>
+        <span class="info">
+          <span class="platform">X (Twitter)</span>
+          <span class="handle">@your-id</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- 이메일 -->
+      <a class="sns-link" href="mailto:your@email.com">
+        <span class="sns-icon icon-email">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9
+              2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0
+              4l-8 5-8-5V6l8 5 8-5v2z"/>
+          </svg>
+        </span>
+        <span class="info">
+          <span class="platform">이메일</span>
+          <span class="handle">your@email.com</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
+
+      <!-- 블로그 -->
+      <a class="sns-link" href="https://your-blog.com" target="_blank" rel="noopener">
+        <span class="sns-icon icon-blog">
+          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10
+              10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93
+              0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2
+              2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55
+              0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19
+              5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </span>
+        <span class="info">
+          <span class="platform">블로그</span>
+          <span class="handle">your-blog.com</span>
+        </span>
+        <span class="arrow">→</span>
+      </a>
+
+    </nav>
+
+    <p class="footer-note">© 2026 · Made with HTML &amp; CSS only</p>
+  </article>
+
+</body>
+</html>
