@@ -4,6 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jeonghana — Personal Landing</title>
+  <script>
+    // Apply theme before render to prevent flash of wrong theme
+    (function () {
+      var saved = localStorage.getItem("theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = saved || (prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
@@ -11,7 +20,7 @@
     rel="stylesheet"
   />
   <style>
-    /* ---------- Material-inspired tokens ---------- */
+    /* ---------- Material-inspired tokens (Light) ---------- */
     :root {
       --md-primary: #1976d2;
       --md-primary-hover: #1565c0;
@@ -22,8 +31,10 @@
       --md-on-surface: #212121;
       --md-on-surface-muted: #5f6368;
       --md-divider: #e0e0e0;
+      --md-tag-bg: rgba(0, 0, 0, 0.04);
+      --md-hover-overlay: rgba(25, 118, 210, 0.08);
 
-      /* Material elevation shadows (light, restrained) */
+      /* Material elevation shadows */
       --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06),
         0 1px 3px rgba(0, 0, 0, 0.08);
       --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.06),
@@ -33,6 +44,32 @@
 
       --radius-sm: 4px;
       --radius-md: 8px;
+    }
+
+    /* ---------- Material Dark theme ---------- */
+    :root[data-theme="dark"] {
+      --md-primary: #90caf9;
+      --md-primary-hover: #64b5f6;
+      --md-on-primary: #0d1b2a;
+
+      --md-surface: #1e1e1e;
+      --md-background: #121212;
+      --md-on-surface: #e0e0e0;
+      --md-on-surface-muted: #9e9e9e;
+      --md-divider: #2c2c2c;
+      --md-tag-bg: rgba(255, 255, 255, 0.08);
+      --md-hover-overlay: rgba(144, 202, 249, 0.12);
+
+      --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4),
+        0 1px 3px rgba(0, 0, 0, 0.5);
+      --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.5);
+      --elevation-3: 0 4px 8px rgba(0, 0, 0, 0.5),
+        0 8px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    body {
+      transition: background-color 0.2s, color 0.2s;
     }
 
     *,
@@ -101,9 +138,38 @@
       transition: background-color 0.2s, color 0.2s;
     }
     .appbar nav a:hover {
-      background-color: rgba(25, 118, 210, 0.08);
+      background-color: var(--md-hover-overlay);
       color: var(--md-primary);
     }
+
+    /* ---------- Theme toggle button ---------- */
+    .appbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-muted);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .theme-toggle:hover {
+      background-color: var(--md-hover-overlay);
+      color: var(--md-primary);
+    }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: inline; }
+    :root[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+    :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
 
     /* ---------- Sections ---------- */
     section {
@@ -192,7 +258,7 @@
       border: 1px solid var(--md-divider);
     }
     .btn-outlined:hover {
-      background-color: rgba(25, 118, 210, 0.06);
+      background-color: var(--md-hover-overlay);
       border-color: var(--md-primary);
     }
 
@@ -294,7 +360,7 @@
       font-size: 12px;
       font-weight: 500;
       color: var(--md-on-surface-muted);
-      background-color: rgba(0, 0, 0, 0.04);
+      background-color: var(--md-tag-bg);
       border-radius: 999px;
     }
 
@@ -357,14 +423,26 @@
   <header class="appbar">
     <div class="container">
       <div class="logo">jeonghana.dev</div>
-      <nav>
-        <ul>
-          <li><a href="#hero">Home</a></li>
-          <li><a href="#skills">Skills</a></li>
-          <li><a href="#projects">Projects</a></li>
-          <li><a href="#contact">Contact</a></li>
-        </ul>
-      </nav>
+      <div class="appbar-actions">
+        <nav>
+          <ul>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+        <button
+          id="themeToggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="테마 전환"
+          title="테마 전환"
+        >
+          <span class="icon-moon" aria-hidden="true">🌙</span>
+          <span class="icon-sun" aria-hidden="true">☀️</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -524,6 +602,15 @@
   </section>
 
   <footer>© 2026 Jeonghana</footer>
+
+  <script>
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var root = document.documentElement;
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+  </script>
 
 </body>
 </html>
