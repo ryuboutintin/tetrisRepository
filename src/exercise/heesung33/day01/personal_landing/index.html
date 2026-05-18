@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heesung | Personal Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, sans-serif;
+            background: #0a0a0f;
+            color: #e0e0e0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .bg-glow {
+            position: fixed;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.15;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-glow--purple {
+            top: -200px;
+            right: -100px;
+            background: #7c3aed;
+        }
+
+        .bg-glow--blue {
+            bottom: -200px;
+            left: -100px;
+            background: #06b6d4;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 60px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 80px;
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .hero__avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #7c3aed, #06b6d4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 48px;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 0 40px rgba(124, 58, 237, 0.3);
+        }
+
+        .hero__name {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #c084fc, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .hero__tagline {
+            font-size: 1.1rem;
+            color: #a0a0b0;
+            line-height: 1.6;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            animation: fadeUp 0.8s ease-out;
+        }
+
+        .section__title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #c084fc;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section__title::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(180deg, #7c3aed, #06b6d4);
+            border-radius: 2px;
+        }
+
+        .about-text {
+            line-height: 1.8;
+            color: #b0b0c0;
+            font-size: 1rem;
+        }
+
+        .interests {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .interests__tag {
+            padding: 8px 18px;
+            background: rgba(124, 58, 237, 0.1);
+            border: 1px solid rgba(124, 58, 237, 0.3);
+            border-radius: 24px;
+            font-size: 0.9rem;
+            color: #c084fc;
+            transition: all 0.3s ease;
+        }
+
+        .interests__tag:hover {
+            background: rgba(124, 58, 237, 0.2);
+            border-color: rgba(124, 58, 237, 0.6);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+        }
+
+        .contact {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .contact__item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            text-decoration: none;
+            color: #b0b0c0;
+            transition: all 0.3s ease;
+        }
+
+        .contact__item:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(124, 58, 237, 0.4);
+            transform: translateX(4px);
+        }
+
+        .contact__icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(124, 58, 237, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .contact__label {
+            font-size: 0.85rem;
+            color: #707080;
+            margin-bottom: 2px;
+        }
+
+        .contact__value {
+            font-size: 0.95rem;
+            color: #e0e0e0;
+        }
+
+        footer {
+            text-align: center;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            color: #505060;
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section:nth-child(2) { animation-delay: 0.1s; }
+        .section:nth-child(3) { animation-delay: 0.2s; }
+        .section:nth-child(4) { animation-delay: 0.3s; }
+
+        @media (max-width: 600px) {
+            .hero__name { font-size: 2rem; }
+            .container { padding: 40px 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-glow bg-glow--purple"></div>
+    <div class="bg-glow bg-glow--blue"></div>
+
+    <div class="container">
+        <header class="hero">
+            <div class="hero__avatar">H</div>
+            <h1 class="hero__name">Heesung</h1>
+            <p class="hero__tagline">안녕하세요! 새로운 기술을 배우고 성장하는 것을 좋아하는 개발자입니다.</p>
+        </header>
+
+        <section class="section">
+            <h2 class="section__title">About Me</h2>
+            <p class="about-text">
+                저는 소프트웨어 개발에 열정을 가진 사람입니다.
+                꾸준히 학습하며 더 나은 코드를 작성하기 위해 노력하고 있습니다.
+                팀과 함께 문제를 해결하고, 사용자에게 가치를 전달하는 서비스를 만드는 것에 보람을 느낍니다.
+            </p>
+        </section>
+
+        <section class="section">
+            <h2 class="section__title">Interests</h2>
+            <div class="interests">
+                <span class="interests__tag">Web Development</span>
+                <span class="interests__tag">Python</span>
+                <span class="interests__tag">JavaScript</span>
+                <span class="interests__tag">Problem Solving</span>
+                <span class="interests__tag">Music</span>
+                <span class="interests__tag">Reading</span>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2 class="section__title">Contact</h2>
+            <div class="contact">
+                <a href="https://github.com/heesung33" class="contact__item" target="_blank">
+                    <div class="contact__icon">GH</div>
+                    <div>
+                        <div class="contact__label">GitHub</div>
+                        <div class="contact__value">github.com/heesung33</div>
+                    </div>
+                </a>
+                <a href="mailto:heesung@example.com" class="contact__item">
+                    <div class="contact__icon">@</div>
+                    <div>
+                        <div class="contact__label">Email</div>
+                        <div class="contact__value">heesung@example.com</div>
+                    </div>
+                </a>
+            </div>
+        </section>
+
+        <footer>
+            <p>&copy; 2026 Heesung. All rights reserved.</p>
+        </footer>
+    </div>
+</body>
+</html>

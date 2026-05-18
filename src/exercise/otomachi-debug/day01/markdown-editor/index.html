@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="header-left">
+        <span class="logo">✦ MD Editor</span>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-ghost" id="btn-clear" title="내용 지우기">Clear</button>
+        <button class="btn btn-ghost" id="btn-copy" title="HTML 복사">Copy HTML</button>
+        <button class="btn btn-primary" id="btn-download" title="파일 다운로드">Download</button>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <div class="toolbar-group">
+        <button class="tool-btn" data-action="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
+        <button class="tool-btn" data-action="italic" title="기울임 (Ctrl+I)"><i>I</i></button>
+        <button class="tool-btn" data-action="strikethrough" title="취소선"><s>S</s></button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="tool-btn" data-action="h1" title="제목 1">H1</button>
+        <button class="tool-btn" data-action="h2" title="제목 2">H2</button>
+        <button class="tool-btn" data-action="h3" title="제목 3">H3</button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="tool-btn" data-action="ul" title="목록">&#8226; 목록</button>
+        <button class="tool-btn" data-action="ol" title="번호 목록">1. 목록</button>
+        <button class="tool-btn" data-action="quote" title="인용">&#10077; 인용</button>
+      </div>
+      <div class="toolbar-divider"></div>
+      <div class="toolbar-group">
+        <button class="tool-btn" data-action="code" title="인라인 코드">&lt;/&gt;</button>
+        <button class="tool-btn" data-action="codeblock" title="코드 블록">{ }</button>
+        <button class="tool-btn" data-action="link" title="링크">🔗</button>
+        <button class="tool-btn" data-action="hr" title="구분선">—</button>
+      </div>
+      <div class="toolbar-right">
+        <label class="toggle-label">
+          <input type="checkbox" id="toggle-sync" checked />
+          <span class="toggle-track"></span>
+          <span class="toggle-text">동기 스크롤</span>
+        </label>
+        <button class="view-btn active" id="btn-split" title="분할 보기">분할</button>
+        <button class="view-btn" id="btn-editor" title="에디터만">에디터</button>
+        <button class="view-btn" id="btn-preview" title="미리보기만">미리보기</button>
+      </div>
+    </div>
+
+    <div class="workspace" id="workspace">
+      <div class="pane editor-pane" id="editor-pane">
+        <div class="pane-label">Markdown</div>
+        <textarea
+          id="editor"
+          class="editor"
+          placeholder="여기에 마크다운을 입력하세요..."
+          spellcheck="false"
+        ></textarea>
+        <div class="status-bar">
+          <span id="char-count">0자</span>
+          <span id="line-count">1줄</span>
+          <span id="word-count">0단어</span>
+        </div>
+      </div>
+
+      <div class="pane-resizer" id="resizer"></div>
+
+      <div class="pane preview-pane" id="preview-pane">
+        <div class="pane-label">Preview</div>
+        <div id="preview" class="preview"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="editor.js"></script>
+</body>
+</html>

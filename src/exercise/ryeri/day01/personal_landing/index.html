@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Landing Page</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0f0f11;
+      --surface: #1a1a1f;
+      --border: #2a2a32;
+      --accent: #7c6ff7;
+      --accent-soft: #a89df9;
+      --text-primary: #f0f0f4;
+      --text-secondary: #8e8ea0;
+      --radius: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      width: 100%;
+      max-width: 480px;
+      padding: 48px 40px;
+      text-align: center;
+    }
+
+    /* ── Profile ── */
+    .profile-section {
+      margin-bottom: 36px;
+    }
+
+    .avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+
+    .avatar {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--accent);
+      background: var(--border);
+      display: block;
+    }
+
+    /* placeholder when no real image */
+    .avatar-placeholder {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      border: 3px solid var(--accent);
+      background: linear-gradient(135deg, #3b3760 0%, #1a1a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      margin: 0 auto 20px;
+    }
+
+    .status-dot {
+      position: absolute;
+      bottom: 6px;
+      right: 6px;
+      width: 16px;
+      height: 16px;
+      background: #4ade80;
+      border-radius: 50%;
+      border: 3px solid var(--surface);
+    }
+
+    .name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 6px;
+    }
+
+    .role {
+      font-size: 0.95rem;
+      color: var(--accent-soft);
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+
+    .location {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── Divider ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 28px 0;
+    }
+
+    /* ── Bio ── */
+    .bio-section {
+      margin-bottom: 32px;
+      text-align: left;
+    }
+
+    .section-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+    }
+
+    .bio-text {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: #c4c4d4;
+    }
+
+    .tag-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .tag {
+      background: rgba(124, 111, 247, 0.12);
+      color: var(--accent-soft);
+      border: 1px solid rgba(124, 111, 247, 0.25);
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    /* ── SNS Links ── */
+    .sns-section {}
+
+    .sns-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .sns-link {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 14px 18px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text-primary);
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    }
+
+    .sns-link:hover {
+      border-color: var(--accent);
+      background: rgba(124, 111, 247, 0.06);
+      transform: translateY(-2px);
+    }
+
+    .sns-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+    }
+
+    .sns-icon.github   { background: #24292e; }
+    .sns-icon.linkedin { background: #0077b5; }
+    .sns-icon.twitter  { background: #1da1f2; }
+    .sns-icon.instagram{ background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+    .sns-icon.email    { background: #2d6a4f; }
+
+    .sns-label {
+      flex: 1;
+    }
+
+    .sns-handle {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-top: 1px;
+    }
+
+    .sns-arrow {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 36px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+
+    <!-- ① 프로필 사진 -->
+    <section class="profile-section">
+      <div class="avatar-wrap">
+        <!--
+          실제 사진이 있으면 아래 img 태그의 주석을 해제하고
+          avatar-placeholder div를 삭제하세요.
+          <img class="avatar" src="profile.jpg" alt="프로필 사진" />
+        -->
+        <div class="avatar-placeholder">👤</div>
+        <span class="status-dot" title="현재 활동 중"></span>
+      </div>
+      <h1 class="name">ryeri</h1>
+      <p class="role">한 줄 소개를 입력하세요</p>
+      <p class="location">📍 위치를 입력하세요</p>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ② 소개 -->
+    <section class="bio-section">
+      <p class="section-label">About me</p>
+      <p class="bio-text">
+        자기소개 문단을 여기에 입력하세요.<br/>
+        어떤 일을 하는지, 무엇을 좋아하는지 자유롭게 적어보세요.
+      </p>
+      <div class="tag-list">
+        <span class="tag">스킬 1</span>
+        <span class="tag">스킬 2</span>
+        <span class="tag">스킬 3</span>
+        <span class="tag">스킬 4</span>
+        <span class="tag">스킬 5</span>
+      </div>
+    </section>
+
+    <hr class="divider" />
+
+    <!-- ③ SNS 링크 -->
+    <section class="sns-section">
+      <p class="section-label">Connect with me</p>
+      <nav class="sns-list">
+
+        <a class="sns-link" href="https://github.com/ryeri" target="_blank" rel="noopener">
+          <div class="sns-icon github">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+              <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.1 3.3 9.42 7.88 10.95.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.54-3.87-1.54-.53-1.34-1.29-1.7-1.29-1.7-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.7 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 2.89-.39c.98.01 1.97.13 2.89.39 2.2-1.49 3.16-1.18 3.16-1.18.63 1.59.24 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.43-2.7 5.41-5.27 5.69.41.36.78 1.07.78 2.15v3.19c0 .31.21.67.8.56C20.2 21.42 23.5 17.1 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
+            </svg>
+          </div>
+          <div class="sns-label">
+            <div>GitHub</div>
+            <div class="sns-handle">@ryeri</div>
+          </div>
+          <span class="sns-arrow">↗</span>
+        </a>
+
+        <a class="sns-link" href="https://linkedin.com/in/your-id" target="_blank" rel="noopener">
+          <div class="sns-icon linkedin">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+              <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.46C23.21 24 24 23.23 24 22.27V1.73C24 .77 23.21 0 22.23 0z"/>
+            </svg>
+          </div>
+          <div class="sns-label">
+            <div>LinkedIn</div>
+            <div class="sns-handle">LinkedIn ID를 입력하세요</div>
+          </div>
+          <span class="sns-arrow">↗</span>
+        </a>
+
+        <a class="sns-link" href="mailto:ryeeeri@gmail.com">
+          <div class="sns-icon email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="#fff">
+              <path d="M20 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 4.7-8 5.33L4 8.7V6.9l8 5.33 8-5.33V8.7z"/>
+            </svg>
+          </div>
+          <div class="sns-label">
+            <div>Email</div>
+            <div class="sns-handle">ryeeeri@gmail.com</div>
+          </div>
+          <span class="sns-arrow">↗</span>
+        </a>
+
+      </nav>
+    </section>
+
+    <p class="footer">© 2026 ryeri</p>
+  </div>
+</body>
+</html>
