@@ -4,22 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>메모장</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>📝 메모장</h1>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="logo">
+        <span class="logo-icon">✏️</span>
+        <span class="logo-text">메모장</span>
+      </div>
+      <span id="memoCount" class="memo-count">0개의 메모</span>
+    </div>
+  </header>
 
-    <div class="form-card">
-      <input id="titleInput" type="text" placeholder="제목" />
-      <textarea id="contentInput" placeholder="내용을 입력하세요..."></textarea>
-      <div class="form-actions">
-        <button id="saveBtn" onclick="saveMemo()">저장</button>
-        <button id="cancelBtn" class="secondary" onclick="cancelEdit()" style="display:none">취소</button>
+  <main class="layout">
+    <!-- 작성 패널 -->
+    <aside class="panel-write">
+      <div class="panel-title" id="formLabel">새 메모</div>
+      <div class="write-form">
+        <div class="field">
+          <label for="titleInput">제목</label>
+          <input id="titleInput" type="text" placeholder="제목을 입력하세요" autocomplete="off" />
+        </div>
+        <div class="field">
+          <label for="contentInput">내용</label>
+          <textarea id="contentInput" placeholder="내용을 입력하세요..."></textarea>
+        </div>
+        <div class="form-actions">
+          <button id="saveBtn" class="btn-primary" onclick="saveMemo()">
+            <span class="btn-icon">＋</span> 저장하기
+          </button>
+          <button id="cancelBtn" class="btn-ghost" onclick="cancelEdit()" style="display:none">
+            취소
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- 메모 목록 -->
+    <section class="panel-list">
+      <div class="list-header">
+        <span class="list-title">전체 메모</span>
+        <input id="searchInput" type="search" placeholder="검색..." oninput="filterMemos()" />
+      </div>
+      <div id="memoList" class="memo-grid"></div>
+    </section>
+  </main>
+
+  <!-- 삭제 확인 다이얼로그 -->
+  <div id="overlay" class="overlay" style="display:none">
+    <div class="dialog">
+      <div class="dialog-icon">🗑️</div>
+      <p class="dialog-msg">이 메모를 삭제할까요?</p>
+      <div class="dialog-actions">
+        <button class="btn-ghost" onclick="closeDialog()">취소</button>
+        <button class="btn-danger" onclick="confirmDelete()">삭제</button>
       </div>
     </div>
-
-    <div id="memoList" class="memo-list"></div>
   </div>
 
   <script src="/static/app.js"></script>
