@@ -1,10 +1,14 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-color-mode="dark" data-light-theme="light" data-dark-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Markdown Editor</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css" />
+  <link id="hljs-dark"  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css" />
+  <link id="hljs-light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css" disabled />
   <style>
     :root {
       --bg: #1e1e1e;
@@ -17,6 +21,19 @@
       --accent-2: #569cd6;
       --code-bg: #2d2d2d;
       --selection: #264f78;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --bg-elev: #f6f8fa;
+      --bg-deep: #eaeef2;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #59636e;
+      --accent: #1f883d;
+      --accent-2: #0969da;
+      --code-bg: #f6f8fa;
+      --selection: #b6d6fb;
     }
 
     * { box-sizing: border-box; }
@@ -72,6 +89,64 @@
       font-size: 12px;
       color: var(--text-muted);
       font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 12px;
+      background: var(--bg-elev);
+      border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar .sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 32px;
+      height: 30px;
+      padding: 0 10px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .toolbar button:hover {
+      background: var(--bg-deep);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .toolbar button:active { transform: translateY(1px); }
+
+    .toolbar button.bold   { font-weight: 700; }
+    .toolbar button.italic { font-style: italic; }
+
+    .toolbar button.danger:hover {
+      border-color: #e06c75;
+      color: #e06c75;
     }
 
     .panes {
@@ -130,84 +205,12 @@
     #preview {
       flex: 1 1 auto;
       overflow: auto;
-      padding: 24px 28px;
-      background: var(--bg-elev);
-      line-height: 1.7;
+      padding: 28px 32px;
     }
 
-    #preview h1, #preview h2, #preview h3,
-    #preview h4, #preview h5, #preview h6 {
-      color: #ffffff;
-      margin-top: 1.4em;
-      margin-bottom: 0.5em;
-      line-height: 1.25;
-    }
-    #preview h1 { font-size: 1.9em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
-    #preview h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.25em; }
-    #preview h3 { font-size: 1.25em; }
-
-    #preview p { margin: 0.7em 0; }
-
-    #preview a {
-      color: var(--accent-2);
-      text-decoration: none;
-      border-bottom: 1px dashed var(--accent-2);
-    }
-    #preview a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-
-    #preview strong { color: #ffffff; }
-    #preview em { color: #c8c8c8; }
-
-    #preview ul, #preview ol { padding-left: 1.6em; }
-    #preview li { margin: 0.25em 0; }
-    #preview li::marker { color: var(--accent); }
-
-    #preview blockquote {
-      margin: 1em 0;
-      padding: 0.6em 1em;
-      border-left: 3px solid var(--accent);
-      background: rgba(78, 201, 176, 0.08);
-      color: #c8c8c8;
-    }
-
-    #preview code {
-      background: var(--code-bg);
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
-      font-size: 0.9em;
-      color: #ce9178;
-    }
-
-    #preview pre {
-      background: var(--code-bg);
-      padding: 14px 16px;
-      border-radius: 6px;
-      overflow-x: auto;
-      border: 1px solid var(--border);
-    }
-    #preview pre code {
-      background: transparent;
-      padding: 0;
-      color: var(--text);
-      font-size: 0.9em;
-    }
-
-    #preview hr {
-      border: 0;
-      border-top: 1px solid var(--border);
-      margin: 1.6em 0;
-    }
-
-    #preview table {
-      border-collapse: collapse;
-      margin: 1em 0;
-    }
-    #preview th, #preview td {
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-    }
-    #preview th { background: var(--bg-deep); }
+    /* GitHub markdown body — let it own its typography & background */
+    .markdown-body { box-sizing: border-box; min-width: 0; }
+    .markdown-body pre { position: relative; }
 
     /* Scrollbar */
     #preview::-webkit-scrollbar,
@@ -237,6 +240,23 @@
       <div class="meta" id="meta">0 chars · 0 words</div>
     </header>
 
+    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+      <div class="group">
+        <button type="button" class="bold"   data-action="bold"    title="굵게 (Ctrl/Cmd+B)">B</button>
+        <button type="button" class="italic" data-action="italic"  title="기울임 (Ctrl/Cmd+I)">I</button>
+        <button type="button"                data-action="heading" title="제목">H</button>
+        <button type="button"                data-action="list"    title="리스트">• 리스트</button>
+        <button type="button"                data-action="link"    title="링크">🔗 링크</button>
+        <button type="button"                data-action="code"    title="코드">&lt;/&gt; 코드</button>
+      </div>
+      <div class="group">
+        <button type="button" id="themeBtn" data-action="theme" title="테마 전환 (다크/라이트)">🌙 다크</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-action="download" title="현재 내용을 .md로 저장 (Ctrl/Cmd+S)">⬇ 다운로드 (.md)</button>
+        <button type="button" class="danger" data-action="reset" title="내용 비우기">🗑 초기화</button>
+      </div>
+    </div>
+
     <main class="panes">
       <section class="pane">
         <div class="pane-header">
@@ -250,7 +270,7 @@
           <span>PREVIEW</span>
           <span class="badge">html</span>
         </div>
-        <article id="preview"></article>
+        <article id="preview" class="markdown-body"></article>
       </section>
     </main>
   </div>
@@ -297,36 +317,173 @@ console.log(fib(10));
 Happy hacking. 🚀
 `;
 
+    const STORAGE_KEY = "jklee:editor-md:content";
+    const THEME_KEY   = "jklee:editor-md:theme";
+
     const editor = document.getElementById("editor");
     const preview = document.getElementById("preview");
     const meta = document.getElementById("meta");
+    const toolbar = document.querySelector(".toolbar");
+    const themeBtn = document.getElementById("themeBtn");
 
-    marked.setOptions({
-      gfm: true,
-      breaks: true,
-    });
+    marked.setOptions({ gfm: true, breaks: true });
 
     function render() {
       const src = editor.value;
       preview.innerHTML = marked.parse(src);
+      if (window.hljs) {
+        preview.querySelectorAll("pre code").forEach((el) => hljs.highlightElement(el));
+      }
       const chars = src.length;
       const words = src.trim() ? src.trim().split(/\s+/).length : 0;
       meta.textContent = `${chars} chars · ${words} words`;
+      try { localStorage.setItem(STORAGE_KEY, src); } catch (_) {}
     }
 
-    editor.value = sample;
+    // --- Cursor helpers ---
+    function wrapSelection(before, after, placeholder = "") {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || placeholder;
+      const text = before + selected + after;
+      editor.setRangeText(text, start, end, "select");
+      // Position selection to highlight the inserted text region
+      editor.selectionStart = start + before.length;
+      editor.selectionEnd = start + before.length + selected.length;
+      editor.focus();
+      render();
+    }
+
+    function prependLines(prefix) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const v = editor.value;
+      const lineStart = v.lastIndexOf("\n", start - 1) + 1;
+      const block = v.slice(lineStart, end) || "";
+      const replaced = block
+        .split("\n")
+        .map((l) => prefix + l)
+        .join("\n");
+      editor.setRangeText(replaced, lineStart, end, "end");
+      editor.focus();
+      render();
+    }
+
+    function insertLink() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || "텍스트";
+      const text = `[${selected}](https://)`;
+      editor.setRangeText(text, start, end, "end");
+      // Place cursor inside the URL parens
+      const cursor = start + text.length - 1;
+      editor.selectionStart = editor.selectionEnd = cursor;
+      editor.focus();
+      render();
+    }
+
+    function insertCode() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end);
+      if (selected.includes("\n")) {
+        const text = "```\n" + selected + "\n```";
+        editor.setRangeText(text, start, end, "end");
+      } else {
+        wrapSelection("`", "`", "code");
+        return;
+      }
+      editor.focus();
+      render();
+    }
+
+    const actions = {
+      bold:    () => wrapSelection("**", "**", "굵게"),
+      italic:  () => wrapSelection("*",  "*",  "기울임"),
+      heading: () => prependLines("## "),
+      list:    () => prependLines("- "),
+      link:    () => insertLink(),
+      code:    () => insertCode(),
+      download: () => downloadMd(),
+      reset:    () => resetEditor(),
+      theme:    () => toggleTheme(),
+    };
+
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const fn = actions[btn.dataset.action];
+      if (fn) fn();
+    });
+
+    // --- Download .md ---
+    function downloadMd() {
+      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      a.href = url;
+      a.download = `note-${ts}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Reset ---
+    function resetEditor() {
+      if (!confirm("작성한 내용을 모두 지울까요? 이 동작은 되돌릴 수 없습니다.")) return;
+      editor.value = "";
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      editor.focus();
+      render();
+    }
+
+    // --- Theme ---
+    function applyTheme(theme) {
+      const t = theme === "light" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", t);
+      document.documentElement.setAttribute("data-color-mode", t);
+      const lightLink = document.getElementById("hljs-light");
+      const darkLink  = document.getElementById("hljs-dark");
+      if (lightLink) lightLink.disabled = t !== "light";
+      if (darkLink)  darkLink.disabled  = t !== "dark";
+      if (themeBtn)  themeBtn.textContent = t === "dark" ? "🌙 다크" : "☀️ 라이트";
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = current === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, next); } catch (_) {}
+      applyTheme(next);
+    }
+
+    // --- Init: theme first, then content ---
+    let savedTheme = "dark";
+    try { savedTheme = localStorage.getItem(THEME_KEY) || "dark"; } catch (_) {}
+    applyTheme(savedTheme);
+
+    let initial;
+    try { initial = localStorage.getItem(STORAGE_KEY); } catch (_) { initial = null; }
+    editor.value = initial != null ? initial : sample;
     render();
+
     editor.addEventListener("input", render);
 
-    // Tab key inserts two spaces instead of changing focus
+    // Tab inserts two spaces; Cmd/Ctrl+B / +I shortcuts
     editor.addEventListener("keydown", (e) => {
       if (e.key === "Tab") {
         e.preventDefault();
         const s = editor.selectionStart;
         const eEnd = editor.selectionEnd;
-        editor.value = editor.value.slice(0, s) + "  " + editor.value.slice(eEnd);
-        editor.selectionStart = editor.selectionEnd = s + 2;
+        editor.setRangeText("  ", s, eEnd, "end");
         render();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+        const k = e.key.toLowerCase();
+        if (k === "b") { e.preventDefault(); actions.bold(); }
+        else if (k === "i") { e.preventDefault(); actions.italic(); }
+        else if (k === "s") { e.preventDefault(); downloadMd(); }
       }
     });
   </script>
