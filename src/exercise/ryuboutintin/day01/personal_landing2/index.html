@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #f2efe8;
+      --panel: rgba(255, 252, 246, 0.88);
+      --panel-strong: #fffdf8;
+      --border: rgba(73, 56, 37, 0.14);
+      --text: #1f1a14;
+      --muted: #6d6256;
+      --accent: #b85c38;
+      --accent-strong: #8f3f21;
+      --shadow: 0 18px 40px rgba(75, 50, 25, 0.12);
+      --radius: 24px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Pretendard", "Noto Sans KR", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(184, 92, 56, 0.18), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(207, 177, 124, 0.28), transparent 26%),
+        linear-gradient(135deg, #f7f2e8 0%, #f0ece4 100%);
+      padding: 24px;
+    }
+
+    .shell {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.45);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      border-radius: 32px;
+      backdrop-filter: blur(18px);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 2vw, 2.2rem);
+      letter-spacing: -0.04em;
+    }
+
+    .title-wrap p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .status {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(184, 92, 56, 0.12);
+      color: var(--accent-strong);
+      font-size: 0.88rem;
+      white-space: nowrap;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      min-height: 78vh;
+    }
+
+    .pane {
+      padding: 24px;
+    }
+
+    .pane + .pane {
+      border-left: 1px solid var(--border);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: var(--panel-strong);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 14px;
+      font: inherit;
+      cursor: pointer;
+      transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: rgba(184, 92, 56, 0.45);
+      background: #fff7f2;
+    }
+
+    .editor {
+      width: 100%;
+      min-height: calc(78vh - 74px);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--panel);
+      color: var(--text);
+      padding: 22px;
+      resize: vertical;
+      font: 500 0.98rem/1.7 "JetBrains Mono", "D2Coding", monospace;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+    }
+
+    .editor:focus {
+      outline: 2px solid rgba(184, 92, 56, 0.18);
+      border-color: rgba(184, 92, 56, 0.4);
+    }
+
+    .preview-card {
+      height: 100%;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--panel);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .preview-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .preview {
+      padding: 26px;
+      overflow: auto;
+      line-height: 1.8;
+    }
+
+    .preview h1,
+    .preview h2,
+    .preview h3,
+    .preview h4,
+    .preview h5,
+    .preview h6 {
+      line-height: 1.25;
+      letter-spacing: -0.03em;
+      margin: 1.2em 0 0.45em;
+    }
+
+    .preview h1 { font-size: 2rem; }
+    .preview h2 { font-size: 1.6rem; }
+    .preview h3 { font-size: 1.3rem; }
+
+    .preview p,
+    .preview ul,
+    .preview ol,
+    .preview blockquote,
+    .preview pre {
+      margin: 0 0 1rem;
+    }
+
+    .preview ul,
+    .preview ol {
+      padding-left: 1.4rem;
+    }
+
+    .preview li + li {
+      margin-top: 0.35rem;
+    }
+
+    .preview blockquote {
+      border-left: 4px solid rgba(184, 92, 56, 0.4);
+      padding: 0.2rem 0 0.2rem 1rem;
+      color: #5e5144;
+      background: rgba(184, 92, 56, 0.08);
+      border-radius: 0 16px 16px 0;
+    }
+
+    .preview code {
+      background: rgba(74, 60, 46, 0.08);
+      border-radius: 8px;
+      padding: 0.15rem 0.4rem;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 0.92em;
+    }
+
+    .preview pre {
+      padding: 16px;
+      border-radius: 16px;
+      background: #201a16;
+      color: #f8efe6;
+      overflow: auto;
+    }
+
+    .preview pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+    }
+
+    .preview a {
+      color: var(--accent-strong);
+    }
+
+    .preview hr {
+      border: 0;
+      border-top: 1px solid rgba(73, 56, 37, 0.18);
+      margin: 1.5rem 0;
+    }
+
+    .preview table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+    }
+
+    .preview th,
+    .preview td {
+      border: 1px solid rgba(73, 56, 37, 0.15);
+      padding: 0.7rem;
+      text-align: left;
+    }
+
+    .preview th {
+      background: rgba(184, 92, 56, 0.08);
+    }
+
+    @media (max-width: 980px) {
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .pane + .pane {
+        border-left: 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .editor {
+        min-height: 48vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="title-wrap">
+        <h1>Markdown Editor</h1>
+        <p>HTML + JavaScript만으로 만든 실시간 미리보기 에디터</p>
+      </div>
+      <div class="status" id="save-status">저장 대기 중</div>
+    </header>
+
+    <section class="workspace">
+      <div class="pane">
+        <div class="toolbar">
+          <button type="button" data-wrap="**" data-placeholder="굵은 텍스트">Bold</button>
+          <button type="button" data-wrap="*" data-placeholder="기울임 텍스트">Italic</button>
+          <button type="button" data-prefix="# " data-placeholder="제목">H1</button>
+          <button type="button" data-prefix="## " data-placeholder="소제목">H2</button>
+          <button type="button" data-prefix="- " data-placeholder="목록 항목">List</button>
+          <button type="button" data-prefix="> " data-placeholder="인용문">Quote</button>
+          <button type="button" data-wrap="`" data-placeholder="inline code">Code</button>
+          <button type="button" id="insert-link">Link</button>
+          <button type="button" id="reset-doc">Reset</button>
+        </div>
+
+        <textarea id="editor" class="editor" spellcheck="false" aria-label="Markdown editor"></textarea>
+      </div>
+
+      <div class="pane">
+        <div class="preview-card">
+          <div class="preview-head">
+            <span>Preview</span>
+            <span id="word-count">0 words</span>
+          </div>
+          <article id="preview" class="preview"></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const STORAGE_KEY = "markdown-editor-content";
+    const SAMPLE = `# 안녕하세요
+
+HTML + JS로 만든 **마크다운 에디터**입니다.
+
+## 기능
+
+- 실시간 미리보기
+- 로컬 스토리지 자동 저장
+- 기본 서식 툴바
+- 코드 블록, 리스트, 인용문 지원
+
+> 왼쪽에 마크다운을 입력하면 오른쪽에서 바로 렌더링됩니다.
+
+\`\`\`
+function greet(name) {
+  return \`Hello, \${name}\`;
+}
+\`\`\`
+
+[OpenAI](https://openai.com) 링크도 지원합니다.
+`;
+
+    const editor = document.getElementById("editor");
+    const preview = document.getElementById("preview");
+    const wordCount = document.getElementById("word-count");
+    const saveStatus = document.getElementById("save-status");
+
+    const escapeHtml = (value) =>
+      value
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+
+    const parseInline = (text) => {
+      let escaped = escapeHtml(text);
+      escaped = escaped.replace(/`([^`]+)`/g, "<code>$1</code>");
+      escaped = escaped.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noreferrer">$1</a>');
+      escaped = escaped.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+      escaped = escaped.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      return escaped;
+    };
+
+    const renderMarkdown = (markdown) => {
+      const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+      const html = [];
+      let inCodeBlock = false;
+      let listType = null;
+      let paragraph = [];
+      let tableBuffer = [];
+
+      const flushParagraph = () => {
+        if (!paragraph.length) return;
+        html.push(`<p>${parseInline(paragraph.join("<br />"))}</p>`);
+        paragraph = [];
+      };
+
+      const flushList = () => {
+        if (!listType) return;
+        html.push(`</${listType}>`);
+        listType = null;
+      };
+
+      const flushTable = () => {
+        if (!tableBuffer.length) return;
+        const rows = tableBuffer.map((row) =>
+          row
+            .split("|")
+            .slice(1, -1)
+            .map((cell) => cell.trim())
+        );
+
+        if (rows.length >= 2) {
+          html.push("<table><thead><tr>");
+          rows[0].forEach((cell) => {
+            html.push(`<th>${parseInline(cell)}</th>`);
+          });
+          html.push("</tr></thead><tbody>");
+          rows.slice(2).forEach((cells) => {
+            html.push("<tr>");
+            cells.forEach((cell) => {
+              html.push(`<td>${parseInline(cell)}</td>`);
+            });
+            html.push("</tr>");
+          });
+          html.push("</tbody></table>");
+        } else {
+          tableBuffer.forEach((row) => paragraph.push(row));
+        }
+
+        tableBuffer = [];
+      };
+
+      lines.forEach((line) => {
+        if (line.startsWith("```")) {
+          flushParagraph();
+          flushList();
+          flushTable();
+          if (!inCodeBlock) {
+            html.push("<pre><code>");
+            inCodeBlock = true;
+          } else {
+            html.push("</code></pre>");
+            inCodeBlock = false;
+          }
+          return;
+        }
+
+        if (inCodeBlock) {
+          html.push(`${escapeHtml(line)}\n`);
+          return;
+        }
+
+        if (/^\|.+\|$/.test(line)) {
+          flushParagraph();
+          flushList();
+          tableBuffer.push(line);
+          return;
+        }
+
+        if (tableBuffer.length) {
+          flushTable();
+        }
+
+        if (!line.trim()) {
+          flushParagraph();
+          flushList();
+          return;
+        }
+
+        const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+        if (headingMatch) {
+          flushParagraph();
+          flushList();
+          const level = headingMatch[1].length;
+          html.push(`<h${level}>${parseInline(headingMatch[2])}</h${level}>`);
+          return;
+        }
+
+        if (/^---+$/.test(line.trim())) {
+          flushParagraph();
+          flushList();
+          html.push("<hr />");
+          return;
+        }
+
+        const quoteMatch = line.match(/^>\s?(.*)$/);
+        if (quoteMatch) {
+          flushParagraph();
+          flushList();
+          html.push(`<blockquote>${parseInline(quoteMatch[1])}</blockquote>`);
+          return;
+        }
+
+        const ulMatch = line.match(/^[-*]\s+(.*)$/);
+        if (ulMatch) {
+          flushParagraph();
+          if (listType !== "ul") {
+            flushList();
+            html.push("<ul>");
+            listType = "ul";
+          }
+          html.push(`<li>${parseInline(ulMatch[1])}</li>`);
+          return;
+        }
+
+        const olMatch = line.match(/^\d+\.\s+(.*)$/);
+        if (olMatch) {
+          flushParagraph();
+          if (listType !== "ol") {
+            flushList();
+            html.push("<ol>");
+            listType = "ol";
+          }
+          html.push(`<li>${parseInline(olMatch[1])}</li>`);
+          return;
+        }
+
+        paragraph.push(line);
+      });
+
+      flushTable();
+      flushParagraph();
+      flushList();
+
+      return html.join("");
+    };
+
+    const updateStatus = (message) => {
+      saveStatus.textContent = message;
+    };
+
+    const updatePreview = () => {
+      const content = editor.value;
+      preview.innerHTML = renderMarkdown(content);
+      const words = content.trim() ? content.trim().split(/\s+/).length : 0;
+      wordCount.textContent = `${words} words`;
+      localStorage.setItem(STORAGE_KEY, content);
+      updateStatus(`자동 저장됨 · ${new Date().toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit" })}`);
+    };
+
+    const wrapSelection = (token, placeholder) => {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || placeholder;
+      editor.setRangeText(`${token}${selected}${token}`, start, end, "select");
+      editor.focus();
+      updatePreview();
+    };
+
+    const prefixSelection = (prefix, placeholder) => {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selection = editor.value.slice(start, end) || placeholder;
+      const nextText = selection
+        .split("\n")
+        .map((line) => `${prefix}${line}`)
+        .join("\n");
+      editor.setRangeText(nextText, start, end, "end");
+      editor.focus();
+      updatePreview();
+    };
+
+    document.querySelectorAll("[data-wrap]").forEach((button) => {
+      button.addEventListener("click", () => {
+        wrapSelection(button.dataset.wrap, button.dataset.placeholder);
+      });
+    });
+
+    document.querySelectorAll("[data-prefix]").forEach((button) => {
+      button.addEventListener("click", () => {
+        prefixSelection(button.dataset.prefix, button.dataset.placeholder);
+      });
+    });
+
+    document.getElementById("insert-link").addEventListener("click", () => {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || "링크 텍스트";
+      editor.setRangeText(`[${selected}](https://example.com)`, start, end, "select");
+      editor.focus();
+      updatePreview();
+    });
+
+    document.getElementById("reset-doc").addEventListener("click", () => {
+      editor.value = SAMPLE;
+      updatePreview();
+    });
+
+    editor.addEventListener("input", updatePreview);
+
+    const initialContent = localStorage.getItem(STORAGE_KEY) || SAMPLE;
+    editor.value = initialContent;
+    updatePreview();
+  </script>
+</body>
+</html>

@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="실습용 마크다운 에디터. 왼쪽에서 작성하면 오른쪽에서 실시간으로 미리보기를 확인할 수 있습니다."
+    />
+    <title>MarkForge | Markdown Editor</title>
+    <style>
+      :root {
+        --bg: #10151f;
+        --bg-soft: #151c29;
+        --surface: rgba(18, 24, 35, 0.78);
+        --surface-strong: #1a2231;
+        --surface-elevated: #232d40;
+        --text: #eef2f7;
+        --muted: #9ea9ba;
+        --border: rgba(255, 255, 255, 0.08);
+        --accent: #f59e0b;
+        --accent-strong: #fbbf24;
+        --success: #34d399;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+      }
+
+      body {
+        margin: 0;
+        color: var(--text);
+        font: 16px/1.6 "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 30%),
+          radial-gradient(circle at top right, rgba(59, 130, 246, 0.16), transparent 28%),
+          linear-gradient(180deg, #090d14 0%, var(--bg) 100%);
+      }
+
+      button,
+      textarea,
+      input {
+        font: inherit;
+      }
+
+      .app {
+        width: min(1320px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 40px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .mark {
+        width: 46px;
+        height: 46px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent), #fb7185);
+        color: #111827;
+        font-weight: 900;
+        box-shadow: var(--shadow);
+      }
+
+      .brand h1 {
+        margin: 0;
+        font-size: clamp(1.4rem, 2vw, 2rem);
+        line-height: 1.1;
+      }
+
+      .brand p {
+        margin: 2px 0 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: flex-end;
+      }
+
+      .btn {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 14px;
+        cursor: pointer;
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+        box-shadow: var(--shadow);
+      }
+
+      .btn:hover {
+        transform: translateY(-1px);
+        border-color: rgba(245, 158, 11, 0.35);
+      }
+
+      .btn:focus-visible {
+        outline: 3px solid rgba(251, 191, 36, 0.32);
+        outline-offset: 2px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.05fr 1fr;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        border-radius: 26px;
+        box-shadow: var(--shadow);
+      }
+
+      .panel {
+        padding: 18px;
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+      }
+
+      .toolbar .btn {
+        box-shadow: none;
+        background: rgba(255, 255, 255, 0.03);
+      }
+
+      .editor-shell {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .meta-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .editor,
+      .preview {
+        min-height: 68vh;
+      }
+
+      .editor {
+        width: 100%;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 18px;
+        resize: vertical;
+        color: var(--text);
+        background: rgba(5, 8, 14, 0.5);
+        outline: none;
+        caret-color: var(--accent-strong);
+      }
+
+      .editor:focus {
+        border-color: rgba(251, 191, 36, 0.4);
+        box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.08);
+      }
+
+      .preview {
+        padding: 20px;
+        overflow: auto;
+      }
+
+      .preview h2 {
+        margin: 0 0 12px;
+        font-size: 1.2rem;
+      }
+
+      .preview-body {
+        color: #e9eef6;
+        word-break: break-word;
+      }
+
+      .preview-body h1,
+      .preview-body h2,
+      .preview-body h3,
+      .preview-body h4 {
+        margin: 1.1em 0 0.45em;
+        line-height: 1.2;
+      }
+
+      .preview-body h1 {
+        font-size: 2rem;
+      }
+
+      .preview-body h2 {
+        font-size: 1.6rem;
+      }
+
+      .preview-body h3 {
+        font-size: 1.28rem;
+      }
+
+      .preview-body p,
+      .preview-body ul,
+      .preview-body ol,
+      .preview-body blockquote,
+      .preview-body pre {
+        margin: 0 0 1em;
+      }
+
+      .preview-body a {
+        color: #7dd3fc;
+      }
+
+      .preview-body strong {
+        color: #fff;
+      }
+
+      .preview-body em {
+        color: #fde68a;
+      }
+
+      .preview-body code {
+        padding: 0.15rem 0.35rem;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.08);
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        font-size: 0.95em;
+      }
+
+      .preview-body pre {
+        overflow: auto;
+        padding: 16px;
+        border-radius: 18px;
+        background: #0b1220;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      .preview-body pre code {
+        padding: 0;
+        background: transparent;
+        color: inherit;
+      }
+
+      .preview-body blockquote {
+        padding: 0.4rem 1rem;
+        border-left: 4px solid var(--accent);
+        color: var(--muted);
+        background: rgba(245, 158, 11, 0.06);
+        border-radius: 0 14px 14px 0;
+      }
+
+      .preview-body hr {
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        margin: 1.2rem 0;
+      }
+
+      .preview-body table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1em;
+      }
+
+      .preview-body th,
+      .preview-body td {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        padding: 0.7rem 0.8rem;
+        text-align: left;
+      }
+
+      .preview-body th {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+
+      .stat {
+        padding: 18px;
+      }
+
+      .stat-label {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      .stat-value {
+        margin: 0;
+        font-size: 1.45rem;
+        font-weight: 800;
+      }
+
+      .hint {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .footer {
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        text-align: center;
+      }
+
+      @media (max-width: 980px) {
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .editor,
+        .preview {
+          min-height: 48vh;
+        }
+      }
+
+      @media (max-width: 720px) {
+        .app {
+          width: min(100% - 20px, 1320px);
+          padding-top: 16px;
+        }
+
+        .header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .actions {
+          justify-content: flex-start;
+        }
+
+        .stats {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div class="brand">
+          <div class="mark">M</div>
+          <div>
+            <h1>MarkForge</h1>
+            <p>실습용 마크다운 에디터</p>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" data-action="sample">샘플 불러오기</button>
+          <button class="btn" type="button" data-action="clear">초기화</button>
+          <button class="btn" type="button" data-action="save">로컬 저장</button>
+          <button class="btn" type="button" data-action="load">불러오기</button>
+        </div>
+      </header>
+
+      <section class="stats" aria-label="문서 통계">
+        <article class="card stat">
+          <p class="stat-label">문자 수</p>
+          <p class="stat-value" id="charCount">0</p>
+        </article>
+        <article class="card stat">
+          <p class="stat-label">단어 수</p>
+          <p class="stat-value" id="wordCount">0</p>
+        </article>
+        <article class="card stat">
+          <p class="stat-label">제목 수</p>
+          <p class="stat-value" id="headingCount">0</p>
+        </article>
+      </section>
+
+      <section class="hero">
+        <article class="card panel">
+          <div class="toolbar" aria-label="서식 도구">
+            <button class="btn" type="button" data-insert="heading"># 제목</button>
+            <button class="btn" type="button" data-insert="bold">**굵게**</button>
+            <button class="btn" type="button" data-insert="italic">*기울임*</button>
+            <button class="btn" type="button" data-insert="quote">&gt; 인용</button>
+            <button class="btn" type="button" data-insert="code">`코드`</button>
+            <button class="btn" type="button" data-insert="link">[링크](url)</button>
+            <button class="btn" type="button" data-insert="list">- 목록</button>
+          </div>
+
+          <div class="editor-shell">
+            <div class="meta-row">
+              <span>왼쪽에서 작성하고 오른쪽에서 결과를 확인하세요.</span>
+              <span id="saveState">변경 사항 없음</span>
+            </div>
+            <textarea
+              id="editor"
+              class="editor"
+              spellcheck="false"
+              aria-label="마크다운 입력 영역"
+            ></textarea>
+          </div>
+        </article>
+
+        <article class="card preview" aria-live="polite">
+          <h2>미리보기</h2>
+          <div id="preview" class="preview-body"></div>
+        </article>
+      </section>
+
+      <p class="hint">
+        지원 예시: 제목, 굵게, 기울임, 목록, 인용문, 코드 블록, 링크, 표, 체크박스.
+      </p>
+      <p class="footer">MarkForge · HTML + JS 실습 과제</p>
+    </main>
+
+    <script>
+      const editor = document.getElementById("editor");
+      const preview = document.getElementById("preview");
+      const saveState = document.getElementById("saveState");
+      const charCount = document.getElementById("charCount");
+      const wordCount = document.getElementById("wordCount");
+      const headingCount = document.getElementById("headingCount");
+      const STORAGE_KEY = "markforge-markdown";
+
+      const sampleMarkdown = `# MarkForge
+
+실습용 **마크다운 에디터**입니다.
+
+## 기능 예시
+
+- 실시간 미리보기
+- 로컬 저장
+- 간단한 서식 버튼
+
+> 이 영역은 마크다운 문법을 바로 확인하기 좋습니다.
+
+\`\`\`js
+const hello = "markdown";
+console.log(hello);
+\`\`\`
+
+| 항목 | 설명 |
+| --- | --- |
+| 제목 | \`#\` 으로 작성 |
+| 링크 | [OpenAI](https://openai.com) |
+`;
+
+      const starterMarkdown = `# 새 문서
+
+여기에 마크다운을 입력하세요.
+
+## 빠른 시작
+
+1. 왼쪽 편집기에 내용을 작성합니다.
+2. 오른쪽에서 렌더링 결과를 확인합니다.
+3. 필요하면 로컬 저장을 사용합니다.
+`;
+
+      function escapeHtml(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#39;");
+      }
+
+      function renderInline(text) {
+        let html = escapeHtml(text);
+
+        html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+        html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        html = html.replace(/\*([^*]+)\*/g, "<em>$1</em>");
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_, label, rawHref) => {
+          const href = rawHref.trim();
+          const isSafe =
+            /^(https?:|mailto:|\/|#)/i.test(href) ||
+            /^[a-z0-9._~/-]+$/i.test(href);
+          const safeHref = isSafe ? href : "#";
+          return `<a href="${safeHref}" target="_blank" rel="noreferrer">${label}</a>`;
+        });
+
+        return html;
+      }
+
+      function renderMarkdown(markdown) {
+        const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+        const html = [];
+        let inCodeBlock = false;
+        let codeLang = "";
+        let inUl = false;
+        let inOl = false;
+        let inTable = false;
+
+        const closeLists = () => {
+          if (inUl) {
+            html.push("</ul>");
+            inUl = false;
+          }
+          if (inOl) {
+            html.push("</ol>");
+            inOl = false;
+          }
+        };
+
+        const closeTable = () => {
+          if (inTable) {
+            html.push("</tbody></table>");
+            inTable = false;
+          }
+        };
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+
+          if (trimmed.startsWith("```")) {
+            if (!inCodeBlock) {
+              closeLists();
+              closeTable();
+              codeLang = trimmed.slice(3).trim();
+              html.push(`<pre><code data-lang="${escapeHtml(codeLang)}">`);
+              inCodeBlock = true;
+            } else {
+              html.push("</code></pre>");
+              inCodeBlock = false;
+            }
+            continue;
+          }
+
+          if (inCodeBlock) {
+            html.push(escapeHtml(line));
+            html.push("\n");
+            continue;
+          }
+
+          if (!trimmed) {
+            closeLists();
+            closeTable();
+            continue;
+          }
+
+          const headingMatch = trimmed.match(/^(#{1,6})\s+(.*)$/);
+          if (headingMatch) {
+            closeLists();
+            closeTable();
+            const level = headingMatch[1].length;
+            html.push(`<h${level}>${renderInline(headingMatch[2])}</h${level}>`);
+            continue;
+          }
+
+          if (/^>\s?/.test(trimmed)) {
+            closeLists();
+            closeTable();
+            html.push(`<blockquote>${renderInline(trimmed.replace(/^>\s?/, ""))}</blockquote>`);
+            continue;
+          }
+
+          if (/^---+$/.test(trimmed)) {
+            closeLists();
+            closeTable();
+            html.push("<hr />");
+            continue;
+          }
+
+          if (/^\|.*\|$/.test(trimmed)) {
+            closeLists();
+            const cells = trimmed
+              .split("|")
+              .slice(1, -1)
+              .map((cell) => cell.trim());
+
+            const isDivider = cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+            if (isDivider) {
+              continue;
+            }
+
+            if (!inTable) {
+              html.push("<table><tbody>");
+              inTable = true;
+            }
+
+            html.push("<tr>");
+            for (const cell of cells) {
+              html.push(`<td>${renderInline(cell)}</td>`);
+            }
+            html.push("</tr>");
+            continue;
+          }
+
+          const checkboxMatch = trimmed.match(/^-\s+\[( |x|X)\]\s+(.*)$/);
+          if (checkboxMatch) {
+            closeTable();
+            if (inOl) {
+              html.push("</ol>");
+              inOl = false;
+            }
+            if (!inUl) {
+              html.push("<ul>");
+              inUl = true;
+            }
+            const checked = checkboxMatch[1].toLowerCase() === "x" ? " checked" : "";
+            html.push(
+              `<li><input type="checkbox" disabled${checked} /> ${renderInline(checkboxMatch[2])}</li>`,
+            );
+            continue;
+          }
+
+          const orderedMatch = trimmed.match(/^\d+\.\s+(.*)$/);
+          if (orderedMatch) {
+            closeTable();
+            if (inUl) {
+              html.push("</ul>");
+              inUl = false;
+            }
+            if (!inOl) {
+              html.push("<ol>");
+              inOl = true;
+            }
+            html.push(`<li>${renderInline(orderedMatch[1])}</li>`);
+            continue;
+          }
+
+          const unorderedMatch = trimmed.match(/^[-*+]\s+(.*)$/);
+          if (unorderedMatch) {
+            closeTable();
+            if (inOl) {
+              html.push("</ol>");
+              inOl = false;
+            }
+            if (!inUl) {
+              html.push("<ul>");
+              inUl = true;
+            }
+            html.push(`<li>${renderInline(unorderedMatch[1])}</li>`);
+            continue;
+          }
+
+          closeLists();
+          closeTable();
+          html.push(`<p>${renderInline(trimmed)}</p>`);
+        }
+
+        closeLists();
+        closeTable();
+
+        return html.join("").replace(/<\/code>\n<\/pre>/g, "</code></pre>");
+      }
+
+      function updateStats(markdown) {
+        const compact = markdown.trim();
+        charCount.textContent = markdown.length.toLocaleString("ko-KR");
+        wordCount.textContent = compact ? compact.split(/\s+/).filter(Boolean).length.toLocaleString("ko-KR") : "0";
+        headingCount.textContent = (markdown.match(/^#{1,6}\s+/gm) || []).length.toLocaleString("ko-KR");
+      }
+
+      function render() {
+        const markdown = editor.value;
+        preview.innerHTML = renderMarkdown(markdown);
+        updateStats(markdown);
+      }
+
+      function setSaveState(label) {
+        saveState.textContent = label;
+      }
+
+      function insertAtCursor(before, after = "", placeholder = "") {
+        const start = editor.selectionStart;
+        const end = editor.selectionEnd;
+        const selected = editor.value.slice(start, end) || placeholder;
+        const next = `${before}${selected}${after}`;
+
+        editor.setRangeText(next, start, end, "end");
+        editor.focus();
+        render();
+        setSaveState("편집됨");
+      }
+
+      function ensureNewLinePrefix() {
+        const start = editor.selectionStart;
+        const before = editor.value.slice(0, start);
+        return before.endsWith("\n") || start === 0 ? "" : "\n";
+      }
+
+      function handleInsert(action) {
+        switch (action) {
+          case "heading":
+            insertAtCursor(`${ensureNewLinePrefix()}## `, "", "제목");
+            break;
+          case "bold":
+            insertAtCursor("**", "**", "굵은 텍스트");
+            break;
+          case "italic":
+            insertAtCursor("*", "*", "기울인 텍스트");
+            break;
+          case "quote":
+            insertAtCursor(`${ensureNewLinePrefix()}> `, "", "인용문");
+            break;
+          case "code":
+            insertAtCursor("`", "`", "code");
+            break;
+          case "link":
+            insertAtCursor("[", "](https://)", "링크 텍스트");
+            break;
+          case "list":
+            insertAtCursor(`${ensureNewLinePrefix()}- `, "", "목록 항목");
+            break;
+        }
+      }
+
+      function saveToLocalStorage() {
+        localStorage.setItem(STORAGE_KEY, editor.value);
+        setSaveState("저장됨");
+      }
+
+      function loadFromLocalStorage() {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved !== null) {
+          editor.value = saved;
+          render();
+          setSaveState("불러옴");
+          return;
+        }
+
+        editor.value = starterMarkdown;
+        render();
+        setSaveState("저장된 문서 없음");
+      }
+
+      document.querySelectorAll("[data-insert]").forEach((button) => {
+        button.addEventListener("click", () => handleInsert(button.dataset.insert));
+      });
+
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const action = button.dataset.action;
+          if (action === "sample") {
+            editor.value = sampleMarkdown;
+            render();
+            setSaveState("샘플 불러옴");
+            return;
+          }
+
+          if (action === "clear") {
+            editor.value = "";
+            render();
+            setSaveState("비움");
+            return;
+          }
+
+          if (action === "save") {
+            saveToLocalStorage();
+            return;
+          }
+
+          if (action === "load") {
+            loadFromLocalStorage();
+          }
+        });
+      });
+
+      editor.addEventListener("input", () => {
+        render();
+        setSaveState("편집됨");
+      });
+
+      editor.addEventListener("keydown", (event) => {
+        if (event.key === "Tab") {
+          event.preventDefault();
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          editor.setRangeText("  ", start, end, "end");
+          render();
+          setSaveState("편집됨");
+        }
+
+        if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "s") {
+          event.preventDefault();
+          saveToLocalStorage();
+        }
+      });
+
+      const initialSaved = localStorage.getItem(STORAGE_KEY);
+      editor.value = initialSaved ?? starterMarkdown;
+      render();
+      setSaveState(initialSaved ? "저장본 불러옴" : "기본 문서");
+    </script>
+  </body>
+</html>
