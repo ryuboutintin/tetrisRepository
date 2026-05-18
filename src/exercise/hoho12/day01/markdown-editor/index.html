@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="toolbar">
+    <span class="logo">Markdown Editor</span>
+    <div class="toolbar-actions">
+      <span class="toolbar-group">
+        <button id="btn-bold" title="굵게 (Ctrl+B)"><b>B</b></button>
+        <button id="btn-italic" title="기울임 (Ctrl+I)"><i>I</i></button>
+        <button id="btn-strike" title="취소선 (Ctrl+Shift+S)"><s>S</s></button>
+      </span>
+      <span class="toolbar-sep"></span>
+      <span class="toolbar-group">
+        <button id="btn-h1" title="H1">H1</button>
+        <button id="btn-h2" title="H2">H2</button>
+        <button id="btn-h3" title="H3">H3</button>
+      </span>
+      <span class="toolbar-sep"></span>
+      <span class="toolbar-group">
+        <button id="btn-ul" title="순서 없는 목록">UL</button>
+        <button id="btn-ol" title="순서 있는 목록 (Ctrl+Shift+O)">OL</button>
+        <button id="btn-quote" title="인용 (Ctrl+Q)">"</button>
+      </span>
+      <span class="toolbar-sep"></span>
+      <span class="toolbar-group">
+        <button id="btn-code" title="인라인 코드">&lt;/&gt;</button>
+        <button id="btn-codeblock" title="코드 블록 (Ctrl+E)">```</button>
+        <button id="btn-link" title="링크 (Ctrl+K)">Link</button>
+        <button id="btn-image" title="이미지">Img</button>
+        <button id="btn-hr" title="구분선">—</button>
+      </span>
+      <span class="toolbar-sep"></span>
+      <span class="save-status" id="save-status">저장됨</span>
+      <button id="btn-clear" class="danger" title="초기화">초기화</button>
+    </div>
+  </header>
+
+  <main class="editor-layout">
+    <div class="pane pane-editor">
+      <div class="pane-label">편집</div>
+      <textarea id="editor" placeholder="마크다운을 입력하세요..."></textarea>
+    </div>
+    <div class="divider" id="divider"></div>
+    <div class="pane pane-preview">
+      <div class="pane-label">미리보기</div>
+      <div id="preview" class="preview-content"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

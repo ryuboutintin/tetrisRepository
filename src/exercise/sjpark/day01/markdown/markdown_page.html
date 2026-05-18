@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자기소개 에디터 | 박수진</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!--
+    라디오 인풋이 .app 의 형제(sibling)여야
+    CSS ~ 선택자로 .app 내부를 제어할 수 있어요.
+  -->
+  <input type="radio" id="tab-editor"  name="tab" checked />
+  <input type="radio" id="tab-preview" name="tab" />
+
+  <div class="app">
+
+    <!-- ── 헤더 ── -->
+    <header class="app-header">
+      <div class="app-brand">
+        <span class="slash">//</span> 자기소개 에디터
+      </div>
+      <span class="app-badge">HTML · CSS · JS</span>
+
+      <!-- 모바일 탭 -->
+      <div class="tab-bar">
+        <label for="tab-editor">에디터</label>
+        <label for="tab-preview">미리보기</label>
+      </div>
+    </header>
+
+    <!-- ── 메인 레이아웃 ── -->
+    <div class="editor-layout">
+
+      <!-- 왼쪽: 마크다운 에디터 -->
+      <div class="pane pane--editor">
+        <div class="pane-header">📝 &nbsp;markdown</div>
+        <textarea id="editor" class="editor-textarea" spellcheck="false"># 박수진
+
+> 코드로 문제를 풀고, 사람에게 닿는 서비스를 만듭니다.
+
+---
+
+## About
+
+백엔드 개발을 주로 하며 Java/Spring 기반의 API 서버
+설계와 운영 경험이 있습니다. 최근에는 클라우드 환경과
+DevOps 도구에 관심을 두고 공부하고 있습니다.
+
+팀과 함께 성장하는 것을 즐기며, 읽기 쉬운 코드를
+짜는 것을 중요하게 생각합니다.
+
+## Skills
+
+`Java`  `Spring Boot`  `Python`
+`MySQL`  `Docker`  `AWS`  `Git`
+
+## Contact
+
+- Email : farmer1590@gmail.com
+- GitHub: github.com/soojin1999</textarea>
+      </div>
+
+      <!-- 오른쪽: 실시간 렌더링 미리보기 -->
+      <div class="pane pane--preview">
+        <div class="pane-header">👁 &nbsp;preview</div>
+        <div class="preview-scroll">
+          <div class="card">
+            <div id="preview-output" class="preview-output"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- .editor-layout -->
+  </div><!-- .app -->
+
+  <script src="app.js"></script>
+
+</body>
+</html>
