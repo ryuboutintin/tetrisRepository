@@ -1,0 +1,21 @@
+[
+  {
+    "content": "오늘 할 일: FastAPI 공부 완료!",
+    "title": "오늘의 메모",
+    "tags": [
+      "공부",
+      "FastAPI"
+    ],
+    "created_at": "2026-05-18T07:43:30.257462+00:00",
+    "updated_at": "2026-05-18T07:43:30.300839+00:00",
+    "id": 1
+  },
+  {
+    "content": "jjjjjjjjjjjjjjjjjjjjjjjjjjjj",
+    "title": "jjjjjjjj",
+    "tags": [],
+    "created_at": "2026-05-18T07:48:55.943632+00:00",
+    "updated_at": "2026-05-18T07:48:55.943632+00:00",
+    "id": 2
+  }
+]
