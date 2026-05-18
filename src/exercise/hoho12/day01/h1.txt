@@ -1,0 +1,44 @@
+    1  xeyes
+    2  exit
+    3  cat ~/.ssh/id_rsa.pub
+    4  ssh-keygen
+    5  cat ~/.ssh/id_rsa.pub
+    6  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+    7  ls
+    8  cd kosa-vibecoding-2026-2nd
+    9  ls
+   10  cd doc
+   11  ls
+   12  cd ..
+   13  cd sr/exercise
+   14  ls
+   15  cd src/exercise
+   16  ls
+   17  cd hoho12
+   18  cat text.txt
+   19  cd day01
+   20  ls
+   21  cat text.txt
+   22  history > h1.txt
+   23  vi hi.txt
+   24  ls
+   25  git add h1.txt
+   26  git commit -m 'add history'
+   27  history > h1.txt
+   28  vi h1.txt
+   29  git add h1.txt
+   30  git commit -m 'add history'
+   31  git clone https://sofansil:[access token]@github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   32  git clone https://sofansil[access token]@github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   33  git clone https://sofansil:abc%2Fdef123@github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   34  git clone https://sofansil@naver.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   35  git clone https://sofansil@github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   36  history > h1.txt
+   37  git add h1.txt
+   38  git commit -m 'add history'
+   39  git config --global user.name "sofansil"
+   40  git config --global user.email sofansil@naver.com
+   41  git config --global pull.rebase false
+   42  git config --global --list
+   43  git clone https://sofansil@github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   44  history > h1.txt
