@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>자기소개 에디터 | 박수진</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -163,7 +164,7 @@
       padding: 2rem 1.5rem;
     }
 
-    /* ── 카드 (미리보기 콘텐츠) ── */
+    /* ── 카드 컨테이너 ── */
     .card {
       max-width: 480px;
       margin: 0 auto;
@@ -173,69 +174,89 @@
       padding: 2.25rem 2.5rem;
     }
 
-    .card-name {
+    /* ── 마크다운 렌더링 결과 스타일 ── */
+    .preview-output h1 {
       font-size: 1.6rem;
       font-weight: 700;
       letter-spacing: -0.02em;
+      margin-bottom: 0.35rem;
     }
 
-    .card-tagline {
-      margin-top: 0.35rem;
-      color: var(--muted);
-      font-size: 0.95rem;
-    }
-
-    .card-divider {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 1.5rem 0 0;
-    }
-
-    .card-section { margin-top: 1.5rem; }
-
-    .card-section-title {
+    .preview-output h2 {
       font-size: 0.72rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--muted);
+      margin-top: 1.5rem;
       margin-bottom: 0.65rem;
     }
 
-    .card-about { font-size: 0.95rem; }
+    .preview-output h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+    }
 
-    .skills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+    .preview-output p {
+      font-size: 0.95rem;
+      margin-bottom: 0.5rem;
+    }
 
-    .skill-tag {
+    .preview-output blockquote {
+      color: var(--muted);
+      border-left: 3px solid var(--accent);
+      padding-left: 1rem;
+      margin: 0.25rem 0 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .preview-output blockquote p { margin-bottom: 0; }
+
+    .preview-output hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.25rem 0;
+    }
+
+    .preview-output code {
+      font-family: "JetBrains Mono", "Fira Code", monospace;
       background: var(--bg);
       border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.25rem 0.7rem;
+      border-radius: 4px;
+      padding: 0.1rem 0.45rem;
       font-size: 0.82rem;
-      font-family: "JetBrains Mono", monospace;
     }
 
-    .contacts { display: flex; flex-direction: column; gap: 0.45rem; }
-
-    .contact-row {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      font-size: 0.88rem;
+    .preview-output pre {
+      background: var(--ed-bg);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 1rem 0;
     }
 
-    .contact-label {
-      width: 52px;
-      flex-shrink: 0;
-      color: var(--muted);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
+    .preview-output pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: var(--ed-text);
     }
 
-    .contact-row a { color: var(--accent); text-decoration: none; }
-    .contact-row a:hover { text-decoration: underline; }
+    .preview-output ul,
+    .preview-output ol {
+      padding-left: 1.5rem;
+      font-size: 0.9rem;
+    }
+
+    .preview-output li { margin-bottom: 0.3rem; }
+
+    .preview-output a { color: var(--accent); text-decoration: none; }
+    .preview-output a:hover { text-decoration: underline; }
+
+    .preview-output strong { font-weight: 700; }
+    .preview-output em     { font-style: italic; }
 
     /* ────────────────────────────
        모바일 (768px 이하)
@@ -264,7 +285,7 @@
         border-bottom-color: var(--accent);
       }
 
-      .card { padding: 1.5rem; }
+      .card { padding: 1.5rem 1.25rem; }
     }
   </style>
 </head>
@@ -284,7 +305,7 @@
       <div class="app-brand">
         <span class="slash">//</span> 자기소개 에디터
       </div>
-      <span class="app-badge">HTML · CSS only</span>
+      <span class="app-badge">HTML · CSS · JS</span>
 
       <!-- 모바일 탭 -->
       <div class="tab-bar">
@@ -299,7 +320,7 @@
       <!-- 왼쪽: 마크다운 에디터 -->
       <div class="pane pane--editor">
         <div class="pane-header">📝 &nbsp;markdown</div>
-        <textarea class="editor-textarea" spellcheck="false"># 박수진
+        <textarea id="editor" class="editor-textarea" spellcheck="false"># 박수진
 
 > 코드로 문제를 풀고, 사람에게 닿는 서비스를 만듭니다.
 
@@ -325,59 +346,32 @@ DevOps 도구에 관심을 두고 공부하고 있습니다.
 - GitHub: github.com/soojin1999</textarea>
       </div>
 
-      <!-- 오른쪽: 렌더링 미리보기 -->
+      <!-- 오른쪽: 실시간 렌더링 미리보기 -->
       <div class="pane pane--preview">
         <div class="pane-header">👁 &nbsp;preview</div>
         <div class="preview-scroll">
           <div class="card">
-
-            <div class="card-name">박수진</div>
-            <div class="card-tagline">코드로 문제를 풀고, 사람에게 닿는 서비스를 만듭니다.</div>
-
-            <hr class="card-divider" />
-
-            <div class="card-section">
-              <div class="card-section-title">About</div>
-              <p class="card-about">
-                백엔드 개발을 주로 하며 Java/Spring 기반의 API 서버 설계와 운영 경험이 있습니다.
-                최근에는 클라우드 환경과 DevOps 도구에 관심을 두고 공부하고 있습니다.
-                팀과 함께 성장하는 것을 즐기며, 읽기 쉬운 코드를 짜는 것을 중요하게 생각합니다.
-              </p>
-            </div>
-
-            <div class="card-section">
-              <div class="card-section-title">Skills</div>
-              <div class="skills">
-                <span class="skill-tag">Java</span>
-                <span class="skill-tag">Spring Boot</span>
-                <span class="skill-tag">Python</span>
-                <span class="skill-tag">MySQL</span>
-                <span class="skill-tag">Docker</span>
-                <span class="skill-tag">AWS</span>
-                <span class="skill-tag">Git</span>
-              </div>
-            </div>
-
-            <div class="card-section">
-              <div class="card-section-title">Contact</div>
-              <div class="contacts">
-                <div class="contact-row">
-                  <span class="contact-label">Email</span>
-                  <a href="mailto:farmer1590@gmail.com">farmer1590@gmail.com</a>
-                </div>
-                <div class="contact-row">
-                  <span class="contact-label">GitHub</span>
-                  <a href="https://github.com/soojin1999" target="_blank" rel="noopener">github.com/soojin1999</a>
-                </div>
-              </div>
-            </div>
-
-          </div><!-- .card -->
-        </div><!-- .preview-scroll -->
+            <div id="preview-output" class="preview-output"></div>
+          </div>
+        </div>
       </div><!-- .pane--preview -->
 
     </div><!-- .editor-layout -->
   </div><!-- .app -->
+
+  <script>
+    const editor = document.getElementById('editor');
+    const output = document.getElementById('preview-output');
+
+    marked.use({ breaks: true });
+
+    function render() {
+      output.innerHTML = marked.parse(editor.value);
+    }
+
+    editor.addEventListener('input', render);
+    render();
+  </script>
 
 </body>
 </html>
