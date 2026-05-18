@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📝 메모장</h1>
+
+    <div class="form-card">
+      <input id="titleInput" type="text" placeholder="제목" />
+      <textarea id="contentInput" placeholder="내용을 입력하세요..."></textarea>
+      <div class="form-actions">
+        <button id="saveBtn" onclick="saveMemo()">저장</button>
+        <button id="cancelBtn" class="secondary" onclick="cancelEdit()" style="display:none">취소</button>
+      </div>
+    </div>
+
+    <div id="memoList" class="memo-list"></div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
