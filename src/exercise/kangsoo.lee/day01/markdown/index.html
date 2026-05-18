@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Header ── -->
+<header>
+  <div class="logo">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+    <span>Markdown Editor</span>
+  </div>
+  <div class="header-actions">
+    <button class="btn" id="btnOpen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+      </svg>
+      열기
+    </button>
+    <button class="btn" id="btnSave">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+        <polyline points="17 21 17 13 7 13 7 21"/>
+        <polyline points="7 3 7 8 15 8"/>
+      </svg>
+      .md 저장
+    </button>
+    <button class="btn btn-primary" id="btnExport">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      HTML 내보내기
+    </button>
+    <button class="btn btn-danger" id="btnClear">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="3 6 5 6 21 6"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+        <path d="M10 11v6"/><path d="M14 11v6"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+      </svg>
+      초기화
+    </button>
+    <input type="file" id="fileInput" accept=".md,.txt,.markdown" style="display:none" />
+  </div>
+</header>
+
+<!-- ── Toolbar ── -->
+<div class="toolbar">
+
+  <!-- Format -->
+  <button class="tb-btn" id="tbBold"   title="굵게 (Ctrl+B)"><b>B</b></button>
+  <button class="tb-btn" id="tbItalic" title="기울임 (Ctrl+I)"><i>I</i></button>
+  <button class="tb-btn" id="tbStrike" title="취소선">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <path d="M16 6C16 6 14.5 4 12 4C9.5 4 8 5.5 8 7.5C8 11 12 12 12 12"/>
+      <path d="M8 18C8 18 9.5 20 12 20C14.5 20 16 18.5 16 16.5"/>
+    </svg>
+  </button>
+  <div class="toolbar-sep"></div>
+
+  <!-- Headings -->
+  <button class="tb-btn" id="tbH1" title="제목 1">H1</button>
+  <button class="tb-btn" id="tbH2" title="제목 2">H2</button>
+  <button class="tb-btn" id="tbH3" title="제목 3">H3</button>
+  <div class="toolbar-sep"></div>
+
+  <!-- Lists -->
+  <button class="tb-btn" id="tbUl" title="순서없는 목록">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/>
+      <circle cx="4" cy="6" r="1.5"/><circle cx="4" cy="12" r="1.5"/><circle cx="4" cy="18" r="1.5"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbOl" title="순서있는 목록">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="10" y1="6" x2="21" y2="6"/><line x1="10" y1="12" x2="21" y2="12"/><line x1="10" y1="18" x2="21" y2="18"/>
+      <path d="M4 6h1v4"/><path d="M4 10h2"/>
+      <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1.5"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbTask" title="체크리스트">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="9 11 12 14 22 4"/>
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+    </svg>
+  </button>
+  <div class="toolbar-sep"></div>
+
+  <!-- Blocks -->
+  <button class="tb-btn" id="tbQuote" title="인용구">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+      <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2h.75c0 2.25.25 4-2.75 4v3c0 1 0 1 1 1z"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbCode" title="인라인 코드">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbCodeBlock" title="코드 블록">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
+      <line x1="8" y1="21" x2="16" y2="21"/>
+      <line x1="12" y1="17" x2="12" y2="21"/>
+    </svg>
+  </button>
+  <div class="toolbar-sep"></div>
+
+  <!-- Insert -->
+  <button class="tb-btn" id="tbLink" title="링크 삽입">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbImg" title="이미지 삽입">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+      <circle cx="8.5" cy="8.5" r="1.5"/>
+      <polyline points="21 15 16 10 5 21"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbHr" title="수평선">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbTable" title="테이블">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="18" height="18" rx="1"/>
+      <line x1="3" y1="9" x2="21" y2="9"/>
+      <line x1="3" y1="15" x2="21" y2="15"/>
+      <line x1="9" y1="3" x2="9" y2="21"/>
+      <line x1="15" y1="3" x2="15" y2="21"/>
+    </svg>
+  </button>
+  <div class="toolbar-sep"></div>
+
+  <!-- Undo / Redo -->
+  <button class="tb-btn" id="tbUndo" title="되돌리기 (Ctrl+Z)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="1 4 1 10 7 10"/>
+      <path d="M3.51 15a9 9 0 1 0 .49-3.75"/>
+    </svg>
+  </button>
+  <button class="tb-btn" id="tbRedo" title="다시실행 (Ctrl+Y)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <polyline points="23 4 23 10 17 10"/>
+      <path d="M20.49 15a9 9 0 1 1-.49-3.75"/>
+    </svg>
+  </button>
+
+  <!-- View toggle (right-aligned via margin-left:auto in CSS) -->
+  <div class="view-toggle">
+    <button class="vt-btn active" data-view="split">Split</button>
+    <button class="vt-btn" data-view="editor">Editor</button>
+    <button class="vt-btn" data-view="preview">Preview</button>
+  </div>
+
+</div>
+
+<!-- ── Editor / Preview ── -->
+<div class="editor-wrap view-split" id="editorWrap">
+
+  <!-- Left: editor pane -->
+  <div class="pane">
+    <div class="pane-label">
+      <div class="pane-label-left">
+        <span class="dot" style="background:var(--yellow)"></span>
+        MARKDOWN
+      </div>
+      <span class="save-badge" id="saveBadge">저장됨</span>
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder="마크다운을 입력하세요..."></textarea>
+  </div>
+
+  <!-- Right: preview pane -->
+  <div class="pane">
+    <div class="pane-label">
+      <div class="pane-label-left">
+        <span class="dot" style="background:var(--green)"></span>
+        PREVIEW
+      </div>
+    </div>
+    <div id="preview"></div>
+  </div>
+
+</div>
+
+<!-- ── Status bar ── -->
+<div class="statusbar">
+  <span><span class="stat-dot"></span>준비</span>
+  <span id="statWords">단어 0</span>
+  <span id="statChars">글자 0</span>
+  <span id="statLines">줄 1</span>
+  <span id="statCursor">1:1</span>
+  <span class="spacer"></span>
+  <span id="statSaved"></span>
+</div>
+
+<!-- ── Toast ── -->
+<div id="toast"></div>
+
+<!-- ── Confirm dialog ── -->
+<div class="dialog-overlay" id="confirmDialog">
+  <div class="dialog">
+    <h3>초기화 확인</h3>
+    <p>편집기의 모든 내용이 삭제되고 로컬 저장소도 지워집니다.<br/>이 작업은 되돌릴 수 없습니다.</p>
+    <div class="dialog-actions">
+      <button class="btn" id="confirmCancel">취소</button>
+      <button class="btn btn-danger" id="confirmOk">초기화</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
