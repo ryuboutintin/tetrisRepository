@@ -21,7 +21,27 @@ body {
 
 .container { max-width: 720px; margin: 0 auto; }
 
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.header h1 { margin-bottom: 0; }
+
 h1 { margin-bottom: 1.5rem; font-size: 1.6rem; font-weight: 600; }
+
+#logout-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    transition: border-color 0.15s, color 0.15s;
+}
+#logout-btn:hover { border-color: var(--danger); color: var(--danger); }
 
 form {
     background: var(--card);
@@ -152,3 +172,73 @@ form button[type="submit"]:hover { background: var(--primary-hover); }
     text-align: center;
     padding: 2rem 0;
 }
+
+/* 태그 필터 바 */
+.tag-filter {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.tag-filter button {
+    background: #fff;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 20px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.85rem;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.tag-filter button:hover { border-color: var(--primary); color: var(--primary); }
+
+.tag-filter button.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #fff;
+}
+
+/* 로그인 페이지 */
+.login-container {
+    max-width: 360px;
+    margin: 6rem auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.login-container h1 { text-align: center; margin-bottom: 0; }
+
+.login-container form {
+    border: none;
+    padding: 0;
+    margin: 0;
+    gap: 0.8rem;
+    background: none;
+}
+
+.login-container form button[type="submit"] { align-self: stretch; }
+
+.error-msg {
+    color: var(--danger);
+    font-size: 0.85rem;
+    min-height: 1.2em;
+}
+
+input[type="password"] {
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+    font-size: 0.95rem;
+    width: 100%;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s;
+}
+
+input[type="password"]:focus { border-color: var(--primary); }
