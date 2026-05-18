@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <h1 class="app-name">메모장</h1>
+        <div class="sidebar-controls">
+          <button class="ctrl-btn" id="themeToggle" title="테마 전환">🌙</button>
+          <button class="ctrl-btn ctrl-btn--new" id="newMemoBtn" title="새 메모">+</button>
+        </div>
+      </div>
+      <ul class="memo-list" id="memoList"></ul>
+      <p class="empty-msg" id="emptyMsg">아직 메모가 없어요</p>
+    </aside>
+
+    <main class="editor">
+      <div class="placeholder" id="placeholder">
+        <span>메모를 선택하거나<br>새 메모를 만드세요</span>
+      </div>
+
+      <form class="write hidden" id="editForm" autocomplete="off">
+        <div class="write-body">
+          <input class="write-title" id="titleInput" type="text" placeholder="제목" />
+          <textarea class="write-content" id="contentInput" placeholder="내용을 적어보세요…"></textarea>
+        </div>
+        <div class="write-footer">
+          <div class="tags-row">
+            <span class="tag-hash">#</span>
+            <input class="tag-input" id="tagsInput" type="text" placeholder="태그 (쉼표로 구분)" />
+          </div>
+          <div class="action-row">
+            <button type="button" class="act-delete" id="deleteBtn">삭제</button>
+            <button type="submit" class="act-save" id="saveBtn">저장</button>
+          </div>
+        </div>
+      </form>
+    </main>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
