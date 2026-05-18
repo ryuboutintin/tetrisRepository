@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Midnight Press — Markdown Editor</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Playfair+Display+SC:wght@400;700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Lora:ital,wght@0,400;0,600;1,400;1,600&display=swap" rel="stylesheet" />
+
+  <!-- highlight.js -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/base16/tomorrow-night.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+  <!-- marked.js -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── MASTHEAD ── -->
+    <header class="header">
+      <div class="masthead">
+        <div class="masthead-rule-top"></div>
+        <div class="masthead-inner">
+          <div class="masthead-left">
+            <span class="masthead-vol">Vol. I</span>
+          </div>
+          <div class="masthead-center">
+            <h1 class="masthead-title">The Midnight Press</h1>
+            <p class="masthead-subtitle">A Markdown Editor</p>
+          </div>
+          <div class="masthead-right">
+            <span id="save-status" class="save-status">— saved —</span>
+          </div>
+        </div>
+        <div class="masthead-rule-bottom"></div>
+      </div>
+
+      <!-- ── TOOLBAR ── -->
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="tool-btn" data-action="bold" title="Bold (Ctrl+B)">
+            <strong>B</strong>
+          </button>
+          <button class="tool-btn tool-btn--italic" data-action="italic" title="Italic (Ctrl+I)">
+            <em>I</em>
+          </button>
+        </div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-group">
+          <button class="tool-btn tool-btn--heading" data-action="h1" title="Heading 1">H1</button>
+          <button class="tool-btn tool-btn--heading" data-action="h2" title="Heading 2">H2</button>
+          <button class="tool-btn tool-btn--heading" data-action="h3" title="Heading 3">H3</button>
+        </div>
+        <div class="toolbar-sep"></div>
+        <div class="toolbar-group">
+          <button class="tool-btn" data-action="link" title="Link">⌗ Link</button>
+          <button class="tool-btn" data-action="code" title="Code">{ } Code</button>
+          <button class="tool-btn" data-action="blockquote" title="Blockquote">" Quote</button>
+          <button class="tool-btn" data-action="hr" title="Horizontal Rule">― HR</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ── WORKSPACE ── -->
+    <main class="workspace">
+      <div class="pane pane-editor" id="pane-editor">
+        <div class="pane-label">Manuscript</div>
+        <textarea
+          id="editor"
+          spellcheck="false"
+          placeholder="Begin writing…&#10;&#10;# Your Title&#10;&#10;The story starts here."
+        ></textarea>
+      </div>
+
+      <div class="divider" id="divider" title="Drag to resize"></div>
+
+      <div class="pane pane-preview" id="pane-preview">
+        <div class="pane-label">Preview</div>
+        <div id="preview"></div>
+      </div>
+    </main>
+
+    <!-- ── STATUS BAR ── -->
+    <footer class="statusbar">
+      <span class="status-item" id="word-count">0 words</span>
+      <span class="status-dot">·</span>
+      <span class="status-item" id="line-count">0 lines</span>
+      <span class="status-spacer"></span>
+      <span class="status-item status-hint">Ctrl+B Bold · Ctrl+I Italic</span>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
