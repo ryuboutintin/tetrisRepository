@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Claude Markdown Editor</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="markdown.css">
+</head>
+<body>
+
+<!-- ===== Symbol defs ===== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Anthropic Claude logo (8-point sparkle) -->
+    <symbol id="claude-mark" viewBox="0 0 100 100">
+      <g fill="#C96442">
+        <path d="M50 5 L56 38 L85 22 L66 48 L95 50 L66 52 L85 78 L56 62 L50 95
+                 L44 62 L15 78 L34 52 L5 50 L34 48 L15 22 L44 38 Z"/>
+      </g>
+    </symbol>
+
+    <!-- Claude Code pixel mascot (the orange pixel friend from terminal splash) -->
+    <symbol id="claude-character" viewBox="0 0 16 12">
+      <g fill="#C96442" shape-rendering="crispEdges">
+        <!-- Row 1: top rounded edge -->
+        <rect x="3" y="1" width="10" height="1"/>
+        <!-- Row 2 -->
+        <rect x="2" y="2" width="12" height="1"/>
+        <!-- Row 3 -->
+        <rect x="1" y="3" width="14" height="1"/>
+        <!-- Row 4 (eyes: empty cells at x=4 and x=11) -->
+        <rect x="0" y="4" width="4" height="1"/>
+        <rect x="5" y="4" width="6" height="1"/>
+        <rect x="12" y="4" width="4" height="1"/>
+        <!-- Row 5: full body -->
+        <rect x="0" y="5" width="16" height="1"/>
+        <!-- Row 6: full body -->
+        <rect x="0" y="6" width="16" height="1"/>
+        <!-- Row 7 -->
+        <rect x="1" y="7" width="14" height="1"/>
+        <!-- Row 8 -->
+        <rect x="2" y="8" width="12" height="1"/>
+        <!-- Row 9: bottom rounded edge -->
+        <rect x="3" y="9" width="10" height="1"/>
+        <!-- Row 10: feet (four small dots, two per side) -->
+        <rect x="4"  y="10" width="1" height="1"/>
+        <rect x="6"  y="10" width="1" height="1"/>
+        <rect x="9"  y="10" width="1" height="1"/>
+        <rect x="11" y="10" width="1" height="1"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header>
+  <svg class="claude-logo" viewBox="0 0 100 100"><use href="#claude-mark"/></svg>
+  <div>
+    <span class="brand">Claude</span>
+    <span class="brand-sub">Markdown Editor</span>
+  </div>
+  <div class="spacer"></div>
+  <span class="status" id="status">자동 저장됨 · 0자</span>
+  <button class="theme-toggle" id="themeToggle" title="테마 전환">
+    <span class="icon">🌙</span>
+    <span class="label">다크 모드</span>
+  </button>
+</header>
+
+<div class="toolbar">
+  <button class="tool-btn bold" data-action="bold" title="굵게 (Ctrl+B)">B</button>
+  <button class="tool-btn italic" data-action="italic" title="기울임 (Ctrl+I)">I</button>
+  <button class="tool-btn strike" data-action="strike" title="취소선">S</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="h1">H1</button>
+  <button class="tool-btn" data-action="h2">H2</button>
+  <button class="tool-btn" data-action="h3">H3</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="ul">• 목록</button>
+  <button class="tool-btn" data-action="ol">1. 번호</button>
+  <button class="tool-btn" data-action="quote">❝ 인용</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="code">&lt;/&gt; 코드</button>
+  <button class="tool-btn" data-action="codeblock">코드블록</button>
+  <button class="tool-btn" data-action="link">🔗 링크</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn primary" data-action="spellcheck" title="한글 맞춤법 검사">✓ 맞춤법 검사</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="clear">초기화</button>
+  <button class="tool-btn" data-action="download">⬇ 다운로드</button>
+</div>
+
+<main>
+  <section class="pane">
+    <div class="pane-header"><span class="dot"></span> 마크다운 작성</div>
+    <textarea id="editor" spellcheck="true" placeholder="여기에 마크다운을 입력하세요..."># 안녕하세요, Claude입니다 ✨
+
+오른쪽 미리보기를 보면서 **마크다운**을 작성할 수 있어요.
+
+## 주요 기능
+- 실시간 미리보기
+- 단축키 지원 (Ctrl+B, Ctrl+I)
+- 자동 저장 (localStorage)
+- 마크다운 파일 다운로드
+- **한글 맞춤법 검사** (툴바의 ✓ 버튼)
+- 🌙 다크 모드 / ☀ 라이트 모드 (오른쪽 위 버튼)
+
+## 맞춤법 테스트 문장
+오늘은 왠만하면 일찍 끝낼께요. 몇일 후에 다시 봬요!
+이거 어떻해? 역활이 너무 많아서 햇갈려요.
+회의는 안되요. 다음에 할꺼야.
+
+> 도움이 필요하면 오른쪽 아래 Claude 친구를 클릭해 보세요!
+
+```javascript
+function hello() {
+  console.log("Happy writing!");
+}
+```
+</textarea>
+  </section>
+
+  <section class="pane">
+    <div class="pane-header"><span class="dot"></span> 미리보기</div>
+    <div id="preview"></div>
+  </section>
+</main>
+
+<!-- ===== Spell check panel ===== -->
+<div class="spell-panel" id="spellPanel">
+  <div class="spell-panel-header">
+    <span>맞춤법 검사 결과<span class="count" id="spellCount"></span></span>
+    <button class="spell-close" id="spellClose" aria-label="닫기">×</button>
+  </div>
+  <div class="spell-body" id="spellBody"></div>
+  <div class="spell-panel-footer">
+    <span>한글 표준어 기준</span>
+    <button class="spell-fix-all" id="spellFixAll">모두 수정</button>
+  </div>
+</div>
+
+<!-- ===== Claude buddy ===== -->
+<div class="speech-bubble" id="bubble"></div>
+<svg class="claude-buddy" id="buddy" viewBox="0 0 16 12"><use href="#claude-character"/></svg>
+
+<script src="markdown.js"></script>
+</body>
+</html>
