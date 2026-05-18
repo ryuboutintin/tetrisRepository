@@ -1,0 +1,32 @@
+    1  cat /etc/*release*
+    2  lsb_release -a
+    3  exit
+    4  wsl -l -v
+    5  -v
+    6  ll
+    7  ls -l
+    8  clear
+    9  ls -l
+   10  ls
+   11  ls -l
+   12  cat ~/.ssh/id_rsa.pub
+   13  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   14  cd ~/work
+   15  ll
+   16  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git
+   17  ll
+   18  cd kosa-vibecoding-2026-2nd/
+   19  ll
+   20  cd src
+   21  ll
+   22  cd ..
+   23  ll
+   24  cd src
+   25  ll
+   26  cd exercise/
+   27  ll
+   28  cd ikhanet/
+   29  ll
+   30  cd day01
+   31  ll
+   32  history> h1.txt
