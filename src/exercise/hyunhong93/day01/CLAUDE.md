@@ -2,6 +2,13 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git 정책
+
+- 원격 변경사항을 가져올 때 rebase 대신 merge 사용
+  ```bash
+  git pull --no-rebase origin main
+  ```
+
 ## 로컬 서버 실행
 
 ```bash
