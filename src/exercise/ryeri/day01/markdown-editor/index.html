@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자기소개 Markdown 에디터</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #0d0d10;
+      --surface:     #16161c;
+      --surface2:    #1e1e26;
+      --border:      #2b2b38;
+      --accent:      #6c63ff;
+      --accent2:     #a78bfa;
+      --accent-glow: rgba(108,99,255,.2);
+      --text:        #ededf0;
+      --muted:       #7e7e96;
+      --green:       #4ade80;
+      --yellow:      #fbbf24;
+      --red:         #f87171;
+      --cyan:        #67e8f9;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 20px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: var(--accent2);
+      white-space: nowrap;
+    }
+
+    .logo-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+    }
+
+    /* ── Toolbar ── */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .toolbar-sep {
+      width: 1px;
+      height: 20px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .toolbar button {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 4px 9px;
+      line-height: 1.4;
+      transition: all .12s;
+      white-space: nowrap;
+    }
+
+    .toolbar button:hover {
+      background: var(--surface2);
+      border-color: var(--border);
+      color: var(--text);
+    }
+
+    .toolbar button.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .header-right {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .btn {
+      padding: 6px 16px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.82rem;
+      font-weight: 600;
+      transition: all .12s;
+      white-space: nowrap;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .btn-outline:hover { color: var(--text); border-color: var(--accent); }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent2); }
+
+    /* ── Sections sidebar ── */
+    .sidebar {
+      width: 200px;
+      min-width: 200px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-title {
+      padding: 12px 16px 8px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+    }
+
+    .section-btn {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 16px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all .12s;
+      border-left: 3px solid transparent;
+      width: 100%;
+    }
+
+    .section-btn:hover {
+      background: var(--surface2);
+      color: var(--text);
+    }
+
+    .section-btn .s-icon { font-size: 1rem; }
+
+    .sidebar-sep {
+      height: 1px;
+      background: var(--border);
+      margin: 4px 16px;
+    }
+
+    /* ── Workspace ── */
+    .workspace {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ── Editor pane ── */
+    .editor-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      flex-shrink: 0;
+    }
+
+    .pane-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    #editor {
+      flex: 1;
+      background: var(--bg);
+      color: #c9d1d9;
+      border: none;
+      outline: none;
+      padding: 24px 28px;
+      font-family: 'Fira Code', 'Cascadia Code', 'Courier New', monospace;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      resize: none;
+      tab-size: 2;
+    }
+
+    /* ── Divider ── */
+    .divider {
+      width: 4px;
+      background: var(--border);
+      cursor: col-resize;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+
+    .divider:hover, .divider.dragging { background: var(--accent); }
+
+    /* ── Preview pane ── */
+    .preview-pane {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    #preview {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 36px;
+      background: var(--surface);
+      line-height: 1.75;
+      scroll-behavior: smooth;
+    }
+
+    /* ── Preview Markdown styles ── */
+    #preview h1 {
+      font-size: 2rem;
+      color: var(--accent2);
+      margin: 0 0 0.3em;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    #preview h2 {
+      font-size: 1.35rem;
+      color: var(--cyan);
+      margin: 1.6em 0 0.5em;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    #preview h3 {
+      font-size: 1.1rem;
+      color: var(--accent2);
+      margin: 1.2em 0 0.4em;
+    }
+
+    #preview h4 { font-size: 1rem; color: var(--yellow); margin: 1em 0 0.3em; }
+
+    #preview p { margin: 0.7em 0; color: var(--text); }
+
+    #preview a { color: var(--cyan); text-decoration: none; }
+    #preview a:hover { text-decoration: underline; }
+
+    #preview strong { color: #fff; }
+    #preview em { color: var(--yellow); font-style: italic; }
+    #preview del { color: var(--muted); }
+
+    #preview code {
+      background: var(--surface2);
+      color: var(--green);
+      padding: 2px 7px;
+      border-radius: 5px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.88em;
+      border: 1px solid var(--border);
+    }
+
+    #preview pre {
+      background: #0a0a0e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 18px 20px;
+      overflow-x: auto;
+      margin: 1em 0;
+      position: relative;
+    }
+
+    #preview pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #c9d1d9;
+      font-size: 0.87rem;
+    }
+
+    #preview blockquote {
+      border-left: 4px solid var(--accent);
+      margin: 1em 0;
+      padding: 10px 18px;
+      background: var(--surface2);
+      border-radius: 0 8px 8px 0;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    #preview ul, #preview ol {
+      padding-left: 1.6em;
+      margin: 0.7em 0;
+    }
+
+    #preview li { margin: 0.3em 0; }
+
+    #preview table {
+      border-collapse: collapse;
+      width: 100%;
+      margin: 1em 0;
+      font-size: 0.9rem;
+    }
+
+    #preview th {
+      background: var(--surface2);
+      color: var(--accent2);
+      padding: 9px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-weight: 600;
+    }
+
+    #preview td {
+      padding: 8px 14px;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    #preview tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+    #preview hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.8em 0;
+    }
+
+    #preview img { max-width: 100%; border-radius: 8px; }
+
+    /* Badge-style inline spans */
+    #preview .badge {
+      display: inline-block;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      color: var(--accent2);
+      border-radius: 12px;
+      padding: 2px 10px;
+      font-size: 0.8em;
+      margin: 2px 3px;
+    }
+
+    /* ── Status bar ── */
+    .status-bar {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding: 5px 20px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .status-bar .val { color: var(--green); }
+
+    .status-bar .saved {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .save-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      display: inline-block;
+    }
+
+    .save-dot.unsaved { background: var(--yellow); }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 48px;
+      right: 24px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 18px;
+      font-size: 0.83rem;
+      color: var(--text);
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all .2s;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="logo">
+    <div class="logo-icon">✍</div>
+    자기소개 MD 에디터
+  </div>
+
+  <div class="toolbar">
+    <button onclick="fmt('**','**')" title="굵게"><b>B</b></button>
+    <button onclick="fmt('*','*')" title="기울임"><i>I</i></button>
+    <button onclick="fmt('~~','~~')" title="취소선"><s>S</s></button>
+    <button onclick="fmt('`','`')" title="인라인 코드">&#96;&#96;</button>
+    <div class="toolbar-sep"></div>
+    <button onclick="line('# ')" title="제목 1">H1</button>
+    <button onclick="line('## ')" title="제목 2">H2</button>
+    <button onclick="line('### ')" title="제목 3">H3</button>
+    <div class="toolbar-sep"></div>
+    <button onclick="line('- ')" title="목록">— 목록</button>
+    <button onclick="line('1. ')" title="번호 목록">1. 목록</button>
+    <button onclick="line('> ')" title="인용">❝ 인용</button>
+    <div class="toolbar-sep"></div>
+    <button onclick="fmt('[','](https://)')">🔗 링크</button>
+    <button onclick="insertCode()">⌨ 코드블록</button>
+    <button onclick="insertTable()">▦ 표</button>
+    <button onclick="line('---')">─ 구분선</button>
+  </div>
+
+  <div class="header-right">
+    <button class="btn btn-outline" onclick="loadTemplate()">📄 템플릿</button>
+    <button class="btn btn-outline" onclick="copyMd()">📋 복사</button>
+    <button class="btn btn-primary" onclick="downloadMd()">⬇ 저장</button>
+  </div>
+</header>
+
+<div class="workspace">
+
+  <!-- Sidebar: section shortcuts -->
+  <aside class="sidebar">
+    <div class="sidebar-title">섹션 삽입</div>
+
+    <button class="section-btn" onclick="insertSection('intro')">
+      <span class="s-icon">👤</span> 기본 정보
+    </button>
+    <button class="section-btn" onclick="insertSection('summary')">
+      <span class="s-icon">💬</span> 한 줄 소개
+    </button>
+    <button class="section-btn" onclick="insertSection('skills')">
+      <span class="s-icon">⚙</span> 기술 스택
+    </button>
+    <button class="section-btn" onclick="insertSection('experience')">
+      <span class="s-icon">💼</span> 경력 사항
+    </button>
+    <button class="section-btn" onclick="insertSection('education')">
+      <span class="s-icon">🎓</span> 학력
+    </button>
+    <button class="section-btn" onclick="insertSection('project')">
+      <span class="s-icon">🚀</span> 프로젝트
+    </button>
+    <button class="section-btn" onclick="insertSection('certificate')">
+      <span class="s-icon">🏆</span> 자격증/수상
+    </button>
+    <button class="section-btn" onclick="insertSection('contact')">
+      <span class="s-icon">📮</span> 연락처
+    </button>
+
+    <div class="sidebar-sep"></div>
+    <div class="sidebar-title">도구</div>
+
+    <button class="section-btn" onclick="clearEditor()">
+      <span class="s-icon">🗑</span> 전체 지우기
+    </button>
+    <button class="section-btn" onclick="toggleView()">
+      <span class="s-icon">⇄</span> 뷰 전환
+    </button>
+  </aside>
+
+  <!-- Editor pane -->
+  <div class="editor-pane" id="editorPane">
+    <div class="pane-header">
+      <div class="pane-dot"></div>
+      편집기 (Markdown)
+    </div>
+    <textarea id="editor" spellcheck="false" placeholder="마크다운으로 자기소개를 작성하세요..."></textarea>
+  </div>
+
+  <!-- Drag divider -->
+  <div class="divider" id="divider"></div>
+
+  <!-- Preview pane -->
+  <div class="preview-pane" id="previewPane">
+    <div class="pane-header">
+      <div class="pane-dot" style="background:var(--green)"></div>
+      미리보기
+    </div>
+    <div id="preview"></div>
+  </div>
+
+</div>
+
+<!-- Status bar -->
+<div class="status-bar">
+  <span>글자: <span class="val" id="sChars">0</span></span>
+  <span>줄: <span class="val" id="sLines">0</span></span>
+  <span>단어: <span class="val" id="sWords">0</span></span>
+  <div class="saved">
+    <span class="save-dot" id="saveDot"></span>
+    <span id="saveLabel">저장됨</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const editor   = document.getElementById('editor');
+  const preview  = document.getElementById('preview');
+  const saveDot  = document.getElementById('saveDot');
+  const saveLabel= document.getElementById('saveLabel');
+
+  /* ── Markdown Parser ── */
+  function parseMd(raw) {
+    let s = raw
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;');
+
+    // fenced code blocks
+    s = s.replace(/```(\w*)\n?([\s\S]*?)```/g, (_,lang,code) =>
+      `<pre><code class="lang-${lang}">${code.trim()}</code></pre>`
+    );
+    // inline code
+    s = s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+
+    // headings
+    s = s.replace(/^#{6} (.+)$/gm,'<h6>$1</h6>');
+    s = s.replace(/^#{5} (.+)$/gm,'<h5>$1</h5>');
+    s = s.replace(/^#{4} (.+)$/gm,'<h4>$1</h4>');
+    s = s.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+    s = s.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+    s = s.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+
+    // blockquote
+    s = s.replace(/^&gt; (.+)$/gm,'<blockquote>$1</blockquote>');
+
+    // hr
+    s = s.replace(/^---+$/gm,'<hr>');
+
+    // bold/italic/del
+    s = s.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+    s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    s = s.replace(/\*(.+?)\*/g,'<em>$1</em>');
+    s = s.replace(/~~(.+?)~~/g,'<del>$1</del>');
+
+    // images before links
+    s = s.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<img src="$2" alt="$1">');
+    // links
+    s = s.replace(/\[([^\]]+)\]\(([^)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+
+    // tables
+    s = s.replace(/((?:^\|.+\|\n?)+)/gm, tbl => {
+      const rows = tbl.trim().split('\n');
+      let out = '<table>';
+      let isHead = true;
+      rows.forEach(row => {
+        if (/^\|[-| :]+\|$/.test(row)) { isHead = false; return; }
+        const cells = row.replace(/^\||\|$/g,'').split('|');
+        const tag   = isHead ? 'th' : 'td';
+        out += '<tr>' + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join('') + '</tr>';
+        isHead = false;
+      });
+      return out + '</table>';
+    });
+
+    // unordered lists
+    s = s.replace(/((?:^[-*+] .+\n?)+)/gm, lst => {
+      const items = lst.trim().split('\n')
+        .map(l => `<li>${l.replace(/^[-*+] /,'')}</li>`).join('');
+      return `<ul>${items}</ul>`;
+    });
+
+    // ordered lists
+    s = s.replace(/((?:^\d+\. .+\n?)+)/gm, lst => {
+      const items = lst.trim().split('\n')
+        .map(l => `<li>${l.replace(/^\d+\. /,'')}</li>`).join('');
+      return `<ol>${items}</ol>`;
+    });
+
+    // paragraphs
+    s = s.replace(/\n{2,}/g,'</p><p>');
+    s = '<p>' + s + '</p>';
+    // clean up block-level elements wrapped in <p>
+    const blocks = 'h[1-6]|ul|ol|pre|blockquote|table|hr|img';
+    s = s.replace(new RegExp(`<p>(\\s*<(?:${blocks})[^>]*>)`,'g'),'$1');
+    s = s.replace(new RegExp(`(<\\/(?:${blocks})>)\\s*<\\/p>`,'g'),'$1');
+    s = s.replace(/<p>\s*<\/p>/g,'');
+    // line breaks
+    s = s.replace(/\n/g,'<br>');
+
+    return s;
+  }
+
+  /* ── Render ── */
+  function render() {
+    const text = editor.value;
+    preview.innerHTML = parseMd(text);
+    document.getElementById('sChars').textContent = text.length;
+    document.getElementById('sLines').textContent = text.split('\n').length;
+    document.getElementById('sWords').textContent = text.trim() ? text.trim().split(/\s+/).length : 0;
+  }
+
+  /* auto-save to localStorage */
+  let saveTimer = null;
+
+  function markUnsaved() {
+    saveDot.classList.add('unsaved');
+    saveLabel.textContent = '저장 중...';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      localStorage.setItem('md_intro', editor.value);
+      saveDot.classList.remove('unsaved');
+      saveLabel.textContent = '저장됨';
+    }, 600);
+  }
+
+  editor.addEventListener('input', () => { render(); markUnsaved(); });
+
+  /* Tab key */
+  editor.addEventListener('keydown', e => {
+    if (e.key !== 'Tab') return;
+    e.preventDefault();
+    const s = editor.selectionStart, end = editor.selectionEnd;
+    editor.value = editor.value.slice(0, s) + '  ' + editor.value.slice(end);
+    editor.selectionStart = editor.selectionEnd = s + 2;
+    render();
+  });
+
+  /* ── Toolbar helpers ── */
+  function fmt(before, after) {
+    const s = editor.selectionStart, e = editor.selectionEnd;
+    const sel = editor.value.slice(s, e) || '텍스트';
+    editor.value = editor.value.slice(0, s) + before + sel + after + editor.value.slice(e);
+    editor.selectionStart = s + before.length;
+    editor.selectionEnd   = s + before.length + sel.length;
+    editor.focus(); render(); markUnsaved();
+  }
+
+  function line(prefix) {
+    const s = editor.selectionStart;
+    const ls = editor.value.lastIndexOf('\n', s - 1) + 1;
+    editor.value = editor.value.slice(0, ls) + prefix + editor.value.slice(ls);
+    editor.selectionStart = editor.selectionEnd = s + prefix.length;
+    editor.focus(); render(); markUnsaved();
+  }
+
+  function insertCode() {
+    const s = editor.selectionStart, e = editor.selectionEnd;
+    const sel = editor.value.slice(s, e) || '// 코드를 입력하세요';
+    const block = '\n```javascript\n' + sel + '\n```\n';
+    editor.value = editor.value.slice(0, s) + block + editor.value.slice(e);
+    editor.selectionStart = editor.selectionEnd = s + block.length;
+    editor.focus(); render(); markUnsaved();
+  }
+
+  function insertTable() {
+    const tbl = '\n| 항목 | 내용 | 비고 |\n|------|------|------|\n| 값 1 | 값 2 | 값 3 |\n\n';
+    insertAtCursor(tbl);
+  }
+
+  function insertAtCursor(text) {
+    const s = editor.selectionStart;
+    editor.value = editor.value.slice(0, s) + text + editor.value.slice(s);
+    editor.selectionStart = editor.selectionEnd = s + text.length;
+    editor.focus(); render(); markUnsaved();
+  }
+
+  /* ── Section templates ── */
+  const SECTIONS = {
+    intro: `\n## 👤 기본 정보\n\n| 항목 | 내용 |\n|------|------|\n| 이름 | 홍길동 |\n| 생년월일 | 1990.01.01 |\n| 거주지 | 서울특별시 |\n| 이메일 | example@email.com |\n| 깃허브 | [github.com/username](https://github.com/username) |\n\n`,
+    summary: `\n## 💬 한 줄 소개\n\n> 사용자 중심의 사고로 **문제를 해결하는** 개발자입니다.\n\n저는 ...에 관심이 많으며, ...한 경험을 통해 성장해왔습니다.\n\n`,
+    skills: `\n## ⚙ 기술 스택\n\n### Languages\n- **JavaScript** / TypeScript\n- Python\n- Java\n\n### Frontend\n- React, Vue.js\n- HTML5, CSS3\n\n### Backend\n- Node.js (Express)\n- Spring Boot\n\n### Tools\n- Git, Docker\n- VS Code, IntelliJ\n\n`,
+    experience: `\n## 💼 경력 사항\n\n### 회사명 · 직책 \`2022.03 – 현재\`\n\n- 주요 업무 1: 설명\n- 주요 업무 2: 설명\n- 성과: **OOO 개선** (숫자로 표현 권장)\n\n### 이전 회사 · 인턴 \`2021.06 – 2022.02\`\n\n- 업무 내용\n\n`,
+    education: `\n## 🎓 학력\n\n### OO대학교 · 컴퓨터공학과 \`2016 – 2020\`\n\n- 학점: 3.8 / 4.5\n- 졸업 논문: 「논문 제목」\n\n`,
+    project: `\n## 🚀 프로젝트\n\n### 프로젝트명 \`2024.01 – 2024.03\`\n\n**개요:** 한 줄 프로젝트 설명\n\n**역할:** 프론트엔드 / 백엔드 / 풀스택\n\n**기술 스택:** React, Node.js, PostgreSQL\n\n**주요 기능:**\n- 기능 1\n- 기능 2\n\n**링크:** [GitHub](https://github.com) · [Demo](https://example.com)\n\n`,
+    certificate: `\n## 🏆 자격증 / 수상\n\n| 구분 | 이름 | 취득일 | 기관 |\n|------|------|--------|------|\n| 자격증 | 정보처리기사 | 2021.11 | 한국산업인력공단 |\n| 수상 | 교내 해커톤 1위 | 2020.09 | OO대학교 |\n\n`,
+    contact: `\n## 📮 연락처\n\n- **이메일:** example@email.com\n- **GitHub:** [github.com/username](https://github.com/username)\n- **LinkedIn:** [linkedin.com/in/username](https://linkedin.com/in/username)\n- **블로그:** [blog.example.com](https://blog.example.com)\n\n`,
+  };
+
+  function insertSection(key) {
+    insertAtCursor(SECTIONS[key]);
+  }
+
+  /* ── Template ── */
+  function loadTemplate() {
+    if (editor.value.trim() && !confirm('현재 내용이 지워집니다. 계속할까요?')) return;
+    editor.value = `# 홍길동 (Hong Gil-dong)
+
+**풀스택 웹 개발자** | 서울, 대한민국
+
+---
+
+## 💬 소개
+
+> 사용자 경험을 최우선으로 생각하며, **깔끔하고 유지보수하기 쉬운 코드**를 지향하는 개발자입니다.
+
+5년간의 웹 개발 경험을 바탕으로 프론트엔드부터 백엔드까지 전반적인 개발을 담당해왔습니다.
+새로운 기술을 빠르게 습득하고 팀과 함께 성장하는 것을 좋아합니다.
+
+---
+
+## ⚙ 기술 스택
+
+### Languages
+- **JavaScript** / TypeScript, Python, Java
+
+### Frontend
+- React, Next.js, Vue.js
+- HTML5 / CSS3 / Tailwind CSS
+
+### Backend
+- Node.js (Express, Fastify)
+- Spring Boot, PostgreSQL, Redis
+
+### DevOps / Tools
+- Git, Docker, GitHub Actions
+- AWS (EC2, S3, RDS)
+
+---
+
+## 💼 경력
+
+### ABC Corp · 시니어 프론트엔드 개발자 \`2022.03 – 현재\`
+
+- 메인 대시보드 리액트 마이그레이션 → 초기 로딩 속도 **40% 개선**
+- 디자인 시스템 컴포넌트 30+ 개 구축 및 문서화
+- 코드 리뷰 문화 정착 및 신입 멘토링
+
+### XYZ Studio · 프론트엔드 개발자 \`2020.01 – 2022.02\`
+
+- 글로벌 이커머스 서비스 UI 개발 (DAU 10만+)
+- 반응형 웹 구현 및 크로스브라우저 대응
+
+---
+
+## 🚀 주요 프로젝트
+
+### 팀 협업 툴 \`2023.06 – 2023.09\`
+
+**개요:** Slack + Notion을 합친 사내 협업 플랫폼
+**역할:** 프론트엔드 리드 (4인 팀)
+**스택:** Next.js, TypeScript, Socket.io, PostgreSQL
+**성과:** 사내 500명 도입, 회의 시간 30% 단축
+[GitHub](https://github.com) · [Demo](https://example.com)
+
+---
+
+## 🎓 학력
+
+### 한국대학교 · 컴퓨터공학과 \`2016 – 2020\`
+
+- 졸업 학점 3.9 / 4.5
+
+---
+
+## 🏆 자격증
+
+| 자격증 | 취득일 | 기관 |
+|--------|--------|------|
+| 정보처리기사 | 2020.11 | 한국산업인력공단 |
+| AWS SAA | 2023.03 | Amazon |
+
+---
+
+## 📮 연락처
+
+- **이메일:** honggildong@email.com
+- **GitHub:** [github.com/honggildong](https://github.com)
+- **LinkedIn:** [linkedin.com/in/honggildong](https://linkedin.com/in)
+- **블로그:** [honggildong.dev](https://example.com)
+`;
+    render(); markUnsaved();
+    toast('템플릿을 불러왔습니다.');
+  }
+
+  /* ── Utilities ── */
+  function clearEditor() {
+    if (editor.value.trim() && !confirm('전체 내용을 지울까요?')) return;
+    editor.value = '';
+    render(); markUnsaved();
+  }
+
+  function copyMd() {
+    if (!editor.value) return;
+    navigator.clipboard.writeText(editor.value).then(() => toast('마크다운 복사 완료!'));
+  }
+
+  function downloadMd() {
+    const blob = new Blob([editor.value], { type: 'text/markdown;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '자기소개.md';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    toast('파일 저장 완료!');
+  }
+
+  let viewMode = 'both'; // both | editor | preview
+  function toggleView() {
+    const ep = document.getElementById('editorPane');
+    const pp = document.getElementById('previewPane');
+    const dv = document.getElementById('divider');
+    viewMode = viewMode === 'both' ? 'preview' : viewMode === 'preview' ? 'editor' : 'both';
+    ep.style.display = viewMode === 'preview' ? 'none' : 'flex';
+    pp.style.display = viewMode === 'editor'  ? 'none' : 'flex';
+    dv.style.display = viewMode === 'both'    ? 'block' : 'none';
+  }
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 2200);
+  }
+
+  /* ── Divider drag ── */
+  const divider  = document.getElementById('divider');
+  const workspace= document.querySelector('.workspace');
+  let dragging   = false;
+
+  divider.addEventListener('mousedown', () => { dragging = true; divider.classList.add('dragging'); });
+  document.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    const sidebar  = document.querySelector('.sidebar');
+    const sideW    = sidebar.offsetWidth;
+    const totalW   = workspace.offsetWidth - sideW;
+    const x        = e.clientX - workspace.getBoundingClientRect().left - sideW;
+    const ratio    = Math.min(Math.max(x / totalW, 0.2), 0.8);
+    const ep       = document.getElementById('editorPane');
+    const pp       = document.getElementById('previewPane');
+    ep.style.flex  = 'none';
+    ep.style.width = `calc(${ratio * 100}% - 2px)`;
+    pp.style.flex  = '1';
+    pp.style.width = '';
+  });
+  document.addEventListener('mouseup', () => {
+    dragging = false;
+    divider.classList.remove('dragging');
+  });
+
+  /* ── Init ── */
+  const saved = localStorage.getItem('md_intro');
+  if (saved) {
+    editor.value = saved;
+    render();
+  } else {
+    loadTemplate();
+  }
+</script>
+</body>
+</html>
