@@ -47,14 +47,8 @@ body {
   justify-content: space-between;
 }
 
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
+.logo { display: flex; align-items: center; gap: 0.5rem; }
 .logo-icon { font-size: 1.4rem; }
-
 .logo-text {
   font-size: 1.2rem;
   font-weight: 700;
@@ -158,9 +152,7 @@ textarea { min-height: 160px; resize: vertical; line-height: 1.6; }
 }
 
 .btn-primary:active, .btn-ghost:active,
-.btn-danger:active, .btn-edit:active, .btn-del:active {
-  transform: scale(0.97);
-}
+.btn-danger:active, .btn-edit:active, .btn-del:active { transform: scale(0.97); }
 
 .btn-primary {
   background: var(--accent);
@@ -185,6 +177,69 @@ textarea { min-height: 160px; resize: vertical; line-height: 1.6; }
 .btn-danger:hover { background: var(--danger-dark); }
 
 .btn-icon { font-style: normal; font-size: 1rem; }
+
+/* ── Image Section ────────────────────────────────── */
+.image-section { margin-top: 1.25rem; }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-bottom: 1.25rem;
+}
+
+.image-preview-wrap {
+  position: relative;
+  margin-bottom: 0.75rem;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  border: 1.5px solid var(--border);
+  background: var(--bg);
+}
+
+.image-preview-wrap img {
+  display: block;
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+}
+
+.img-remove-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  border: none;
+  border-radius: 99px;
+  width: 26px;
+  height: 26px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s;
+}
+.img-remove-btn:hover { background: var(--danger); }
+
+.upload-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+  transition: border-color .2s, background .2s;
+}
+.upload-label:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.upload-icon { font-size: 1rem; }
 
 /* ── List Panel ───────────────────────────────────── */
 .panel-list { min-width: 0; }
@@ -227,14 +282,12 @@ input[type="search"]:focus {
 .memo-card {
   background: var(--surface);
   border-radius: var(--radius);
-  padding: 1.1rem 1.2rem;
   box-shadow: var(--shadow-sm);
   border: 1.5px solid transparent;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  overflow: hidden;
   transition: box-shadow .2s, border-color .2s, transform .15s;
-  position: relative;
 }
 
 .memo-card:hover {
@@ -247,6 +300,20 @@ input[type="search"]:focus {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
+
+/* 이미지 영역 */
+.card-image {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  display: block;
+  cursor: zoom-in;
+  transition: opacity .2s;
+}
+.card-image:hover { opacity: .9; }
+
+/* 카드 본문 */
+.card-body { padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.45rem; flex: 1; }
 
 .memo-chip {
   display: inline-block;
@@ -324,9 +391,7 @@ input[type="search"]:focus {
   padding: 3rem 1rem;
   color: var(--text-muted);
 }
-
 .empty-state .empty-icon { font-size: 3rem; margin-bottom: 0.75rem; }
-
 .empty-state p { font-size: 0.9rem; }
 
 /* ── Dialog ───────────────────────────────────────── */
@@ -358,16 +423,33 @@ input[type="search"]:focus {
 }
 
 .dialog-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
-
 .dialog-msg {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-main);
   margin-bottom: 1.5rem;
 }
+.dialog-actions { display: flex; gap: 0.6rem; justify-content: center; }
 
-.dialog-actions {
+/* ── Lightbox ─────────────────────────────────────── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.88);
+  z-index: 300;
   display: flex;
-  gap: 0.6rem;
+  align-items: center;
   justify-content: center;
+  cursor: zoom-out;
+  animation: fade .2s ease;
+}
+
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+.lightbox img {
+  max-width: 92vw;
+  max-height: 88vh;
+  border-radius: var(--radius-sm);
+  object-fit: contain;
+  box-shadow: 0 8px 40px rgba(0,0,0,.6);
 }

@@ -1,11 +1,12 @@
 const API = '/api/memos';
-let editingId = null;
-let deleteTargetId = null;
-let allMemos = [];
+let editingId       = null;
+let deleteTargetId  = null;
+let allMemos        = [];
 
+/* ── Fetch & Render ── */
 async function fetchMemos() {
-  const res = await fetch(API);
-  allMemos = await res.json();
+  const res  = await fetch(API);
+  allMemos   = await res.json();
   renderMemos(allMemos);
   updateCount(allMemos.length);
 }
@@ -34,29 +35,35 @@ function renderMemos(memos) {
       </div>`;
     return;
   }
-  list.innerHTML = memos.map(m => `
+  list.innerHTML = memos.map(m => {
+    const imgHtml = m.image_path
+      ? `<img class="card-image" src="${m.image_path}" alt="첨부 이미지"
+             onclick="openLightbox('${m.image_path}')" />`
+      : '';
+    return `
     <div class="memo-card${editingId === m.id ? ' editing' : ''}" id="card-${m.id}">
-      <span class="memo-chip">MEMO</span>
-      <div class="memo-title">${escapeHtml(m.title)}</div>
-      <div class="memo-content">${escapeHtml(m.content)}</div>
-      <div class="memo-footer">
-        <span class="memo-date">${formatDate(m.updated_at)}</span>
-        <div class="memo-actions">
-          <button class="btn-edit" onclick="startEdit(${m.id})">수정</button>
-          <button class="btn-del"  onclick="openDialog(${m.id})">삭제</button>
+      ${imgHtml}
+      <div class="card-body">
+        <span class="memo-chip">MEMO</span>
+        <div class="memo-title">${escapeHtml(m.title)}</div>
+        <div class="memo-content">${escapeHtml(m.content)}</div>
+        <div class="memo-footer">
+          <span class="memo-date">${formatDate(m.updated_at)}</span>
+          <div class="memo-actions">
+            <button class="btn-edit" onclick="startEdit(${m.id})">수정</button>
+            <button class="btn-del"  onclick="openDialog(${m.id})">삭제</button>
+          </div>
         </div>
       </div>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
+/* ── CRUD ── */
 async function saveMemo() {
   const title   = document.getElementById('titleInput').value.trim();
   const content = document.getElementById('contentInput').value.trim();
-  if (!title || !content) {
-    shakeForm();
-    return;
-  }
+  if (!title || !content) { shakeForm(); return; }
 
   if (editingId !== null) {
     await fetch(`${API}/${editingId}`, {
@@ -82,8 +89,18 @@ async function startEdit(id) {
   document.getElementById('titleInput').value   = memo.title;
   document.getElementById('contentInput').value = memo.content;
   document.getElementById('saveBtn').innerHTML  = '<span class="btn-icon">✔</span> 수정 완료';
-  document.getElementById('cancelBtn').style.display = 'inline-flex';
-  document.getElementById('formLabel').textContent   = '메모 수정';
+  document.getElementById('cancelBtn').style.display  = 'inline-flex';
+  document.getElementById('formLabel').textContent    = '메모 수정';
+  document.getElementById('imageSection').style.display = 'block';
+
+  const wrap = document.getElementById('imagePreviewWrap');
+  if (memo.image_path) {
+    document.getElementById('imagePreview').src = memo.image_path;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+  }
+
   editingId = id;
   renderMemos(allMemos);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -93,22 +110,48 @@ function cancelEdit() {
   editingId = null;
   clearForm();
   document.getElementById('saveBtn').innerHTML  = '<span class="btn-icon">＋</span> 저장하기';
-  document.getElementById('cancelBtn').style.display = 'none';
-  document.getElementById('formLabel').textContent   = '새 메모';
+  document.getElementById('cancelBtn').style.display      = 'none';
+  document.getElementById('formLabel').textContent        = '새 메모';
+  document.getElementById('imageSection').style.display   = 'none';
+  document.getElementById('imagePreviewWrap').style.display = 'none';
   renderMemos(allMemos);
 }
 
 function clearForm() {
   document.getElementById('titleInput').value   = '';
   document.getElementById('contentInput').value = '';
+  document.getElementById('imageInput').value   = '';
 }
 
-function shakeForm() {
-  const form = document.querySelector('.write-form');
-  form.style.animation = 'none';
-  requestAnimationFrame(() => {
-    form.style.animation = 'shake .35s ease';
-  });
+/* ── Image Upload ── */
+async function uploadImage(event) {
+  if (editingId === null) return;
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res  = await fetch(`${API}/${editingId}/image`, { method: 'POST', body: formData });
+  const memo = await res.json();
+
+  document.getElementById('imagePreview').src         = memo.image_path;
+  document.getElementById('imagePreviewWrap').style.display = 'block';
+
+  const idx = allMemos.findIndex(m => m.id === editingId);
+  if (idx !== -1) allMemos[idx] = memo;
+  renderMemos(allMemos);
+}
+
+async function removeImage() {
+  if (editingId === null) return;
+  await fetch(`${API}/${editingId}/image`, { method: 'DELETE' });
+  document.getElementById('imagePreviewWrap').style.display = 'none';
+  document.getElementById('imageInput').value = '';
+
+  const idx = allMemos.findIndex(m => m.id === editingId);
+  if (idx !== -1) allMemos[idx].image_path = null;
+  renderMemos(allMemos);
 }
 
 /* ── Delete dialog ── */
@@ -130,13 +173,27 @@ async function confirmDelete() {
   fetchMemos();
 }
 
+/* ── Lightbox ── */
+function openLightbox(src) {
+  document.getElementById('lightboxImg').src         = src;
+  document.getElementById('lightbox').style.display  = 'flex';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').style.display = 'none';
+}
+
 /* ── Helpers ── */
+function shakeForm() {
+  const form = document.querySelector('.write-form');
+  form.style.animation = 'none';
+  requestAnimationFrame(() => { form.style.animation = 'shake .35s ease'; });
+}
+
 function escapeHtml(str) {
   return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function formatDate(iso) {
@@ -145,12 +202,15 @@ function formatDate(iso) {
   return d.toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' });
 }
 
-/* ── Shake keyframe (injected once) ── */
+/* ── Global keyframes ── */
 const style = document.createElement('style');
-style.textContent = '@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';
+style.textContent =
+  '@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}';
 document.head.appendChild(style);
 
-/* ── ESC closes dialog ── */
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDialog(); });
+/* ── Keyboard shortcuts ── */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeDialog(); closeLightbox(); }
+});
 
 fetchMemos();

@@ -42,6 +42,21 @@
           </button>
         </div>
       </div>
+
+      <!-- 이미지 업로드 (수정 모드일 때만 표시) -->
+      <div id="imageSection" class="image-section" style="display:none">
+        <div class="section-divider"></div>
+        <div class="panel-title">이미지</div>
+        <div id="imagePreviewWrap" class="image-preview-wrap" style="display:none">
+          <img id="imagePreview" src="" alt="첨부 이미지" />
+          <button class="img-remove-btn" onclick="removeImage()" title="이미지 삭제">✕</button>
+        </div>
+        <label class="upload-label" id="uploadLabel">
+          <span class="upload-icon">📎</span>
+          <span>이미지 첨부 (JPG·PNG·GIF·WEBP)</span>
+          <input id="imageInput" type="file" accept=".jpg,.jpeg,.png,.gif,.webp" onchange="uploadImage(event)" style="display:none" />
+        </label>
+      </div>
     </aside>
 
     <!-- 메모 목록 -->
@@ -64,6 +79,11 @@
         <button class="btn-danger" onclick="confirmDelete()">삭제</button>
       </div>
     </div>
+  </div>
+
+  <!-- 이미지 라이트박스 -->
+  <div id="lightbox" class="lightbox" style="display:none" onclick="closeLightbox()">
+    <img id="lightboxImg" src="" alt="" />
   </div>
 
   <script src="/static/app.js"></script>
