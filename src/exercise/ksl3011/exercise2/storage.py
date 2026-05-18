@@ -42,9 +42,37 @@ def _init() -> None:
                 tokenize='trigram'
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS users (
+                id              INTEGER PRIMARY KEY AUTOINCREMENT,
+                username        TEXT UNIQUE NOT NULL,
+                hashed_password TEXT NOT NULL,
+                created_at      TEXT NOT NULL
+            )
+        """)
 
 
 _init()
+
+
+# ── 사용자 ────────────────────────────────────────────────────────────────────
+
+def get_user(username: str) -> Optional[Dict[str, Any]]:
+    with _connect() as conn:
+        row = conn.execute(
+            "SELECT * FROM users WHERE username = ?", (username,)
+        ).fetchone()
+    return dict(row) if row else None
+
+
+def create_user(username: str, hashed_password: str) -> Dict[str, Any]:
+    now = datetime.now(timezone.utc).isoformat()
+    with _connect() as conn:
+        conn.execute(
+            "INSERT INTO users (username, hashed_password, created_at) VALUES (?, ?, ?)",
+            (username, hashed_password, now),
+        )
+    return get_user(username)
 
 
 def _to_dict(row: sqlite3.Row) -> Dict[str, Any]:
