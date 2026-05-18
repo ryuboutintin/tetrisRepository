@@ -4,204 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Markdown Editor</title>
+  <link rel="stylesheet" href="markdown-editor.css" />
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
-      background: #0f0f13;
-      color: #e8e8f0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    /* ── 툴바 ── */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 10px 16px;
-      background: #1a1a24;
-      border-bottom: 1px solid #2a2a3a;
-      flex-shrink: 0;
-    }
-
-    .toolbar-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #6c63ff;
-      margin-right: 12px;
-      letter-spacing: 0.5px;
-    }
-
-    .toolbar-sep { width: 1px; height: 20px; background: #2a2a3a; margin: 0 6px; }
-
-    .tb-btn {
-      background: none;
-      border: 1px solid transparent;
-      border-radius: 6px;
-      color: #a0a0b8;
-      font-size: 0.85rem;
-      font-weight: 600;
-      padding: 4px 9px;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s;
-      font-family: 'Courier New', monospace;
-    }
-    .tb-btn:hover { background: #24243a; border-color: #3a3a54; color: #e8e8f0; }
-
-    .toolbar-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
-
-    .view-btn {
-      background: #24243a;
-      border: 1px solid #3a3a54;
-      border-radius: 8px;
-      color: #a0a0b8;
-      font-size: 0.8rem;
-      padding: 4px 12px;
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s;
-    }
-    .view-btn.active { background: #6c63ff; border-color: #6c63ff; color: #fff; }
-
-    /* ── 에디터 영역 ── */
-    .editor-wrap {
-      display: flex;
-      flex: 1;
-      overflow: hidden;
-    }
-
-    .pane {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .pane-header {
-      padding: 8px 16px;
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: #5a5a78;
-      background: #14141c;
-      border-bottom: 1px solid #1e1e2e;
-      flex-shrink: 0;
-    }
-
-    .pane-divider { width: 1px; background: #2a2a3a; flex-shrink: 0; }
-
-    textarea#editor {
-      flex: 1;
-      background: #13131b;
-      color: #d8d8f0;
-      border: none;
-      outline: none;
-      resize: none;
-      padding: 20px;
-      font-family: 'Courier New', 'Consolas', monospace;
-      font-size: 0.95rem;
-      line-height: 1.75;
-      tab-size: 2;
-    }
-
-    #preview {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px 28px;
-      background: #111118;
-      line-height: 1.8;
-    }
-
-    /* ── 미리보기 마크다운 스타일 ── */
-    #preview h1, #preview h2, #preview h3,
-    #preview h4, #preview h5, #preview h6 {
-      color: #ffffff;
-      margin: 1.2em 0 0.5em;
-      line-height: 1.3;
-    }
-    #preview h1 { font-size: 1.8rem; border-bottom: 2px solid #2a2a3a; padding-bottom: 0.3em; }
-    #preview h2 { font-size: 1.4rem; border-bottom: 1px solid #2a2a3a; padding-bottom: 0.2em; }
-    #preview h3 { font-size: 1.15rem; }
-
-    #preview p { margin: 0.8em 0; color: #c8c8e0; }
-
-    #preview a { color: #6c63ff; text-decoration: none; }
-    #preview a:hover { text-decoration: underline; }
-
-    #preview ul, #preview ol { padding-left: 1.6em; margin: 0.8em 0; color: #c8c8e0; }
-    #preview li { margin: 0.3em 0; }
-
-    #preview blockquote {
-      border-left: 3px solid #6c63ff;
-      margin: 1em 0;
-      padding: 0.5em 1em;
-      background: #1a1a2e;
-      color: #9090b8;
-      border-radius: 0 8px 8px 0;
-    }
-
-    #preview code {
-      background: #1e1e30;
-      border: 1px solid #2e2e44;
-      border-radius: 4px;
-      padding: 2px 6px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.88em;
-      color: #3ec6e0;
-    }
-
-    #preview pre {
-      background: #1a1a28;
-      border: 1px solid #2a2a3e;
-      border-radius: 10px;
-      padding: 16px;
-      overflow-x: auto;
-      margin: 1em 0;
-    }
-    #preview pre code {
-      background: none;
-      border: none;
-      padding: 0;
-      color: #b8e0ff;
-      font-size: 0.9rem;
-    }
-
-    #preview table {
-      border-collapse: collapse;
-      width: 100%;
-      margin: 1em 0;
-    }
-    #preview th, #preview td {
-      border: 1px solid #2a2a3a;
-      padding: 8px 14px;
-      text-align: left;
-    }
-    #preview th { background: #1e1e2e; color: #e0e0f8; }
-    #preview tr:nth-child(even) { background: #16161e; }
-
-    #preview hr { border: none; border-top: 1px solid #2a2a3a; margin: 1.5em 0; }
-
-    #preview img { max-width: 100%; border-radius: 8px; }
-
-    /* ── 뷰 모드 ── */
-    .editor-wrap.view-edit   .pane:last-child  { display: none; }
-    .editor-wrap.view-edit   .pane-divider     { display: none; }
-    .editor-wrap.view-preview .pane:first-child { display: none; }
-    .editor-wrap.view-preview .pane-divider    { display: none; }
-
-    /* ── 글자 수 ── */
-    .status-bar {
-      padding: 5px 16px;
-      font-size: 0.72rem;
-      color: #4a4a68;
-      background: #14141c;
-      border-top: 1px solid #1e1e2e;
-      flex-shrink: 0;
-    }
-  </style>
 </head>
 <body>
 
@@ -231,142 +35,29 @@
       <button class="view-btn" id="btn-split"   onclick="setView('split')">분할</button>
       <button class="view-btn" id="btn-edit"    onclick="setView('edit')">편집</button>
       <button class="view-btn" id="btn-preview" onclick="setView('preview')">미리보기</button>
+      <button class="theme-toggle" id="themeToggle" title="다크/라이트 모드 전환">🌙</button>
     </div>
   </div>
 
   <!-- 에디터 + 미리보기 -->
   <div class="editor-wrap" id="editorWrap">
-
     <div class="pane">
       <div class="pane-header">Markdown</div>
       <textarea id="editor" spellcheck="false" placeholder="여기에 마크다운을 입력하세요..."></textarea>
     </div>
-
     <div class="pane-divider"></div>
-
     <div class="pane">
       <div class="pane-header">Preview</div>
       <div id="preview"></div>
     </div>
-
   </div>
 
-  <div class="status-bar" id="statusBar">0 글자 · 0 줄</div>
+  <!-- 상태바 -->
+  <div class="status-bar">
+    <span id="statusText">0 글자 · 0 줄</span>
+    <span id="saveIndicator" class="save-indicator hidden">저장됨 ✓</span>
+  </div>
 
-  <script>
-    const editor   = document.getElementById('editor');
-    const preview  = document.getElementById('preview');
-    const statusBar = document.getElementById('statusBar');
-
-    // 초기 예제
-    editor.value = `# 마크다운 에디터 👋
-
-## 소개
-**굵게**, *기울임*, ~~취소선~~ 텍스트를 사용할 수 있어요.
-
-## 코드
-인라인 \`코드\`와 코드 블록:
-
-\`\`\`js
-function hello() {
-  console.log("Hello, Markdown!");
-}
-\`\`\`
-
-## 목록
-- 항목 1
-- 항목 2
-  - 중첩 항목
-
-1. 첫 번째
-2. 두 번째
-
-## 인용
-> 마크다운으로 빠르게 문서를 작성하세요.
-
-## 링크
-[GitHub](https://github.com)
-
----
-*즐거운 코딩!*
-`;
-
-    // 실시간 렌더링
-    function render() {
-      preview.innerHTML = marked.parse(editor.value);
-      const chars = editor.value.length;
-      const lines = editor.value.split('\n').length;
-      statusBar.textContent = `${chars.toLocaleString()} 글자 · ${lines} 줄`;
-    }
-
-    editor.addEventListener('input', render);
-
-    // 툴바 액션
-    const actions = {
-      h1:        { prefix: '# ',   suffix: '' },
-      h2:        { prefix: '## ',  suffix: '' },
-      h3:        { prefix: '### ', suffix: '' },
-      bold:      { prefix: '**',   suffix: '**' },
-      italic:    { prefix: '*',    suffix: '*' },
-      strike:    { prefix: '~~',   suffix: '~~' },
-      code:      { prefix: '`',    suffix: '`' },
-      quote:     { prefix: '> ',   suffix: '' },
-      ul:        { prefix: '- ',   suffix: '' },
-      ol:        { prefix: '1. ',  suffix: '' },
-      hr:        { prefix: '\n---\n', suffix: '' },
-    };
-
-    document.querySelectorAll('.tb-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const action = btn.dataset.action;
-        const start  = editor.selectionStart;
-        const end    = editor.selectionEnd;
-        const sel    = editor.value.substring(start, end);
-
-        let insert = '';
-
-        if (action === 'link') {
-          const url = prompt('URL을 입력하세요:', 'https://');
-          if (!url) return;
-          insert = `[${sel || '링크 텍스트'}](${url})`;
-          editor.setRangeText(insert, start, end, 'end');
-        } else if (action === 'codeblock') {
-          insert = `\`\`\`\n${sel || '// 코드'}\n\`\`\``;
-          editor.setRangeText(insert, start, end, 'end');
-        } else if (actions[action]) {
-          const { prefix, suffix } = actions[action];
-          insert = prefix + (sel || '') + suffix;
-          editor.setRangeText(insert, start, end, 'select');
-        }
-
-        editor.focus();
-        render();
-      });
-    });
-
-    // 뷰 모드 전환
-    function setView(mode) {
-      const wrap = document.getElementById('editorWrap');
-      wrap.className = 'editor-wrap view-' + mode;
-      document.getElementById('btn-split').classList.toggle('active',   mode === 'split');
-      document.getElementById('btn-edit').classList.toggle('active',    mode === 'edit');
-      document.getElementById('btn-preview').classList.toggle('active', mode === 'preview');
-    }
-
-    // Tab 키 들여쓰기
-    editor.addEventListener('keydown', e => {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const s = editor.selectionStart;
-        editor.setRangeText('  ', s, s, 'end');
-        render();
-      }
-    });
-
-    // 초기 렌더링 & 뷰
-    setView('split');
-    render();
-  </script>
-
+  <script src="markdown-editor.js"></script>
 </body>
 </html>
