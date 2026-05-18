@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>이준규 :: AI 활용 교육 강사</title>
+<meta name="description" content="이준규 - 비개발자도 AI로 웹사이트를 만들 수 있다는 걸 가르칩니다." />
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-soft: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #ff7b72;
+    --purple: #bc8cff;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    line-height: 1.6;
+    scroll-behavior: smooth;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(88, 166, 255, 0.08), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(188, 140, 255, 0.07), transparent 45%);
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+  a:hover { text-decoration: underline; }
+
+  /* ---- Nav (fixed) ---- */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(13, 17, 23, 0.85);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  body { padding-top: 56px; }
+  .nav-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .nav-brand {
+    color: var(--green);
+    font-weight: bold;
+  }
+  .nav-brand .blink { color: var(--accent); }
+  .nav-links {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;
+  }
+  .nav-links a {
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .nav-links a:hover { color: var(--accent); }
+
+  /* ---- Layout ---- */
+  main {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  section { margin-bottom: 64px; }
+
+  .terminal {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    overflow: hidden;
+  }
+  .terminal-header {
+    background: #21262d;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .dot.red { background: #ff5f56; }
+  .dot.yellow { background: #ffbd2e; }
+  .dot.green { background: #27c93f; }
+  .terminal-title {
+    margin-left: 10px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .terminal-body {
+    padding: 22px 20px;
+    font-size: 15px;
+  }
+
+  .prompt {
+    color: var(--green);
+  }
+  .prompt::before {
+    content: "$ ";
+    color: var(--green);
+    font-weight: bold;
+  }
+  .cmd-line {
+    margin-top: 6px;
+  }
+  .cmd-out {
+    color: var(--text);
+    margin: 4px 0 10px 14px;
+    min-height: 1.4em;
+  }
+  .comment { color: var(--muted); }
+  .keyword { color: var(--red); }
+  .string  { color: var(--accent); }
+  .var     { color: var(--purple); }
+  .num     { color: var(--yellow); }
+
+  /* ---- Hero ---- */
+  .hero h1 {
+    font-size: 28px;
+    margin: 18px 0 6px;
+    color: var(--text);
+  }
+  .hero .role {
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 18px;
+  }
+  .typed-line {
+    min-height: 1.6em;
+    color: var(--text);
+  }
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    background: var(--text);
+    margin-left: 2px;
+    animation: blink 1s steps(2) infinite;
+    vertical-align: -2px;
+    height: 1em;
+  }
+  @keyframes blink {
+    50% { opacity: 0; }
+  }
+
+  /* ---- Section heading ---- */
+  .section-title {
+    color: var(--accent);
+    font-size: 20px;
+    margin: 0 0 18px;
+  }
+  .section-title::before {
+    content: "// ";
+    color: var(--muted);
+  }
+
+  /* ---- Skills (badges) ---- */
+  .skill-group {
+    margin-bottom: 18px;
+  }
+  .skill-group-label {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 10px;
+  }
+  .skill-group-label::before {
+    content: "# ";
+    color: var(--green);
+  }
+  .badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: stretch;
+    font-size: 12px;
+    font-family: var(--mono);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(88, 166, 255, 0.25);
+  }
+  .badge .b-label {
+    background: #21262d;
+    color: #c9d1d9;
+    padding: 5px 9px;
+  }
+  .badge .b-value {
+    background: var(--accent);
+    color: #0d1117;
+    padding: 5px 9px;
+    font-weight: 600;
+  }
+  .badge.green   .b-value { background: var(--green); }
+  .badge.purple  .b-value { background: var(--purple); }
+  .badge.yellow  .b-value { background: var(--yellow); color: #0d1117; }
+  .badge.red     .b-value { background: var(--red); }
+
+  /* ---- Projects ---- */
+  .projects {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .project {
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .project:hover {
+    transform: translateY(-3px);
+    border-color: var(--purple);
+  }
+  .project h3 {
+    margin: 0 0 6px;
+    color: var(--text);
+    font-size: 16px;
+  }
+  .project h3::before {
+    content: "{ ";
+    color: var(--yellow);
+  }
+  .project h3::after {
+    content: " }";
+    color: var(--yellow);
+  }
+  .project p {
+    color: var(--muted);
+    font-size: 14px;
+    flex-grow: 1;
+  }
+  .project .tags {
+    margin-top: 10px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 11px;
+    background: #0d1117;
+    border: 1px solid var(--border);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 999px;
+  }
+
+  /* ---- Contact ---- */
+  .contact-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .contact-list li {
+    padding: 8px 0;
+    color: var(--text);
+  }
+  .contact-list li::before {
+    content: "$ ";
+    color: var(--green);
+  }
+  .contact-list .key {
+    color: var(--purple);
+    margin-right: 8px;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* ---- Responsive ---- */
+  @media (max-width: 600px) {
+    .hero h1 { font-size: 22px; }
+    .terminal-body { padding: 18px 14px; font-size: 14px; }
+    .section-title { font-size: 17px; }
+    .nav-links { gap: 12px; }
+    .nav-links a { font-size: 13px; }
+  }
+
+  /* Reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s cubic-bezier(.2,.7,.2,1), transform 0.7s cubic-bezier(.2,.7,.2,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  /* stagger children if present */
+  .reveal.visible .badge,
+  .reveal.visible .project {
+    animation: pop 0.5s ease both;
+  }
+  .reveal.visible .badge:nth-child(2),
+  .reveal.visible .project:nth-child(2) { animation-delay: 0.07s; }
+  .reveal.visible .badge:nth-child(3),
+  .reveal.visible .project:nth-child(3) { animation-delay: 0.14s; }
+  .reveal.visible .badge:nth-child(4),
+  .reveal.visible .project:nth-child(4) { animation-delay: 0.21s; }
+  .reveal.visible .badge:nth-child(5) { animation-delay: 0.28s; }
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0)  scale(1); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, .reveal.visible .badge, .reveal.visible .project { transition: none; animation: none; transform: none; opacity: 1; }
+    .cursor { animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">~/leejoonkyu<span class="blink">_</span></span>
+    <div class="nav-links">
+      <a href="#hero">about</a>
+      <a href="#skills">skills</a>
+      <a href="#projects">projects</a>
+      <a href="#contact">contact</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- HERO -->
+  <section id="hero" class="hero reveal">
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="terminal-title">~/leejoonkyu — zsh — 80x24</span>
+      </div>
+      <div class="terminal-body" id="terminal-body">
+        <div class="cmd-line"><span class="prompt"></span><span class="cmd" data-cmd="whoami"></span></div>
+        <div class="cmd-out" data-out><h1 style="display:inline; font-size:28px;">이준규</h1></div>
+
+        <div class="cmd-line"><span class="prompt"></span><span class="cmd" data-cmd="cat role.txt"></span></div>
+        <div class="cmd-out" data-out><span class="role" style="color: var(--accent);">AI 활용 교육 강사</span></div>
+
+        <div class="cmd-line"><span class="prompt"></span><span class="cmd" data-cmd="cat about.md"></span></div>
+        <div class="cmd-out" data-out>비개발자도 AI로 웹사이트를 만들 수 있다는 걸 가르칩니다.</div>
+
+        <div class="cmd-line"><span class="prompt"></span><span class="cmd" data-cmd="echo $MISSION"></span></div>
+        <div class="cmd-out" data-out>
+          <span class="string">"누구나 AI로 무언가를 만들 수 있다."</span>
+        </div>
+
+        <div class="cmd-line"><span class="prompt"></span><span class="cursor" id="final-cursor"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SKILLS -->
+  <section id="skills" class="reveal">
+    <h2 class="section-title">skills &amp; interests</h2>
+
+    <div class="skill-group">
+      <div class="skill-group-label">AI Tools</div>
+      <div class="badges">
+        <span class="badge"><span class="b-label">ChatGPT</span><span class="b-value">expert</span></span>
+        <span class="badge"><span class="b-label">Claude</span><span class="b-value">expert</span></span>
+        <span class="badge green"><span class="b-label">Gemini</span><span class="b-value">advanced</span></span>
+        <span class="badge purple"><span class="b-label">Prompt Eng.</span><span class="b-value">advanced</span></span>
+      </div>
+    </div>
+
+    <div class="skill-group">
+      <div class="skill-group-label">Web &amp; Deploy</div>
+      <div class="badges">
+        <span class="badge"><span class="b-label">HTML5</span><span class="b-value">90%</span></span>
+        <span class="badge"><span class="b-label">CSS3</span><span class="b-value">85%</span></span>
+        <span class="badge yellow"><span class="b-label">JavaScript</span><span class="b-value">80%</span></span>
+        <span class="badge green"><span class="b-label">GitHub Pages</span><span class="b-value">deploy</span></span>
+        <span class="badge"><span class="b-label">Git</span><span class="b-value">daily</span></span>
+      </div>
+    </div>
+
+    <div class="skill-group">
+      <div class="skill-group-label">Interests</div>
+      <div class="badges">
+        <span class="badge purple"><span class="b-label">바이브 코딩</span><span class="b-value">★★★★★</span></span>
+        <span class="badge"><span class="b-label">교육</span><span class="b-value">강의/코칭</span></span>
+        <span class="badge red"><span class="b-label">AI 도입</span><span class="b-value">B2B</span></span>
+        <span class="badge green"><span class="b-label">자동화</span><span class="b-value">workflow</span></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects" class="reveal">
+    <h2 class="section-title">projects &amp; outputs</h2>
+    <div class="projects">
+      <div class="project">
+        <h3>AI 바이브 코딩 워크숍</h3>
+        <p>비개발자를 위한 1일 코스. ChatGPT/Claude로 웹사이트와 자동화 도구를 직접 만들어봅니다.</p>
+        <div class="tags">
+          <span class="tag">#워크숍</span>
+          <span class="tag">#커리큘럼</span>
+        </div>
+      </div>
+      <div class="project">
+        <h3>GitHub Pages 랜딩 템플릿</h3>
+        <p>수강생이 바로 따라 만들 수 있는 단일 HTML 랜딩 페이지 템플릿 모음.</p>
+        <div class="tags">
+          <span class="tag">#HTML</span>
+          <span class="tag">#GitHubPages</span>
+        </div>
+      </div>
+      <div class="project">
+        <h3>프롬프트 엔지니어링 가이드</h3>
+        <p>현업 사례 기반의 프롬프트 패턴 정리. 기획서·요약·코드 생성에 바로 적용.</p>
+        <div class="tags">
+          <span class="tag">#Prompt</span>
+          <span class="tag">#Guide</span>
+        </div>
+      </div>
+      <div class="project">
+        <h3>사내 AI 도입 코칭</h3>
+        <p>업무 흐름 진단 → AI 적용 포인트 도출 → 실습. 비개발 직군 대상 1:1/팀 코칭.</p>
+        <div class="tags">
+          <span class="tag">#Coaching</span>
+          <span class="tag">#B2B</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="reveal">
+    <h2 class="section-title">contact</h2>
+    <div class="terminal">
+      <div class="terminal-header">
+        <span class="dot red"></span>
+        <span class="dot yellow"></span>
+        <span class="dot green"></span>
+        <span class="terminal-title">contact.sh</span>
+      </div>
+      <div class="terminal-body">
+        <ul class="contact-list">
+          <li><span class="key">email</span><a href="mailto:ljk6463@naver.com">ljk6463@naver.com</a></li>
+          <li><span class="key">github</span><a href="https://github.com/LeeJoonkyu" target="_blank" rel="noopener">github.com/LeeJoonkyu</a></li>
+          <li><span class="key">blog</span><a href="#" target="_blank" rel="noopener">leejoonkyu.dev</a></li>
+          <li><span class="key">linkedin</span><a href="#" target="_blank" rel="noopener">linkedin.com/in/leejoonkyu</a></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div>© <span id="year"></span> 이준규 · built with vibe coding ✨</div>
+</footer>
+
+<script>
+  // ---- Multi-command typing effect ----
+  function typeText(el, text, speed) {
+    return new Promise(resolve => {
+      let i = 0;
+      el.textContent = "";
+      (function step() {
+        if (i <= text.length) {
+          el.textContent = text.slice(0, i);
+          i++;
+          setTimeout(step, speed);
+        } else {
+          resolve();
+        }
+      })();
+    });
+  }
+
+  async function runTerminal() {
+    const cmdEls = document.querySelectorAll('.cmd');
+    const outEls = document.querySelectorAll('[data-out]');
+
+    // hide all outputs initially
+    outEls.forEach(o => o.style.display = 'none');
+
+    for (let i = 0; i < cmdEls.length; i++) {
+      const el = cmdEls[i];
+      const text = el.dataset.cmd;
+      // attach a temp cursor while typing
+      const cursor = document.createElement('span');
+      cursor.className = 'cursor';
+      el.after(cursor);
+      await typeText(el, text, 55);
+      cursor.remove();
+      await new Promise(r => setTimeout(r, 250));
+      if (outEls[i]) {
+        outEls[i].style.display = 'block';
+      }
+      await new Promise(r => setTimeout(r, 350));
+    }
+  }
+
+  // ---- Reveal on scroll ----
+  const reveals = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  reveals.forEach(r => io.observe(r));
+
+  // Hero should reveal immediately on load (no scroll needed)
+  document.getElementById('hero').classList.add('visible');
+
+  // ---- Year ----
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ---- Start ----
+  window.addEventListener('load', runTerminal);
+</script>
+
+</body>
+</html>

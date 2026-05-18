@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Claude Markdown Editor</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F5F1E8;
+    --panel: #FAF7F0;
+    --border: #E8E0D0;
+    --text: #2B2B2B;
+    --muted: #8A8377;
+    --accent: #C96442;
+    --accent-dark: #A14F33;
+    --accent-soft: #E8AE92;
+    --code-bg: #F0EBDD;
+    --warn-bg: #FDECE0;
+    --ok-bg: #E0F2DA;
+    --ok-text: #2D7A2D;
+  }
+
+  body {
+    font-family: 'Söhne', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ===== Header ===== */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  .claude-logo { width: 32px; height: 32px; flex-shrink: 0; }
+  .brand { font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+  .brand-sub { font-size: 13px; color: var(--muted); margin-left: 6px; font-weight: 400; }
+  header .spacer { flex: 1; }
+  .status { font-size: 12px; color: var(--muted); }
+
+  /* ===== Toolbar ===== */
+  .toolbar {
+    display: flex;
+    gap: 4px;
+    padding: 8px 24px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .tool-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text);
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .tool-btn:hover { background: var(--bg); border-color: var(--border); }
+  .tool-btn.primary { background: var(--accent); color: white; }
+  .tool-btn.primary:hover { background: var(--accent-dark); border-color: transparent; }
+  .tool-btn.bold { font-weight: 700; }
+  .tool-btn.italic { font-style: italic; }
+  .tool-btn.strike { text-decoration: line-through; }
+  .tool-divider { width: 1px; background: var(--border); margin: 4px 6px; }
+
+  /* ===== Main split ===== */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+  }
+  .pane { display: flex; flex-direction: column; overflow: hidden; }
+  .pane-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .pane-header .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+
+  #editor {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    resize: none;
+    padding: 24px;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+  #preview {
+    flex: 1;
+    padding: 24px 28px;
+    overflow-y: auto;
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    line-height: 1.7;
+  }
+
+  /* ===== Rendered Markdown ===== */
+  #preview h1, #preview h2, #preview h3 { margin: 1.2em 0 0.5em; font-weight: 600; letter-spacing: -0.01em; }
+  #preview h1 { font-size: 1.8em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; }
+  #preview h2 { font-size: 1.4em; }
+  #preview h3 { font-size: 1.15em; }
+  #preview p { margin: 0.7em 0; }
+  #preview ul, #preview ol { padding-left: 1.6em; margin: 0.7em 0; }
+  #preview li { margin: 0.25em 0; }
+  #preview code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 0.9em;
+    color: var(--accent);
+  }
+  #preview pre {
+    background: var(--code-bg);
+    padding: 14px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 0.8em 0;
+  }
+  #preview pre code { background: none; padding: 0; color: var(--text); }
+  #preview blockquote {
+    border-left: 3px solid var(--accent);
+    padding-left: 14px;
+    color: var(--muted);
+    margin: 0.8em 0;
+    font-style: italic;
+  }
+  #preview a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+  #preview table { border-collapse: collapse; margin: 0.8em 0; width: 100%; }
+  #preview th, #preview td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+  #preview th { background: var(--panel); font-weight: 600; }
+  #preview hr { border: none; border-top: 1px solid var(--border); margin: 1.5em 0; }
+  #preview img { max-width: 100%; border-radius: 6px; }
+
+  /* ===== Claude Pixel Buddy ===== */
+  .claude-buddy {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 96px;
+    height: auto;
+    cursor: pointer;
+    z-index: 100;
+    animation: float 3s ease-in-out infinite;
+    transition: transform 0.2s;
+    filter: drop-shadow(0 4px 8px rgba(201,100,66,0.25));
+  }
+  .claude-buddy:hover { transform: scale(1.1) rotate(-4deg); }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .speech-bubble {
+    position: fixed;
+    bottom: 130px;
+    right: 28px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px 16px;
+    max-width: 260px;
+    font-size: 13px;
+    line-height: 1.5;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    z-index: 101;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+  }
+  .speech-bubble.show { opacity: 1; transform: translateY(0); }
+  .speech-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 32px;
+    width: 14px; height: 14px;
+    background: white;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    transform: rotate(45deg);
+  }
+
+  /* ===== Spell Check Panel ===== */
+  .spell-panel {
+    position: fixed;
+    bottom: 28px;
+    left: 28px;
+    width: 380px;
+    max-height: 70vh;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    z-index: 200;
+    opacity: 0;
+    transform: translateY(10px);
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .spell-panel.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .spell-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .spell-panel-header .count {
+    color: var(--accent);
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .spell-close {
+    background: none;
+    border: none;
+    font-size: 22px;
+    cursor: pointer;
+    color: var(--muted);
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .spell-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .spell-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .spell-item:hover { background: var(--panel); }
+  .spell-item .pair { flex: 1; }
+  .spell-item .wrong {
+    background: var(--warn-bg);
+    color: var(--accent);
+    text-decoration: line-through;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .spell-item .right {
+    background: var(--ok-bg);
+    color: var(--ok-text);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+  }
+  .spell-item .reason {
+    color: var(--muted);
+    font-size: 11px;
+    margin-top: 5px;
+  }
+  .spell-item button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    flex-shrink: 0;
+  }
+  .spell-item button:hover { background: var(--accent-dark); }
+  .spell-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  .spell-panel-footer {
+    padding: 10px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .spell-fix-all {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    font-weight: 500;
+  }
+  .spell-fix-all:hover { background: var(--accent-dark); }
+  .spell-fix-all:disabled { background: var(--muted); cursor: not-allowed; opacity: 0.5; }
+</style>
+</head>
+<body>
+
+<!-- ===== Symbol defs ===== -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <!-- Anthropic Claude logo (8-point sparkle) -->
+    <symbol id="claude-mark" viewBox="0 0 100 100">
+      <g fill="#C96442">
+        <path d="M50 5 L56 38 L85 22 L66 48 L95 50 L66 52 L85 78 L56 62 L50 95
+                 L44 62 L15 78 L34 52 L5 50 L34 48 L15 22 L44 38 Z"/>
+      </g>
+    </symbol>
+
+    <!-- Claude Code pixel mascot (the orange pixel friend from terminal splash) -->
+    <symbol id="claude-character" viewBox="0 0 16 12">
+      <g fill="#C96442" shape-rendering="crispEdges">
+        <!-- Row 1: top rounded edge -->
+        <rect x="3" y="1" width="10" height="1"/>
+        <!-- Row 2 -->
+        <rect x="2" y="2" width="12" height="1"/>
+        <!-- Row 3 -->
+        <rect x="1" y="3" width="14" height="1"/>
+        <!-- Row 4 (eyes: empty cells at x=4 and x=11) -->
+        <rect x="0" y="4" width="4" height="1"/>
+        <rect x="5" y="4" width="6" height="1"/>
+        <rect x="12" y="4" width="4" height="1"/>
+        <!-- Row 5: full body -->
+        <rect x="0" y="5" width="16" height="1"/>
+        <!-- Row 6: full body -->
+        <rect x="0" y="6" width="16" height="1"/>
+        <!-- Row 7 -->
+        <rect x="1" y="7" width="14" height="1"/>
+        <!-- Row 8 -->
+        <rect x="2" y="8" width="12" height="1"/>
+        <!-- Row 9: bottom rounded edge -->
+        <rect x="3" y="9" width="10" height="1"/>
+        <!-- Row 10: feet (four small dots, two per side) -->
+        <rect x="4"  y="10" width="1" height="1"/>
+        <rect x="6"  y="10" width="1" height="1"/>
+        <rect x="9"  y="10" width="1" height="1"/>
+        <rect x="11" y="10" width="1" height="1"/>
+      </g>
+    </symbol>
+  </defs>
+</svg>
+
+<header>
+  <svg class="claude-logo" viewBox="0 0 100 100"><use href="#claude-mark"/></svg>
+  <div>
+    <span class="brand">Claude</span>
+    <span class="brand-sub">Markdown Editor</span>
+  </div>
+  <div class="spacer"></div>
+  <span class="status" id="status">자동 저장됨 · 0자</span>
+</header>
+
+<div class="toolbar">
+  <button class="tool-btn bold" data-action="bold" title="굵게 (Ctrl+B)">B</button>
+  <button class="tool-btn italic" data-action="italic" title="기울임 (Ctrl+I)">I</button>
+  <button class="tool-btn strike" data-action="strike" title="취소선">S</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="h1">H1</button>
+  <button class="tool-btn" data-action="h2">H2</button>
+  <button class="tool-btn" data-action="h3">H3</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="ul">• 목록</button>
+  <button class="tool-btn" data-action="ol">1. 번호</button>
+  <button class="tool-btn" data-action="quote">❝ 인용</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="code">&lt;/&gt; 코드</button>
+  <button class="tool-btn" data-action="codeblock">코드블록</button>
+  <button class="tool-btn" data-action="link">🔗 링크</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn primary" data-action="spellcheck" title="한글 맞춤법 검사">✓ 맞춤법 검사</button>
+  <div class="tool-divider"></div>
+  <button class="tool-btn" data-action="clear">초기화</button>
+  <button class="tool-btn" data-action="download">⬇ 다운로드</button>
+</div>
+
+<main>
+  <section class="pane">
+    <div class="pane-header"><span class="dot"></span> 마크다운 작성</div>
+    <textarea id="editor" spellcheck="true" placeholder="여기에 마크다운을 입력하세요..."># 안녕하세요, Claude입니다 ✨
+
+오른쪽 미리보기를 보면서 **마크다운**을 작성할 수 있어요.
+
+## 주요 기능
+- 실시간 미리보기
+- 단축키 지원 (Ctrl+B, Ctrl+I)
+- 자동 저장 (localStorage)
+- 마크다운 파일 다운로드
+- **한글 맞춤법 검사** (툴바의 ✓ 버튼)
+
+## 맞춤법 테스트 문장
+오늘은 왠만하면 일찍 끝낼께요. 몇일 후에 다시 봬요!
+이거 어떻해? 역활이 너무 많아서 햇갈려요.
+회의는 안되요. 다음에 할꺼야.
+
+> 도움이 필요하면 오른쪽 아래 Claude 친구를 클릭해 보세요!
+
+```javascript
+function hello() {
+  console.log("Happy writing!");
+}
+```
+</textarea>
+  </section>
+
+  <section class="pane">
+    <div class="pane-header"><span class="dot"></span> 미리보기</div>
+    <div id="preview"></div>
+  </section>
+</main>
+
+<!-- ===== Spell check panel ===== -->
+<div class="spell-panel" id="spellPanel">
+  <div class="spell-panel-header">
+    <span>맞춤법 검사 결과<span class="count" id="spellCount"></span></span>
+    <button class="spell-close" id="spellClose" aria-label="닫기">×</button>
+  </div>
+  <div class="spell-body" id="spellBody"></div>
+  <div class="spell-panel-footer">
+    <span>한글 표준어 기준</span>
+    <button class="spell-fix-all" id="spellFixAll">모두 수정</button>
+  </div>
+</div>
+
+<!-- ===== Claude buddy ===== -->
+<div class="speech-bubble" id="bubble"></div>
+<svg class="claude-buddy" id="buddy" viewBox="0 0 16 12"><use href="#claude-character"/></svg>
+
+<script>
+  const editor = document.getElementById('editor');
+  const preview = document.getElementById('preview');
+  const status = document.getElementById('status');
+  const buddy = document.getElementById('buddy');
+  const bubble = document.getElementById('bubble');
+  const spellPanel = document.getElementById('spellPanel');
+  const spellBody = document.getElementById('spellBody');
+  const spellCount = document.getElementById('spellCount');
+  const spellClose = document.getElementById('spellClose');
+  const spellFixAll = document.getElementById('spellFixAll');
+
+  // ===== Render =====
+  function render() {
+    preview.innerHTML = marked.parse(editor.value);
+    const len = editor.value.length;
+    status.textContent = `자동 저장됨 · ${len}자`;
+    localStorage.setItem('claude-md', editor.value);
+  }
+
+  const saved = localStorage.getItem('claude-md');
+  if (saved !== null && saved.trim() !== '') editor.value = saved;
+  render();
+  editor.addEventListener('input', render);
+
+  // ===== Toolbar actions =====
+  function wrap(before, after = before) {
+    const s = editor.selectionStart;
+    const e = editor.selectionEnd;
+    const sel = editor.value.slice(s, e);
+    const replaced = before + (sel || '텍스트') + after;
+    editor.setRangeText(replaced, s, e, 'end');
+    editor.focus();
+    render();
+  }
+
+  function prefixLines(prefix) {
+    const s = editor.selectionStart;
+    const e = editor.selectionEnd;
+    const before = editor.value.slice(0, s);
+    const sel = editor.value.slice(s, e) || '항목';
+    const after = editor.value.slice(e);
+    const lines = sel.split('\n').map((l, i) => {
+      if (prefix === '1. ') return `${i + 1}. ${l}`;
+      return prefix + l;
+    }).join('\n');
+    editor.value = before + lines + after;
+    editor.focus();
+    render();
+  }
+
+  document.querySelectorAll('.tool-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const a = btn.dataset.action;
+      switch (a) {
+        case 'bold': wrap('**'); break;
+        case 'italic': wrap('*'); break;
+        case 'strike': wrap('~~'); break;
+        case 'h1': prefixLines('# '); break;
+        case 'h2': prefixLines('## '); break;
+        case 'h3': prefixLines('### '); break;
+        case 'ul': prefixLines('- '); break;
+        case 'ol': prefixLines('1. '); break;
+        case 'quote': prefixLines('> '); break;
+        case 'code': wrap('`'); break;
+        case 'codeblock': wrap('\n```\n', '\n```\n'); break;
+        case 'link': wrap('[', '](https://)'); break;
+        case 'spellcheck': openSpellPanel(); break;
+        case 'clear':
+          if (confirm('편집기 내용을 모두 지우시겠어요?')) {
+            editor.value = '';
+            render();
+          }
+          break;
+        case 'download':
+          const blob = new Blob([editor.value], { type: 'text/markdown' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'document.md';
+          link.click();
+          URL.revokeObjectURL(url);
+          say('마크다운 파일을 저장했어요! 📥');
+          break;
+      }
+    });
+  });
+
+  editor.addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      if (e.key === 'b') { e.preventDefault(); wrap('**'); }
+      if (e.key === 'i') { e.preventDefault(); wrap('*'); }
+    }
+  });
+
+  // ===== Korean spell check =====
+  // 흔하게 틀리는 한국어 표현 사전 (국립국어원 표준어 기준)
+  const KOREAN_TYPOS = [
+    { wrong: '안되요',   right: '안 돼요',  reason: "'안 되어요'의 준말은 '안 돼요'" },
+    { wrong: '안되',     right: '안 돼',    reason: "'안'은 띄어쓰고 종결은 '돼'" },
+    { wrong: '되요',     right: '돼요',     reason: "'되어요'의 준말은 '돼요'" },
+    { wrong: '되서',     right: '돼서',     reason: "'되어서'의 준말은 '돼서'" },
+    { wrong: '할께',     right: '할게',     reason: "어미 '-ㄹ게'는 된소리로 적지 않음" },
+    { wrong: '갈께',     right: '갈게',     reason: "어미 '-ㄹ게'는 된소리로 적지 않음" },
+    { wrong: '끝낼께',   right: '끝낼게',   reason: "어미 '-ㄹ게'는 된소리로 적지 않음" },
+    { wrong: '할꺼야',   right: '할 거야',  reason: "'할 것이야'의 준말은 '할 거야'" },
+    { wrong: '갈꺼야',   right: '갈 거야',  reason: "'갈 것이야'의 준말은 '갈 거야'" },
+    { wrong: '어떻해',   right: '어떡해',   reason: "'어떻게 해'의 준말은 '어떡해'" },
+    { wrong: '왠만하면', right: '웬만하면', reason: "'웬만하다'가 올바른 표기" },
+    { wrong: '왠지모르', right: '왠지 모르', reason: "'왠지'는 띄어 사용" },
+    { wrong: '몇일',     right: '며칠',     reason: "'며칠'이 표준어 (몇일은 비표준)" },
+    { wrong: '바램',     right: '바람',     reason: "'바라다'의 명사형은 '바람'" },
+    { wrong: '깨끗히',   right: '깨끗이',   reason: "'깨끗이'가 표준 표기" },
+    { wrong: '일일히',   right: '일일이',   reason: "'일일이'가 표준 표기" },
+    { wrong: '햇갈',     right: '헷갈',     reason: "'헷갈리다'가 표준어" },
+    { wrong: '설겆이',   right: '설거지',   reason: "'설거지'가 표준 표기" },
+    { wrong: '어의없',   right: '어이없',   reason: "'어이없다'가 표준어" },
+    { wrong: '역활',     right: '역할',     reason: "'역할'이 올바른 표기" },
+    { wrong: '오랫만',   right: '오랜만',   reason: "'오랜만'이 표준 표기" },
+    { wrong: '뵈요',     right: '봬요',     reason: "'뵈어요'의 준말은 '봬요'" },
+    { wrong: '뵈서',     right: '봬서',     reason: "'뵈어서'의 준말은 '봬서'" },
+    { wrong: '들리다 ',  right: '들르다 ',  reason: "(들르다: 거치다 / 들리다: 소리가 나다)" },
+    { wrong: '맞추다',   right: '맞히다',   reason: "정답 맞히기는 '맞히다' (조립은 '맞추다')" },
+    { wrong: '몇 일',    right: '며칠',     reason: "'며칠'이 표준어" },
+    { wrong: '돼는',     right: '되는',     reason: "관형사형 '-는' 앞은 '되-'" },
+  ];
+
+  let currentErrors = [];
+
+  function findErrors() {
+    const text = editor.value;
+    const errors = [];
+    for (const rule of KOREAN_TYPOS) {
+      let idx = 0;
+      while ((idx = text.indexOf(rule.wrong, idx)) !== -1) {
+        errors.push({ ...rule, index: idx });
+        idx += rule.wrong.length;
+      }
+    }
+    return errors.sort((a, b) => a.index - b.index);
+  }
+
+  function renderSpellPanel() {
+    currentErrors = findErrors();
+    spellCount.textContent = currentErrors.length > 0 ? ` · ${currentErrors.length}건` : '';
+    spellBody.innerHTML = '';
+    if (currentErrors.length === 0) {
+      spellBody.innerHTML = '<div class="spell-empty">맞춤법 의심 표현을 찾지 못했어요 ✨</div>';
+      spellFixAll.disabled = true;
+      return;
+    }
+    spellFixAll.disabled = false;
+    currentErrors.forEach((err, i) => {
+      const item = document.createElement('div');
+      item.className = 'spell-item';
+      const pair = document.createElement('div');
+      pair.className = 'pair';
+      const wrong = document.createElement('span');
+      wrong.className = 'wrong';
+      wrong.textContent = err.wrong;
+      const arrow = document.createTextNode(' → ');
+      const right = document.createElement('span');
+      right.className = 'right';
+      right.textContent = err.right;
+      const reason = document.createElement('div');
+      reason.className = 'reason';
+      reason.textContent = err.reason;
+      pair.append(wrong, arrow, right, reason);
+      const btn = document.createElement('button');
+      btn.textContent = '수정';
+      btn.addEventListener('click', () => fixOne(i));
+      item.append(pair, btn);
+      spellBody.appendChild(item);
+    });
+  }
+
+  function fixOne(idx) {
+    const err = currentErrors[idx];
+    if (!err) return;
+    const text = editor.value;
+    const at = text.indexOf(err.wrong);
+    if (at < 0) { renderSpellPanel(); return; }
+    editor.value = text.slice(0, at) + err.right + text.slice(at + err.wrong.length);
+    render();
+    renderSpellPanel();
+  }
+
+  function fixAll() {
+    let text = editor.value;
+    let fixedCount = 0;
+    for (const rule of KOREAN_TYPOS) {
+      const parts = text.split(rule.wrong);
+      if (parts.length > 1) {
+        fixedCount += parts.length - 1;
+        text = parts.join(rule.right);
+      }
+    }
+    editor.value = text;
+    render();
+    renderSpellPanel();
+    say(`${fixedCount}개 표현을 한 번에 수정했어요! ✓`);
+  }
+
+  function openSpellPanel() {
+    renderSpellPanel();
+    spellPanel.classList.add('show');
+    const n = currentErrors.length;
+    if (n === 0) say('맞춤법 문제를 찾지 못했어요! 글솜씨가 멋져요 ✨');
+    else say(`${n}개의 의심 표현을 찾았어요. 왼쪽 패널에서 확인해 보세요!`);
+  }
+
+  spellClose.addEventListener('click', () => spellPanel.classList.remove('show'));
+  spellFixAll.addEventListener('click', fixAll);
+
+  // ===== Claude buddy chat =====
+  const tips = [
+    "팁: **굵게** 표시는 Ctrl+B로 빠르게 적용할 수 있어요!",
+    "글이 길어지면 ## 부제목으로 정리해 보세요 ✨",
+    "코드 블록은 ``` 세 개로 감쌀 수 있어요!",
+    "툴바의 ✓ 버튼으로 한글 맞춤법을 점검할 수 있어요!",
+    "> 인용문은 글에 무게감을 더해줘요.",
+    "자동 저장 중이니 안심하고 작성하세요 💾",
+    "Markdown은 .md 확장자로 저장된답니다!",
+    "저는 Claude Code의 픽셀 친구예요!"
+  ];
+
+  let bubbleTimer;
+  function say(msg) {
+    bubble.textContent = msg;
+    bubble.classList.add('show');
+    clearTimeout(bubbleTimer);
+    bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 4500);
+  }
+
+  buddy.addEventListener('click', () => {
+    const tip = tips[Math.floor(Math.random() * tips.length)];
+    say(tip);
+  });
+
+  setTimeout(() => say('안녕하세요! 저는 Claude Code의 픽셀 친구예요 ✨ 클릭해 보세요!'), 700);
+</script>
+
+</body>
+</html>
