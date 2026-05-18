@@ -15,11 +15,9 @@
   --error-bg:     #450a0a;
   --error-text:   #fca5a5;
   --header-h:     56px;
-  --sidebar-w:    300px;
   --radius:       10px;
 }
 
-/* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; }
 
@@ -30,7 +28,75 @@ body {
   font-size: 0.9rem;
 }
 
-/* ── Layout ── */
+/* ── Auth wrap ── */
+.auth-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.auth-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.auth-logo {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.auth-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s;
+  margin-bottom: -1px;
+}
+.auth-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.auth-form { display: flex; flex-direction: column; gap: 16px; }
+
+.auth-error {
+  font-size: 0.8rem;
+  color: var(--error-text);
+  background: var(--error-bg);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.auth-success {
+  font-size: 0.8rem;
+  color: var(--success-text);
+  background: var(--success-bg);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+/* ── App layout ── */
 .app {
   display: flex;
   flex-direction: column;
@@ -55,8 +121,44 @@ body {
   color: var(--accent);
 }
 
-.btn-new {
+.header-right {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.username-badge {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 12px;
+}
+
+.app-body {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 11px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+.btn-primary:hover { background: var(--accent-hover); }
+
+.btn-new {
   background: var(--accent);
   color: #fff;
   border: none;
@@ -69,15 +171,21 @@ body {
 }
 .btn-new:hover { background: var(--accent-hover); }
 
-.app-body {
-  flex: 1;
-  display: flex;
-  overflow: hidden;
+.btn-logout {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.12s;
 }
+.btn-logout:hover { color: var(--danger); border-color: var(--danger); }
 
 /* ── Sidebar ── */
 .sidebar {
-  width: var(--sidebar-w);
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -138,26 +246,9 @@ body {
 .memo-item:hover  { background: var(--surface2); }
 .memo-item.active { background: var(--surface2); border-left: 3px solid var(--accent); padding-left: 9px; }
 
-.item-title {
-  font-weight: 600;
-  font-size: 0.875rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--text);
-}
-.item-preview {
-  font-size: 0.775rem;
-  color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.item-date {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  opacity: 0.7;
-}
+.item-title   { font-weight: 600; font-size: 0.875rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-preview { font-size: 0.775rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item-date    { font-size: 0.7rem; color: var(--text-muted); opacity: 0.7; }
 
 .empty-list {
   flex: 1;
@@ -189,7 +280,6 @@ body {
   justify-content: center;
   gap: 12px;
   color: var(--text-muted);
-  font-size: 0.9rem;
 }
 .empty-editor svg { opacity: 0.3; }
 
@@ -211,7 +301,7 @@ body {
 }
 
 .btn-back {
-  display: none;      /* 모바일에서만 표시 */
+  display: none;
   align-items: center;
   gap: 4px;
   background: transparent;
@@ -234,11 +324,7 @@ body {
 }
 
 /* ── Fields ── */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 7px;
-}
+.field { display: flex; flex-direction: column; gap: 7px; }
 
 .field label {
   font-size: 0.72rem;
@@ -265,22 +351,11 @@ body {
 
 .field input { font-size: 1.1rem; font-weight: 600; }
 
-.field-content { flex: 1; min-height: 0; }
-.field-content textarea {
-  flex: 1;
-  resize: none;
-  line-height: 1.7;
-  height: 100%;
-  min-height: 200px;
-}
+.field-content        { flex: 1; min-height: 0; }
+.field-content textarea { flex: 1; resize: none; line-height: 1.7; height: 100%; min-height: 200px; }
 
 /* ── Form actions ── */
-.form-actions {
-  display: flex;
-  gap: 10px;
-  flex-shrink: 0;
-  padding-top: 4px;
-}
+.form-actions { display: flex; gap: 10px; flex-shrink: 0; padding-top: 4px; }
 
 .btn-save {
   background: var(--accent);
@@ -341,11 +416,7 @@ body {
 
 /* ── Responsive ── */
 @media (max-width: 640px) {
-  .sidebar {
-    width: 100%;
-    border-right: none;
-  }
-
+  .sidebar { width: 100%; border-right: none; }
   .editor-panel {
     position: absolute;
     inset: var(--header-h) 0 0 0;
@@ -353,8 +424,7 @@ body {
     background: var(--bg);
   }
   .editor-panel.hidden { display: none !important; }
-
-  .btn-back { display: flex; }
-
+  .btn-back  { display: flex; }
   .memo-form { padding: 20px 16px; }
+  .username-badge { display: none; }
 }
