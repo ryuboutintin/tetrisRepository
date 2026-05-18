@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메모장</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>📝 메모장</h1>
+
+        <!-- 메모 작성/수정 폼 -->
+        <div class="form-section">
+            <h2 id="form-title">새 메모 작성</h2>
+            <form id="memo-form">
+                <input type="hidden" id="memo-id">
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" placeholder="메모 제목을 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea id="content" rows="5" placeholder="메모 내용을 입력하세요" required></textarea>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" id="submit-btn">저장</button>
+                    <button type="button" id="cancel-btn" class="btn-cancel" style="display:none;">취소</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- 메모 목록 -->
+        <div class="list-section">
+            <h2>메모 목록</h2>
+            <div id="memo-list"></div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
