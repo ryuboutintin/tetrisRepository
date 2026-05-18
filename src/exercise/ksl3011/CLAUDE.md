@@ -31,6 +31,7 @@ python3 pi/pi.py          # 실행 후 자릿수 입력 프롬프트 표시
 | `personal_landing2/index.html` | 에디토리얼 스타일 랜딩 페이지 (단일 HTML) |
 | `fibonacci/fibonacci.py` | n번째 피보나치 수 반복 계산 |
 | `pi/pi.py` | Chudnovsky 알고리즘으로 임의 자릿수 원주율 계산 |
+| `exercise2/` | FastAPI 메모앱 — REST API(SQLite+FTS5) + 바닐라JS 프론트엔드. 자세한 내용은 `exercise2/CLAUDE.md` 참조. |
 
 ## 구조 설명
 
