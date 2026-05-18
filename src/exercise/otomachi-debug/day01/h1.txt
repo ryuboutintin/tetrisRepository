@@ -1,0 +1,16 @@
+ 1058  cd src/exercise/otomachi-debug/day01
+ 1059  ls
+ 1060  clear
+ 1061  history > h1.txt
+ 1062  ls
+ 1063  cear
+ 1064  cat h1.txt
+ 1065  clear
+ 1066  rm h1.txt
+ 1067  ls
+ 1068  ls
+ 1069  history
+ 1070  clear
+ 1071  ls
+ 1072  git pull
+ 1073  clear
