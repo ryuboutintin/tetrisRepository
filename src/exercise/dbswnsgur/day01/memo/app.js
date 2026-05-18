@@ -1,6 +1,168 @@
 const API = 'http://localhost:8000';
 
-// DOM 요소
+// ── 토큰 관리 ─────────────────────────────────────────
+
+function getToken() { return localStorage.getItem('token'); }
+function setToken(t) { localStorage.setItem('token', t); }
+function clearToken() { localStorage.removeItem('token'); }
+
+function authHeaders() {
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${getToken()}`,
+  };
+}
+
+// 401 응답 시 자동 로그아웃
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, options);
+  if (res.status === 401) {
+    logout();
+    return null;
+  }
+  return res;
+}
+
+// ── 인증 화면 전환 ────────────────────────────────────
+
+const authView  = document.getElementById('auth-view');
+const memoView  = document.getElementById('memo-view');
+const authError = document.getElementById('auth-error');
+const authForm  = document.getElementById('auth-form');
+const authUsernameInput = document.getElementById('auth-username');
+const authPasswordInput = document.getElementById('auth-password');
+const authSubmit = document.getElementById('auth-submit');
+const headerUsername = document.getElementById('header-username');
+
+let currentTab = 'login';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+  document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+  authSubmit.textContent = tab === 'login' ? '로그인' : '회원가입';
+  hideAuthError();
+}
+
+function showAuthError(msg) {
+  authError.textContent = msg;
+  authError.classList.remove('hidden');
+}
+
+function hideAuthError() {
+  authError.classList.add('hidden');
+}
+
+function showAuthView() {
+  authView.classList.remove('hidden');
+  memoView.classList.add('hidden');
+  authUsernameInput.value = '';
+  authPasswordInput.value = '';
+  hideAuthError();
+}
+
+function showMemoView(username) {
+  authView.classList.add('hidden');
+  memoView.classList.remove('hidden');
+  headerUsername.textContent = username;
+  loadAndRender();
+}
+
+function logout() {
+  clearToken();
+  showAuthView();
+}
+
+// ── 인증 API ──────────────────────────────────────────
+
+authForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const username = authUsernameInput.value.trim();
+  const password = authPasswordInput.value;
+  if (!username || !password) return;
+
+  hideAuthError();
+  authSubmit.disabled = true;
+
+  try {
+    if (currentTab === 'login') {
+      await doLogin(username, password);
+    } else {
+      await doRegister(username, password);
+    }
+  } finally {
+    authSubmit.disabled = false;
+  }
+});
+
+async function doLogin(username, password) {
+  const body = new URLSearchParams({ username, password });
+  const res = await fetch(`${API}/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body,
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    showAuthError(data.detail || '로그인에 실패했습니다');
+    return;
+  }
+  setToken(data.access_token);
+  showMemoView(data.username);
+}
+
+async function doRegister(username, password) {
+  const res = await fetch(`${API}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username, password }),
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    showAuthError(data.detail || '회원가입에 실패했습니다');
+    return;
+  }
+  setToken(data.access_token);
+  showMemoView(data.username);
+}
+
+// ── 메모 API ─────────────────────────────────────────
+
+async function fetchMemos() {
+  const res = await apiFetch(`${API}/memos`, { headers: authHeaders() });
+  if (!res) return [];
+  return res.json();
+}
+
+async function createMemo(title, content) {
+  const res = await apiFetch(`${API}/memos`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ title, content }),
+  });
+  if (!res) return null;
+  return res.json();
+}
+
+async function updateMemo(id, title, content) {
+  const res = await apiFetch(`${API}/memos/${id}`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify({ title, content }),
+  });
+  if (!res) return null;
+  return res.json();
+}
+
+async function deleteMemo(id) {
+  await apiFetch(`${API}/memos/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+}
+
+// ── DOM 요소 ─────────────────────────────────────────
+
 const inputTitle   = document.getElementById('input-title');
 const inputContent = document.getElementById('input-content');
 const btnSubmit    = document.getElementById('btn-submit');
@@ -11,37 +173,8 @@ const overlay      = document.getElementById('modal-overlay');
 const modalCancel  = document.getElementById('modal-cancel');
 const modalConfirm = document.getElementById('modal-confirm');
 
-let editingId = null;   // 현재 편집 중인 메모 id
-let deletingId = null;  // 삭제 확인 대기 중인 메모 id
-
-// ── API 호출 ─────────────────────────────────────────
-
-async function fetchMemos() {
-  const res = await fetch(`${API}/memos`);
-  return res.json();
-}
-
-async function createMemo(title, content) {
-  const res = await fetch(`${API}/memos`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content }),
-  });
-  return res.json();
-}
-
-async function updateMemo(id, title, content) {
-  const res = await fetch(`${API}/memos/${id}`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ title, content }),
-  });
-  return res.json();
-}
-
-async function deleteMemo(id) {
-  await fetch(`${API}/memos/${id}`, { method: 'DELETE' });
-}
+let editingId  = null;
+let deletingId = null;
 
 // ── 렌더링 ───────────────────────────────────────────
 
@@ -59,11 +192,7 @@ function renderMemos(memos) {
     return;
   }
   emptyMsg.classList.add('hidden');
-
-  // 최신순 정렬
-  [...memos].reverse().forEach(memo => {
-    memoList.appendChild(createCard(memo));
-  });
+  memos.forEach(memo => memoList.appendChild(createCard(memo)));
 }
 
 function createCard(memo) {
@@ -92,9 +221,7 @@ function createCard(memo) {
 // ── 인라인 편집 ──────────────────────────────────────
 
 function startInlineEdit(card, memo) {
-  // 다른 카드 편집 중이면 취소
   cancelInlineEdit();
-
   editingId = memo.id;
   card.classList.add('editing');
 
@@ -109,7 +236,6 @@ function startInlineEdit(card, memo) {
 
   const titleInput   = card.querySelector('.edit-input');
   const contentInput = card.querySelector('.edit-textarea');
-
   titleInput.focus();
   titleInput.select();
 
@@ -157,7 +283,7 @@ modalConfirm.addEventListener('click', async () => {
   loadAndRender();
 });
 
-// ── 폼 제출 ──────────────────────────────────────────
+// ── 폼 ──────────────────────────────────────────────
 
 btnSubmit.addEventListener('click', async () => {
   const title   = inputTitle.value.trim();
@@ -175,23 +301,21 @@ btnCancel.addEventListener('click', () => {
   btnCancel.classList.add('hidden');
 });
 
-// 내용 입력 시 취소 버튼 표시
 [inputTitle, inputContent].forEach(el => {
   el.addEventListener('input', () => {
-    const hasValue = inputTitle.value || inputContent.value;
-    btnCancel.classList.toggle('hidden', !hasValue);
+    btnCancel.classList.toggle('hidden', !inputTitle.value && !inputContent.value);
   });
 });
 
-// Enter(제목 필드) → 내용으로 포커스 이동
 inputTitle.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); inputContent.focus(); }
 });
 
-// Ctrl+Enter → 저장
 inputContent.addEventListener('keydown', e => {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) btnSubmit.click();
 });
+
+document.getElementById('btn-logout').addEventListener('click', logout);
 
 // ── 초기 로드 ────────────────────────────────────────
 
@@ -208,4 +332,23 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-loadAndRender();
+// 토큰이 있으면 /auth/me로 사용자 정보 확인 후 메모 화면 진입
+async function init() {
+  const token = getToken();
+  if (!token) {
+    showAuthView();
+    return;
+  }
+  const res = await fetch(`${API}/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    clearToken();
+    showAuthView();
+    return;
+  }
+  const user = await res.json();
+  showMemoView(user.username);
+}
+
+init();
