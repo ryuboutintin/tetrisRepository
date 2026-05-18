@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>개인 랜딩 페이지</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-dark: #3730a3;
+      --accent: #818cf8;
+      --bg: #0f0f1a;
+      --surface: #1a1a2e;
+      --surface-2: #242438;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: rgba(255, 255, 255, 0.08);
+      --radius: 16px;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── 배경 그라디언트 장식 ── */
+    body::before {
+      content: '';
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(79, 70, 229, 0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    main {
+      width: 100%;
+      max-width: 680px;
+      padding: 48px 24px 80px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── 카드 공통 ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 36px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    /* ── 프로필 섹션 ── */
+    .profile-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 120px;
+      height: 120px;
+    }
+
+    .avatar-ring {
+      position: absolute;
+      inset: -4px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      z-index: 0;
+    }
+
+    .avatar {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      background: var(--surface-2);
+      border: 3px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      overflow: hidden;
+    }
+
+    /* 사진이 없을 때 보여줄 이니셜 아바타 */
+    .avatar-placeholder {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: 3px solid var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .profile-name {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #fff 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .profile-role {
+      font-size: 14px;
+      color: var(--accent);
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .badge-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .badge {
+      background: rgba(79, 70, 229, 0.15);
+      border: 1px solid rgba(79, 70, 229, 0.3);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 12px;
+      border-radius: 999px;
+    }
+
+    /* ── 소개 섹션 ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .about-text {
+      font-size: 15px;
+      line-height: 1.8;
+      color: var(--text-muted);
+    }
+
+    .about-text strong {
+      color: var(--text);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .stat-item {
+      background: var(--surface-2);
+      border-radius: 12px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-desc {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── SNS 링크 섹션 ── */
+    .links-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .link-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: var(--text);
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .link-item:hover {
+      background: rgba(79, 70, 229, 0.12);
+      border-color: rgba(79, 70, 229, 0.4);
+      transform: translateX(4px);
+    }
+
+    .link-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .link-info {
+      flex: 1;
+    }
+
+    .link-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .link-handle {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .link-arrow {
+      font-size: 18px;
+      color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+
+    .link-item:hover .link-arrow {
+      transform: translateX(4px);
+      color: var(--accent);
+    }
+
+    /* 각 SNS별 아이콘 배경색 */
+    .icon-github   { background: rgba(255, 255, 255, 0.08); }
+    .icon-linkedin { background: rgba(10, 102, 194, 0.2); }
+    .icon-twitter  { background: rgba(29, 155, 240, 0.2); }
+    .icon-email    { background: rgba(234, 67, 53, 0.2); }
+    .icon-blog     { background: rgba(249, 115, 22, 0.2); }
+    .icon-instagram{ background: rgba(225, 48, 108, 0.2); }
+
+    /* ── 푸터 ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      font-size: 12px;
+      color: var(--text-muted);
+      padding-bottom: 32px;
+    }
+  </style>
+</head>
+<body>
+
+  <main>
+
+    <!-- ① 프로필 사진 섹션 -->
+    <div class="card profile-section">
+      <div class="avatar-wrapper">
+        <div class="avatar-ring"></div>
+        <!--
+          프로필 사진이 있으면 아래 주석을 해제하고 src 경로를 수정하세요.
+          <img class="avatar" src="profile.jpg" alt="프로필 사진" />
+        -->
+        <div class="avatar-placeholder">👨‍💻</div>
+      </div>
+
+      <div>
+        <h1 class="profile-name">홍길동</h1>
+        <p class="profile-role">Full-Stack Developer</p>
+      </div>
+
+      <div class="badge-row">
+        <span class="badge">Python</span>
+        <span class="badge">JavaScript</span>
+        <span class="badge">React</span>
+        <span class="badge">Node.js</span>
+        <span class="badge">AI / ML</span>
+      </div>
+    </div>
+
+    <!-- ② 소개 섹션 -->
+    <div class="card">
+      <p class="section-label">소개</p>
+      <p class="about-text">
+        안녕하세요! 저는 <strong>문제를 코드로 해결하는 것</strong>을 좋아하는
+        풀스택 개발자입니다.<br /><br />
+        사용자 경험을 중심으로 생각하고,
+        <strong>클린 코드</strong>와 <strong>지속 가능한 아키텍처</strong>를
+        추구합니다. 현재는 AI 기반 서비스 개발에 깊은 관심을 가지고 있으며,
+        새로운 기술을 배우고 공유하는 것을 즐깁니다.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat-item">
+          <div class="stat-number">3+</div>
+          <div class="stat-desc">Years Exp.</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">20+</div>
+          <div class="stat-desc">Projects</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">∞</div>
+          <div class="stat-desc">Curiosity</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ③ SNS 링크 섹션 -->
+    <div class="card">
+      <p class="section-label">SNS 링크</p>
+      <div class="links-grid">
+
+        <a class="link-item" href="https://github.com/" target="_blank" rel="noopener">
+          <div class="link-icon icon-github">🐙</div>
+          <div class="link-info">
+            <div class="link-name">GitHub</div>
+            <div class="link-handle">@username</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+        <a class="link-item" href="https://linkedin.com/" target="_blank" rel="noopener">
+          <div class="link-icon icon-linkedin">💼</div>
+          <div class="link-info">
+            <div class="link-name">LinkedIn</div>
+            <div class="link-handle">linkedin.com/in/username</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+        <a class="link-item" href="https://twitter.com/" target="_blank" rel="noopener">
+          <div class="link-icon icon-twitter">🐦</div>
+          <div class="link-info">
+            <div class="link-name">Twitter / X</div>
+            <div class="link-handle">@username</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+        <a class="link-item" href="https://instagram.com/" target="_blank" rel="noopener">
+          <div class="link-icon icon-instagram">📸</div>
+          <div class="link-info">
+            <div class="link-name">Instagram</div>
+            <div class="link-handle">@username</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+        <a class="link-item" href="mailto:example@email.com">
+          <div class="link-icon icon-email">✉️</div>
+          <div class="link-info">
+            <div class="link-name">이메일</div>
+            <div class="link-handle">example@email.com</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+        <a class="link-item" href="https://velog.io/" target="_blank" rel="noopener">
+          <div class="link-icon icon-blog">📝</div>
+          <div class="link-info">
+            <div class="link-name">블로그 (Velog)</div>
+            <div class="link-handle">velog.io/@username</div>
+          </div>
+          <span class="link-arrow">→</span>
+        </a>
+
+      </div>
+    </div>
+
+  </main>
+
+  <footer>
+    <p>© 2026 홍길동 · Made with HTML &amp; CSS</p>
+  </footer>
+
+</body>
+</html>
