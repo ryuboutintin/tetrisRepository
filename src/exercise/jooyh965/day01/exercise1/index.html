@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Editor</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <header class="topbar">
+        <h1>📝 Markdown Editor</h1>
+        <div class="actions">
+            <span class="status" id="status">자동 저장됨</span>
+            <button id="downloadBtn" title="다운로드 (.md)">⬇ Download</button>
+            <button id="clearBtn" title="모두 지우기">🗑 Clear</button>
+        </div>
+    </header>
+
+    <div class="toolbar">
+        <button data-action="bold" title="굵게 (Ctrl+B)"><b>B</b></button>
+        <button data-action="italic" title="기울임 (Ctrl+I)"><i>I</i></button>
+        <button data-action="strike" title="취소선"><s>S</s></button>
+        <span class="sep"></span>
+        <button data-action="h1" title="제목 1">H1</button>
+        <button data-action="h2" title="제목 2">H2</button>
+        <button data-action="h3" title="제목 3">H3</button>
+        <span class="sep"></span>
+        <button data-action="ul" title="순서 없는 목록">• List</button>
+        <button data-action="ol" title="순서 있는 목록">1. List</button>
+        <button data-action="quote" title="인용">❝ Quote</button>
+        <span class="sep"></span>
+        <button data-action="code" title="인라인 코드">{ }</button>
+        <button data-action="codeblock" title="코드 블록">&lt;/&gt;</button>
+        <button data-action="link" title="링크 (Ctrl+K)">🔗 Link</button>
+        <button data-action="image" title="이미지">🖼 Image</button>
+        <button data-action="hr" title="구분선">― HR</button>
+    </div>
+
+    <main class="workspace">
+        <section class="pane editor-pane">
+            <div class="pane-header">Editor</div>
+            <textarea id="editor" spellcheck="false" placeholder="여기에 마크다운을 입력하세요..."></textarea>
+        </section>
+        <section class="pane preview-pane">
+            <div class="pane-header">Preview</div>
+            <article id="preview" class="markdown-body"></article>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

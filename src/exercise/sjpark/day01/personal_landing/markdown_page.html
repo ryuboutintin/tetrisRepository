@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>자기소개 에디터 | 박수진</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      /* Light */
+      --bg:      #f9f9f7;
+      --surface: #ffffff;
+      --border:  #e5e5e0;
+      --text:    #1a1a1a;
+      --muted:   #6b6b6b;
+      --accent:  #2563eb;
+      /* Dark editor (Catppuccin Mocha) */
+      --ed-bg:     #1e1e2e;
+      --ed-header: #181825;
+      --ed-text:   #cdd6f4;
+      --ed-muted:  #6c7086;
+      --ed-border: #313244;
+      --ed-sel:    #45475a;
+    }
+
+    /* ── 라디오 인풋 숨기기 (모바일 탭 트릭용) ── */
+    #tab-editor,
+    #tab-preview { display: none; }
+
+    /* ── Body ── */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── App shell ── */
+    .app {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* ── Header ── */
+    .app-header {
+      flex-shrink: 0;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      height: 52px;
+      padding: 0 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .app-brand {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+    }
+
+    .app-brand .slash { color: var(--accent); }
+
+    /* 데스크톱용 배지 */
+    .app-badge {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.15rem 0.65rem;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* 모바일 탭 바 (기본 숨김) */
+    .tab-bar {
+      display: none;
+      margin-left: auto;
+    }
+
+    .tab-bar label {
+      display: inline-block;
+      padding: 0.3rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .tab-bar label:hover { color: var(--text); }
+
+    /* ── Editor Layout ── */
+    .editor-layout {
+      flex: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    /* ── 공통 Pane ── */
+    .pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .pane-header {
+      flex-shrink: 0;
+      padding: 0.45rem 1.25rem;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    /* ── 에디터 Pane ── */
+    .pane--editor { background: var(--ed-bg); border-right: 1px solid var(--ed-border); }
+
+    .pane--editor .pane-header {
+      background: var(--ed-header);
+      color: var(--ed-muted);
+      border-bottom: 1px solid var(--ed-border);
+    }
+
+    .editor-textarea {
+      flex: 1;
+      min-height: 0;
+      padding: 1.25rem 1.5rem;
+      background: var(--ed-bg);
+      color: var(--ed-text);
+      font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "Courier New", monospace;
+      font-size: 0.875rem;
+      line-height: 1.9;
+      border: none;
+      resize: none;
+      outline: none;
+      overflow-y: auto;
+      tab-size: 2;
+    }
+
+    .editor-textarea::selection { background: var(--ed-sel); }
+
+    /* ── 미리보기 Pane ── */
+    .pane--preview { background: var(--bg); }
+
+    .pane--preview .pane-header {
+      background: var(--surface);
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .preview-scroll {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* ── 카드 (미리보기 콘텐츠) ── */
+    .card {
+      max-width: 480px;
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2.25rem 2.5rem;
+    }
+
+    .card-name {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .card-tagline {
+      margin-top: 0.35rem;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .card-divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 1.5rem 0 0;
+    }
+
+    .card-section { margin-top: 1.5rem; }
+
+    .card-section-title {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.65rem;
+    }
+
+    .card-about { font-size: 0.95rem; }
+
+    .skills { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+
+    .skill-tag {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.25rem 0.7rem;
+      font-size: 0.82rem;
+      font-family: "JetBrains Mono", monospace;
+    }
+
+    .contacts { display: flex; flex-direction: column; gap: 0.45rem; }
+
+    .contact-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.88rem;
+    }
+
+    .contact-label {
+      width: 52px;
+      flex-shrink: 0;
+      color: var(--muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .contact-row a { color: var(--accent); text-decoration: none; }
+    .contact-row a:hover { text-decoration: underline; }
+
+    /* ────────────────────────────
+       모바일 (768px 이하)
+       CSS Radio Trick 으로 탭 전환
+    ──────────────────────────── */
+    @media (max-width: 768px) {
+      .app-badge { display: none; }
+      .tab-bar   { display: block; }
+
+      .editor-layout { grid-template-columns: 1fr; }
+
+      /* 기본: 두 pane 모두 숨김 */
+      .pane--editor,
+      .pane--preview { display: none; }
+
+      /* 에디터 탭 선택 시 → 에디터 pane 표시 */
+      #tab-editor:checked ~ .app .pane--editor  { display: flex; }
+
+      /* 미리보기 탭 선택 시 → 미리보기 pane 표시 */
+      #tab-preview:checked ~ .app .pane--preview { display: flex; }
+
+      /* 선택된 탭 강조 */
+      #tab-editor:checked  ~ .app label[for="tab-editor"],
+      #tab-preview:checked ~ .app label[for="tab-preview"] {
+        color: var(--accent);
+        border-bottom-color: var(--accent);
+      }
+
+      .card { padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!--
+    라디오 인풋이 .app 의 형제(sibling)여야
+    CSS ~ 선택자로 .app 내부를 제어할 수 있어요.
+  -->
+  <input type="radio" id="tab-editor"  name="tab" checked />
+  <input type="radio" id="tab-preview" name="tab" />
+
+  <div class="app">
+
+    <!-- ── 헤더 ── -->
+    <header class="app-header">
+      <div class="app-brand">
+        <span class="slash">//</span> 자기소개 에디터
+      </div>
+      <span class="app-badge">HTML · CSS only</span>
+
+      <!-- 모바일 탭 -->
+      <div class="tab-bar">
+        <label for="tab-editor">에디터</label>
+        <label for="tab-preview">미리보기</label>
+      </div>
+    </header>
+
+    <!-- ── 메인 레이아웃 ── -->
+    <div class="editor-layout">
+
+      <!-- 왼쪽: 마크다운 에디터 -->
+      <div class="pane pane--editor">
+        <div class="pane-header">📝 &nbsp;markdown</div>
+        <textarea class="editor-textarea" spellcheck="false"># 박수진
+
+> 코드로 문제를 풀고, 사람에게 닿는 서비스를 만듭니다.
+
+---
+
+## About
+
+백엔드 개발을 주로 하며 Java/Spring 기반의 API 서버
+설계와 운영 경험이 있습니다. 최근에는 클라우드 환경과
+DevOps 도구에 관심을 두고 공부하고 있습니다.
+
+팀과 함께 성장하는 것을 즐기며, 읽기 쉬운 코드를
+짜는 것을 중요하게 생각합니다.
+
+## Skills
+
+`Java`  `Spring Boot`  `Python`
+`MySQL`  `Docker`  `AWS`  `Git`
+
+## Contact
+
+- Email : farmer1590@gmail.com
+- GitHub: github.com/soojin1999</textarea>
+      </div>
+
+      <!-- 오른쪽: 렌더링 미리보기 -->
+      <div class="pane pane--preview">
+        <div class="pane-header">👁 &nbsp;preview</div>
+        <div class="preview-scroll">
+          <div class="card">
+
+            <div class="card-name">박수진</div>
+            <div class="card-tagline">코드로 문제를 풀고, 사람에게 닿는 서비스를 만듭니다.</div>
+
+            <hr class="card-divider" />
+
+            <div class="card-section">
+              <div class="card-section-title">About</div>
+              <p class="card-about">
+                백엔드 개발을 주로 하며 Java/Spring 기반의 API 서버 설계와 운영 경험이 있습니다.
+                최근에는 클라우드 환경과 DevOps 도구에 관심을 두고 공부하고 있습니다.
+                팀과 함께 성장하는 것을 즐기며, 읽기 쉬운 코드를 짜는 것을 중요하게 생각합니다.
+              </p>
+            </div>
+
+            <div class="card-section">
+              <div class="card-section-title">Skills</div>
+              <div class="skills">
+                <span class="skill-tag">Java</span>
+                <span class="skill-tag">Spring Boot</span>
+                <span class="skill-tag">Python</span>
+                <span class="skill-tag">MySQL</span>
+                <span class="skill-tag">Docker</span>
+                <span class="skill-tag">AWS</span>
+                <span class="skill-tag">Git</span>
+              </div>
+            </div>
+
+            <div class="card-section">
+              <div class="card-section-title">Contact</div>
+              <div class="contacts">
+                <div class="contact-row">
+                  <span class="contact-label">Email</span>
+                  <a href="mailto:farmer1590@gmail.com">farmer1590@gmail.com</a>
+                </div>
+                <div class="contact-row">
+                  <span class="contact-label">GitHub</span>
+                  <a href="https://github.com/soojin1999" target="_blank" rel="noopener">github.com/soojin1999</a>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- .card -->
+        </div><!-- .preview-scroll -->
+      </div><!-- .pane--preview -->
+
+    </div><!-- .editor-layout -->
+  </div><!-- .app -->
+
+</body>
+</html>
