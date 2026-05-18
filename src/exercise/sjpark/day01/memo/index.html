@@ -8,8 +8,33 @@
 </head>
 <body>
 
+<!-- 인증 오버레이 -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <h2 class="auth-title">📝 메모장</h2>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">로그인</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">회원가입</button>
+    </div>
+
+    <div id="auth-error" class="auth-error" style="display:none;"></div>
+
+    <form id="auth-form" onsubmit="submitAuth(event)">
+      <input class="auth-input" id="auth-username" type="text" placeholder="아이디" autocomplete="username" required />
+      <input class="auth-input" id="auth-password" type="password" placeholder="비밀번호" autocomplete="current-password" required />
+      <button class="auth-submit" type="submit" id="auth-submit-btn">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- 메인 앱 -->
 <header>
   <h1>📝 메모장</h1>
+  <div class="header-user">
+    <span id="header-username"></span>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
 </header>
 
 <div class="layout">
@@ -21,10 +46,9 @@
   </aside>
 
   <main class="editor-pane">
-    <!-- 선택 전 안내 -->
     <div class="placeholder-pane" id="placeholder">메모를 선택하거나 새 메모를 만드세요.</div>
 
-    <!-- 뷰 모드 (읽기 전용) -->
+    <!-- 뷰 모드 -->
     <div id="view-pane" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
       <div class="pane-toolbar">
         <span class="view-title" id="view-title"></span>

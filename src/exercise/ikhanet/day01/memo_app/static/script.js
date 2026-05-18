@@ -1,10 +1,62 @@
 const API = '/memos';
 const memoData = new Map();
+let allMemos = [];
+let currentFilter = null;
+
+const token = localStorage.getItem('token');
+if (!token) location.href = '/login';
+
+async function authFetch(url, options = {}) {
+    const headers = {
+        'Authorization': `Bearer ${token}`,
+        ...(options.body ? { 'Content-Type': 'application/json' } : {}),
+        ...options.headers,
+    };
+    const res = await fetch(url, { ...options, headers });
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        location.href = '/login';
+    }
+    return res;
+}
 
 async function loadMemos() {
-    const res = await fetch(API);
-    const memos = await res.json();
-    renderMemos(memos);
+    const res = await authFetch(API);
+    allMemos = await res.json();
+    renderTagFilter(allMemos);
+    renderMemos(filterMemos(allMemos));
+}
+
+function filterMemos(memos) {
+    if (!currentFilter) return memos;
+    return memos.filter(m =>
+        m.tags && m.tags.split(',').map(t => t.trim()).includes(currentFilter)
+    );
+}
+
+function renderTagFilter(memos) {
+    const tags = [...new Set(
+        memos.flatMap(m => m.tags ? m.tags.split(',').map(t => t.trim()).filter(Boolean) : [])
+    )];
+    const bar = document.getElementById('tag-filter');
+    if (tags.length === 0) {
+        bar.innerHTML = '';
+        return;
+    }
+    bar.innerHTML =
+        `<button data-tag="" class="${!currentFilter ? 'active' : ''}">전체</button>` +
+        tags.map(t =>
+            `<button data-tag="${escHtml(t)}" class="${currentFilter === t ? 'active' : ''}">${escHtml(t)}</button>`
+        ).join('');
+    bar.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => setFilter(btn.dataset.tag || null));
+    });
+}
+
+function setFilter(tag) {
+    currentFilter = tag;
+    renderTagFilter(allMemos);
+    renderMemos(filterMemos(allMemos));
 }
 
 function renderMemos(memos) {
@@ -67,19 +119,20 @@ async function submitEdit(id) {
         content: document.getElementById(`edit-content-${id}`).value,
         tags: document.getElementById(`edit-tags-${id}`).value,
     };
-    await fetch(`${API}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    });
+    await authFetch(`${API}/${id}`, { method: 'PUT', body: JSON.stringify(body) });
     loadMemos();
 }
 
 async function deleteMemo(id) {
     if (!confirm('삭제하시겠습니까?')) return;
-    await fetch(`${API}/${id}`, { method: 'DELETE' });
+    await authFetch(`${API}/${id}`, { method: 'DELETE' });
     loadMemos();
 }
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+    localStorage.removeItem('token');
+    location.href = '/login';
+});
 
 document.getElementById('memo-form').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -88,11 +141,7 @@ document.getElementById('memo-form').addEventListener('submit', async (e) => {
         content: document.getElementById('content').value,
         tags: document.getElementById('tags').value,
     };
-    await fetch(API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-    });
+    await authFetch(API, { method: 'POST', body: JSON.stringify(body) });
     e.target.reset();
     loadMemos();
 });
