@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown Viewer | SS.MOON</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Fira+Code&display=swap" rel="stylesheet">
+    <!-- Marked.js library for Markdown parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        header {
+            background-color: #333;
+            color: white;
+            padding: 1rem 2rem;
+            text-align: center;
+        }
+        main {
+            display: flex;
+            flex: 1;
+            gap: 10px;
+            padding: 20px;
+            overflow: hidden;
+        }
+        .editor, .preview {
+            flex: 1;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .panel-header {
+            padding: 10px 15px;
+            background-color: #eee;
+            border-bottom: 1px solid #ddd;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        textarea {
+            flex: 1;
+            width: 100%;
+            border: none;
+            padding: 15px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            resize: none;
+            outline: none;
+        }
+        #preview-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        /* Markdown Styling */
+        #preview-content h1, #preview-content h2, #preview-content h3 {
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.3em;
+        }
+        #preview-content code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+        }
+        #preview-content pre {
+            background-color: #282c34;
+            color: #abb2bf;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+        #preview-content pre code {
+            background-color: transparent;
+            padding: 0;
+            color: inherit;
+        }
+        #preview-content blockquote {
+            border-left: 4px solid #ddd;
+            margin: 0;
+            padding-left: 15px;
+            color: #777;
+        }
+        #preview-content img {
+            max-width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SS.MOON Markdown Viewer</h1>
+    </header>
+    <main>
+        <div class="editor">
+            <div class="panel-header">Markdown Input</div>
+            <textarea id="markdown-input" placeholder="이곳에 마크다운을 입력하세요..."></textarea>
+        </div>
+        <div class="preview">
+            <div class="panel-header">Real-time Preview</div>
+            <div id="preview-content"></div>
+        </div>
+    </main>
+
+    <script>
+        const input = document.getElementById('markdown-input');
+        const preview = document.getElementById('preview-content');
+
+        // 초기 샘플 텍스트
+        const sampleMarkdown = `# 마크다운 뷰어에 오신 것을 환영합니다!
+
+이곳에 마크다운을 입력하면 오른쪽에 실시간으로 렌더링됩니다.
+
+## 주요 기능
+- **굵게**, *기울임*, ~~취소선~~ 지원
+- [링크](https://github.com) 및 이미지 지원
+- 코드 블록 지원:
+\`\`\`javascript
+function hello() {
+  console.log("Hello, SS.MOON!");
+}
+\`\`\`
+
+> "마크다운은 텍스트 기반의 마크업 언어로, 웹에서 가독성이 매우 좋습니다."
+
+수정해 보면서 테스트해 보세요!`;
+
+        input.value = sampleMarkdown;
+
+        // 마크다운 렌더링 함수
+        function renderMarkdown() {
+            const rawValue = input.value;
+            preview.innerHTML = marked.parse(rawValue);
+        }
+
+        // 입력 시 실시간 업데이트
+        input.addEventListener('input', renderMarkdown);
+
+        // 초기 실행
+        renderMarkdown();
+    </script>
+</body>
+</html>
