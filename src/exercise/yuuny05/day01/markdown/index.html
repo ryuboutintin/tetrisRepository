@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="header">
+    <h1 class="header__title">Markdown Editor</h1>
+    <div class="header__actions">
+      <span class="save-status" id="saveStatus">저장됨</span>
+      <button class="btn btn--clear" id="clearBtn">초기화</button>
+    </div>
+  </header>
+
+  <main class="editor">
+    <section class="editor__pane editor__pane--input">
+      <div class="pane__header">
+        <span class="pane__label">편집</span>
+      </div>
+      <textarea
+        class="editor__textarea"
+        id="markdownInput"
+        placeholder="마크다운을 입력하세요..."
+        spellcheck="false"
+      ></textarea>
+    </section>
+
+    <div class="editor__divider"></div>
+
+    <section class="editor__pane editor__pane--preview">
+      <div class="pane__header">
+        <span class="pane__label">미리보기</span>
+      </div>
+      <div class="editor__preview" id="markdownPreview"></div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

@@ -202,7 +202,7 @@ editor.addEventListener('keydown', e => {
 
   if (!ctrl) return;
 
-  switch (e.key) {
+  switch (e.key.toLowerCase()) {
     case 'b': e.preventDefault(); insertAround('**', '**'); break;
     case 'i': e.preventDefault(); insertAround('*', '*'); break;
     case 'k': e.preventDefault(); insertLink(); break;
