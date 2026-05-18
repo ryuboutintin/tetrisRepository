@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastAPI 메모장</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 50px; background-color: #f8f9fa; }
+        .memo-card { margin-bottom: 20px; transition: transform 0.2s; }
+        .memo-card:hover { transform: scale(1.02); }
+        .delete-btn { cursor: pointer; color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">📝 FastAPI 메모장</h1>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card p-3 shadow-sm">
+                    <h4>메모 작성</h4>
+                    <div class="mb-3">
+                        <label for="title" class="form-label">제목</label>
+                        <input type="text" class="form-control" id="title" placeholder="제목을 입력하세요">
+                    </div>
+                    <div class="mb-3">
+                        <label for="content" class="form-label">내용</label>
+                        <textarea class="form-control" id="content" rows="4" placeholder="내용을 입력하세요"></textarea>
+                    </div>
+                    <button class="btn btn-primary w-100" onclick="createMemo()">저장하기</button>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <h4>메모 목록</h4>
+                <div id="memo-list" class="row">
+                    <!-- 메모가 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">메모 수정</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-id">
+                    <div class="mb-3">
+                        <label for="edit-title" class="form-label">제목</label>
+                        <input type="text" class="form-control" id="edit-title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-content" class="form-label">내용</label>
+                        <textarea class="form-control" id="edit-content" rows="4"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" onclick="updateMemo()">수정 완료</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', fetchMemos);
+
+        async function fetchMemos() {
+            const response = await fetch('/memos/');
+            const memos = await response.json();
+            const memoList = document.getElementById('memo-list');
+            memoList.innerHTML = '';
+            
+            memos.forEach(memo => {
+                const card = `
+                    <div class="col-md-6">
+                        <div class="card memo-card shadow-sm">
+                            <div class="card-body">
+                                <h5 class="card-title">${memo.title}</h5>
+                                <p class="card-text">${memo.content}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <small class="text-muted">${new Date(memo.created_at).toLocaleString()}</small>
+                                    <div>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="openEditModal(${memo.id}, '${memo.title}', '${memo.content}')">수정</button>
+                                        <button class="btn btn-sm btn-outline-danger" onclick="deleteMemo(${memo.id})">삭제</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                memoList.innerHTML += card;
+            });
+        }
+
+        async function createMemo() {
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            
+            if (!title || !content) {
+                alert('제목과 내용을 모두 입력해주세요.');
+                return;
+            }
+
+            const response = await fetch('/memos/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+
+            if (response.ok) {
+                document.getElementById('title').value = '';
+                document.getElementById('content').value = '';
+                fetchMemos();
+            }
+        }
+
+        function openEditModal(id, title, content) {
+            document.getElementById('edit-id').value = id;
+            document.getElementById('edit-title').value = title;
+            document.getElementById('edit-content').value = content;
+            const modal = new bootstrap.Modal(document.getElementById('editModal'));
+            modal.show();
+        }
+
+        async function updateMemo() {
+            const id = document.getElementById('edit-id').value;
+            const title = document.getElementById('edit-title').value;
+            const content = document.getElementById('edit-content').value;
+
+            const response = await fetch(`/memos/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            });
+
+            if (response.ok) {
+                bootstrap.Modal.getInstance(document.getElementById('editModal')).hide();
+                fetchMemos();
+            }
+        }
+
+        async function deleteMemo(id) {
+            if (confirm('정말 삭제하시겠습니까?')) {
+                const response = await fetch(`/memos/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    fetchMemos();
+                }
+            }
+        }
+    </script>
+</body>
+</html>

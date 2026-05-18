@@ -76,3 +76,74 @@ git log --oneline -5               # 최근 커밋 5개 확인
 git ls-tree origin/main <path>     # 원격의 특정 경로 파일 확인
 git fetch origin                   # 원격 정보 갱신 (병합 없이)
 ```
+
+---
+
+# Git 작업 기록 — 추가분 (이번 세션)
+
+위 문서 자체와 exercise2(FastAPI 메모 앱)를 push한 작업 기록입니다.
+
+## 작업 요약
+
+| # | 내용 | 커밋 해시 | 커밋 메시지 |
+|---|------|----------|-------------|
+| 4 | git 작업 기록 문서 | `22d09c1` | `docs: add git workflow notes for day01 session` |
+| 5 | FastAPI 메모 앱 (API + 프론트 + SQLite) | `0270f29` | `feat(exercise2): add FastAPI memo app with frontend and SQLite` |
+
+## 새로 마주친 이슈와 해결
+
+### 이슈 3 — venv 생성 실패 (`ensurepip is not available`)
+
+WSL Ubuntu 22.04에 `python3.10-venv` 패키지가 없어 `python3 -m venv .venv` 실패.
+
+**해결**: 시스템 패키지 설치 (sudo 권한 필요).
+
+```bash
+sudo apt update
+sudo apt install -y python3.10-venv python3-pip
+```
+
+설치 후 `dpkg -l python3.10-venv`로 `ii` 상태 확인하는 습관이 좋음.
+(처음에 `python3-venv`로 시도했으나 Ubuntu 22.04 + Python 3.10 조합에서는 버전 명시 패키지 `python3.10-venv`가 정확한 이름)
+
+### 이슈 4 — venv 디렉토리·DB 파일이 untracked로 노출
+
+`exercise2/` 전체가 untracked일 때 `.venv/`, `memos.db`, `__pycache__/`가 모두 보임.
+
+**해결**: 디렉토리에 `.gitignore` 추가하고 **명시적으로 파일명 나열해서 스테이징**.
+
+```
+# exercise2/.gitignore
+.venv/
+__pycache__/
+*.pyc
+*.db
+```
+
+`.gitignore`가 있어도 untracked 표시는 사라지므로, `git add -A`만 피하면 안전.
+스테이징은 항상 파일별로:
+
+```bash
+git add \
+  src/exercise/jooyh965/day01/exercise2/.gitignore \
+  src/exercise/jooyh965/day01/exercise2/main.py \
+  src/exercise/jooyh965/day01/exercise2/db.py \
+  ...
+```
+
+확인:
+```bash
+git ls-tree -r origin/main src/exercise/jooyh965/day01/exercise2/
+# .venv/, memos.db, __pycache__/ 가 결과에 없어야 정상
+```
+
+## 이번에 추가로 배운 점
+
+- **패키지명 정밀도**: Ubuntu에서 Python 가상환경용 패키지는 `python3-venv`가 아니라 메이저 버전을 포함한 `python3.X-venv` 형태가 정확한 이름인 경우가 많음. `apt`가 모호하면 에러 메시지가 정확한 패키지명을 알려줌.
+- **`.gitignore`는 미리**: 새 프로젝트 디렉토리를 만들 때 가장 먼저 `.gitignore`부터 작성하면 staging 사고가 줄어듬. 특히 `.venv/`, `*.db`, `__pycache__/` 같은 산출물.
+- **검증을 푸시 직후에**: `git ls-tree -r origin/main <path>`로 원격에 의도하지 않은 파일(가상환경, DB 등)이 섞이지 않았는지 확인하는 게 좋음.
+
+## 이번 세션 총 푸시 커밋
+
+5건 (1차: 랜딩 페이지, 2차: 마크다운 에디터, 3차: CLAUDE.md, 4차: git.md, 5차: FastAPI 메모 앱).
+모든 푸시에서 1차 거부 → `git pull --rebase` → 재푸시 패턴이 반복됨. 공동 학습 리포에서는 이 패턴이 기본 워크플로우라는 점을 다시 확인.
