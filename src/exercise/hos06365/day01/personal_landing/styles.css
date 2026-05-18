@@ -1,0 +1,249 @@
+:root {
+  color-scheme: light;
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --text: #172033;
+  --muted: #667085;
+  --line: #d9dee8;
+  --primary: #2563eb;
+  --primary-dark: #1d4ed8;
+  --code-bg: #eff3f8;
+  --shadow: 0 18px 45px rgba(23, 32, 51, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Arial, "Noto Sans KR", sans-serif;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 24px 32px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+
+.app-header h1 {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.app-header p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.header-actions,
+.format-buttons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+button {
+  min-height: 36px;
+  border: 1px solid var(--primary);
+  border-radius: 6px;
+  padding: 0 14px;
+  background: var(--primary);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+button.ghost,
+.format-buttons button {
+  background: #ffffff;
+  color: var(--text);
+  border-color: var(--line);
+}
+
+button.ghost:hover,
+.format-buttons button:hover {
+  background: #eef4ff;
+  border-color: #9bb8ff;
+}
+
+.editor-shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 20px;
+  width: min(1400px, calc(100% - 48px));
+  margin: 24px auto;
+}
+
+.pane {
+  min-height: calc(100vh - 150px);
+  overflow: hidden;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.pane-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 58px;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.preview-toolbar {
+  padding-inline: 18px;
+}
+
+.status-text {
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+#markdownInput {
+  display: block;
+  width: 100%;
+  height: calc(100vh - 208px);
+  min-height: 520px;
+  border: 0;
+  resize: none;
+  padding: 22px;
+  outline: none;
+  color: var(--text);
+  background: #fbfcff;
+  font: 16px/1.65 Consolas, Monaco, "Courier New", monospace;
+}
+
+.preview {
+  height: calc(100vh - 208px);
+  min-height: 520px;
+  overflow: auto;
+  padding: 22px 28px 40px;
+  line-height: 1.7;
+}
+
+.preview > :first-child {
+  margin-top: 0;
+}
+
+.preview h1,
+.preview h2,
+.preview h3 {
+  line-height: 1.25;
+  margin: 28px 0 12px;
+}
+
+.preview h1 {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+  font-size: 32px;
+}
+
+.preview h2 {
+  font-size: 25px;
+}
+
+.preview h3 {
+  font-size: 20px;
+}
+
+.preview p {
+  margin: 12px 0;
+}
+
+.preview a {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.preview blockquote {
+  margin: 16px 0;
+  padding: 10px 16px;
+  color: #475467;
+  background: #f1f5f9;
+  border-left: 4px solid #8aa4d6;
+}
+
+.preview pre,
+.preview code {
+  border-radius: 5px;
+  background: var(--code-bg);
+  font-family: Consolas, Monaco, "Courier New", monospace;
+}
+
+.preview code {
+  padding: 2px 5px;
+}
+
+.preview pre {
+  overflow: auto;
+  padding: 14px;
+}
+
+.preview pre code {
+  padding: 0;
+}
+
+.preview ul,
+.preview ol {
+  padding-left: 26px;
+}
+
+.preview hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 24px 0;
+}
+
+@media (max-width: 900px) {
+  .app-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .editor-shell {
+    grid-template-columns: 1fr;
+    width: min(100% - 24px, 760px);
+    margin-block: 12px;
+  }
+
+  .pane {
+    min-height: auto;
+  }
+
+  #markdownInput,
+  .preview {
+    height: 420px;
+    min-height: 420px;
+  }
+
+  .pane-toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .status-text {
+    white-space: normal;
+  }
+}
