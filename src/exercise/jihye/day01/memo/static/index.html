@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Memo</title>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("memo-theme");
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = theme || (prefersDark ? "dark" : "light");
+      })();
+    </script>
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div>
+          <h1>Memo</h1>
+          <p class="sub">FastAPI + SQLite 메모장 CRUD</p>
+        </div>
+        <div class="header-actions">
+          <button class="btn" id="themeToggleBtn" type="button" aria-pressed="false">다크모드</button>
+          <button class="btn primary" id="newMemoBtn" type="button">새 메모</button>
+        </div>
+      </header>
+
+      <section class="layout">
+        <aside class="memo-list" aria-label="메모 목록">
+          <div class="toolbar">
+            <strong>메모 목록</strong>
+            <span class="status" id="countText">0개</span>
+          </div>
+          <div id="memoList"></div>
+        </aside>
+
+        <section class="editor" aria-label="메모 편집">
+          <div class="toolbar">
+            <strong id="editorTitle">새 메모</strong>
+            <div class="button-group">
+              <button class="btn" id="deleteBtn" type="button">삭제</button>
+              <button class="btn primary" id="saveBtn" type="button">저장</button>
+            </div>
+          </div>
+
+          <div class="editor-grid">
+            <div class="field">
+              <label for="titleInput">제목</label>
+              <input id="titleInput" type="text" placeholder="제목을 입력하세요" />
+            </div>
+
+            <div class="field">
+              <label for="contentInput">내용</label>
+              <textarea id="contentInput" placeholder="메모 내용을 입력하세요"></textarea>
+            </div>
+          </div>
+
+          <section class="preview">
+            <h2>미리보기</h2>
+            <div class="preview-box" id="previewBox"><span class="empty">내용이 여기에 표시됩니다.</span></div>
+          </section>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>
