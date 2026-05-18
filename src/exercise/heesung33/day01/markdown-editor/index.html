@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>실시간 마크다운 에디터</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Markdown Editor</h1>
+    </header>
+    <main>
+        <section class="editor-pane">
+            <div class="pane-header">Markdown</div>
+            <textarea id="editor" placeholder="마크다운을 입력하세요..."># Hello Markdown!
+
+## 소개
+
+이것은 **실시간 마크다운 에디터**입니다.
+
+### 기능
+
+- 실시간 미리보기
+- 다양한 마크다운 문법 지원
+- 깔끔한 UI
+
+### 코드 블록
+
+`인라인 코드`도 지원합니다.
+
+```
+function hello() {
+    console.log("Hello, World!");
+}
+```
+
+### 인용문
+
+> 마크다운은 텍스트를 HTML로 변환하는 경량 마크업 언어입니다.
+
+### 링크와 이미지
+
+[Google](https://www.google.com)
+
+---
+
+1. 첫 번째 항목
+2. 두 번째 항목
+3. 세 번째 항목</textarea>
+        </section>
+        <section class="preview-pane">
+            <div class="pane-header">Preview</div>
+            <div id="preview"></div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+</body>
+</html>
