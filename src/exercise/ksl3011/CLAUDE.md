@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**루트 디렉터리**: `src/exercise/ksl3011/` — 이 CLAUDE.md가 위치한 곳이 작업 기준 루트이며, 모든 상대 경로는 여기서 시작한다.
+
 ## Git 정책
 
 - 브랜치 통합 시 **항상 머지(merge)** 사용. 리베이스(rebase) 금지.
