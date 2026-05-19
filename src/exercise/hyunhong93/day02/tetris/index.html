@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris</title>
+  <link rel="stylesheet" href="game.css">
+</head>
+<body>
+<div id="app">
+  <div id="board-wrap">
+    <canvas id="board" width="300" height="600"></canvas>
+    <div id="overlay">
+      <h2>TETRIS</h2>
+      <p>시작 버튼을 눌러 플레이하세요</p>
+    </div>
+  </div>
+
+  <div id="sidebar">
+    <div class="panel">
+      <label>Score</label>
+      <div class="value" id="score-val">0</div>
+    </div>
+    <div class="panel">
+      <label>Level</label>
+      <div class="value" id="level-val">1</div>
+    </div>
+    <div class="panel">
+      <label>Lines</label>
+      <div class="value" id="lines-val">0</div>
+    </div>
+    <div class="panel">
+      <label>Next</label>
+      <canvas id="next-canvas" width="120" height="80"></canvas>
+    </div>
+    <div class="btn-row">
+      <button id="btn">시작</button>
+      <button id="mute-btn" title="음악 on/off">🔊</button>
+    </div>
+    <div class="panel">
+      <label>조작키</label>
+      <div class="keys">
+        <span>←→</span> 이동<br>
+        <span>↑</span> 회전<br>
+        <span>↓</span> 내리기<br>
+        <span>Space</span> 즉시낙하<br>
+        <span>P</span> 일시정지<br>
+        <span>M</span> 음악
+      </div>
+    </div>
+    <a href="landing.html" id="home-link">← 홈으로</a>
+  </div>
+</div>
+
+<script src="game.js"></script>
+</body>
+</html>

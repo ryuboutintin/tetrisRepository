@@ -1,12 +1,22 @@
+import sys
+import os
+
+# day01 디렉터리를 경로에 추가해 auth 패키지를 임포트
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
 import sqlite3
 from contextlib import contextmanager
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
+import auth.router as auth_module
+from auth.jwt_utils import get_current_user
+
 DB_PATH = "memo.db"
+auth_module.DB_PATH = DB_PATH  # auth 패키지가 같은 DB를 사용하도록 설정
 
 app = FastAPI(title="메모장 API")
 
@@ -16,6 +26,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(auth_module.router)
 
 
 @contextmanager
@@ -30,16 +42,27 @@ def get_db():
 
 
 def init_db():
+    auth_module.init_users_table()
     with get_db() as conn:
         conn.execute("""
             CREATE TABLE IF NOT EXISTS memos (
                 id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER NOT NULL DEFAULT 0,
                 title      TEXT    NOT NULL,
                 content    TEXT    NOT NULL DEFAULT '',
+                category   TEXT    NOT NULL DEFAULT '',
+                tags       TEXT    NOT NULL DEFAULT '',
                 created_at TEXT    NOT NULL,
                 updated_at TEXT    NOT NULL
             )
         """)
+        cols = [r[1] for r in conn.execute("PRAGMA table_info(memos)").fetchall()]
+        if "user_id" not in cols:
+            conn.execute("ALTER TABLE memos ADD COLUMN user_id INTEGER NOT NULL DEFAULT 0")
+        if "category" not in cols:
+            conn.execute("ALTER TABLE memos ADD COLUMN category TEXT NOT NULL DEFAULT ''")
+        if "tags" not in cols:
+            conn.execute("ALTER TABLE memos ADD COLUMN tags TEXT NOT NULL DEFAULT ''")
 
 init_db()
 
@@ -47,71 +70,127 @@ init_db()
 class MemoCreate(BaseModel):
     title: str
     content: str
+    category: str = ""
+    tags: str = ""
 
 
 class MemoUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
+    category: Optional[str] = None
+    tags: Optional[str] = None
 
 
 class MemoResponse(BaseModel):
     id: int
+    user_id: int
     title: str
     content: str
+    category: str
+    tags: str
     created_at: str
     updated_at: str
 
 
 @app.get("/memos", response_model=list[MemoResponse])
-def list_memos():
+def list_memos(
+    category: Optional[str] = Query(None),
+    tag: Optional[str] = Query(None),
+    current_user: dict = Depends(get_current_user),
+):
     with get_db() as conn:
-        rows = conn.execute("SELECT * FROM memos ORDER BY id DESC").fetchall()
-    return [dict(r) for r in rows]
+        rows = conn.execute(
+            "SELECT * FROM memos WHERE user_id = ? ORDER BY id DESC",
+            (current_user["id"],),
+        ).fetchall()
+    memos = [dict(r) for r in rows]
+    if category:
+        memos = [m for m in memos if m["category"] == category]
+    if tag:
+        memos = [m for m in memos if tag in [t.strip() for t in m["tags"].split(",") if t.strip()]]
+    return memos
+
+
+@app.get("/categories", response_model=list[str])
+def list_categories(current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT DISTINCT category FROM memos WHERE user_id = ? AND category != '' ORDER BY category",
+            (current_user["id"],),
+        ).fetchall()
+    return [r[0] for r in rows]
+
+
+@app.get("/tags", response_model=list[str])
+def list_tags(current_user: dict = Depends(get_current_user)):
+    with get_db() as conn:
+        rows = conn.execute(
+            "SELECT tags FROM memos WHERE user_id = ? AND tags != ''",
+            (current_user["id"],),
+        ).fetchall()
+    tag_set: set[str] = set()
+    for r in rows:
+        for t in r[0].split(","):
+            t = t.strip()
+            if t:
+                tag_set.add(t)
+    return sorted(tag_set)
 
 
 @app.post("/memos", response_model=MemoResponse, status_code=201)
-def create_memo(body: MemoCreate):
+def create_memo(body: MemoCreate, current_user: dict = Depends(get_current_user)):
     now = datetime.now().isoformat()
     with get_db() as conn:
         cur = conn.execute(
-            "INSERT INTO memos (title, content, created_at, updated_at) VALUES (?, ?, ?, ?)",
-            (body.title, body.content, now, now),
+            "INSERT INTO memos (user_id, title, content, category, tags, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            (current_user["id"], body.title, body.content, body.category, body.tags, now, now),
         )
         row = conn.execute("SELECT * FROM memos WHERE id = ?", (cur.lastrowid,)).fetchone()
     return dict(row)
 
 
 @app.get("/memos/{memo_id}", response_model=MemoResponse)
-def get_memo(memo_id: int):
+def get_memo(memo_id: int, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
-        row = conn.execute("SELECT * FROM memos WHERE id = ?", (memo_id,)).fetchone()
+        row = conn.execute(
+            "SELECT * FROM memos WHERE id = ? AND user_id = ?",
+            (memo_id, current_user["id"]),
+        ).fetchone()
     if row is None:
         raise HTTPException(status_code=404, detail="메모를 찾을 수 없습니다")
     return dict(row)
 
 
 @app.patch("/memos/{memo_id}", response_model=MemoResponse)
-def update_memo(memo_id: int, body: MemoUpdate):
+def update_memo(memo_id: int, body: MemoUpdate, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
-        row = conn.execute("SELECT * FROM memos WHERE id = ?", (memo_id,)).fetchone()
+        row = conn.execute(
+            "SELECT * FROM memos WHERE id = ? AND user_id = ?",
+            (memo_id, current_user["id"]),
+        ).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="메모를 찾을 수 없습니다")
         memo = dict(row)
-        new_title   = body.title   if body.title   is not None else memo["title"]
-        new_content = body.content if body.content is not None else memo["content"]
+        new_title    = body.title    if body.title    is not None else memo["title"]
+        new_content  = body.content  if body.content  is not None else memo["content"]
+        new_category = body.category if body.category is not None else memo["category"]
+        new_tags     = body.tags     if body.tags     is not None else memo["tags"]
         now = datetime.now().isoformat()
         conn.execute(
-            "UPDATE memos SET title = ?, content = ?, updated_at = ? WHERE id = ?",
-            (new_title, new_content, now, memo_id),
+            "UPDATE memos SET title = ?, content = ?, category = ?, tags = ?, updated_at = ? WHERE id = ? AND user_id = ?",
+            (new_title, new_content, new_category, new_tags, now, memo_id, current_user["id"]),
         )
         updated = conn.execute("SELECT * FROM memos WHERE id = ?", (memo_id,)).fetchone()
     return dict(updated)
 
 
 @app.delete("/memos/{memo_id}", status_code=204)
-def delete_memo(memo_id: int):
+def delete_memo(memo_id: int, current_user: dict = Depends(get_current_user)):
     with get_db() as conn:
-        row = conn.execute("SELECT id FROM memos WHERE id = ?", (memo_id,)).fetchone()
+        row = conn.execute(
+            "SELECT id FROM memos WHERE id = ? AND user_id = ?",
+            (memo_id, current_user["id"]),
+        ).fetchone()
         if row is None:
             raise HTTPException(status_code=404, detail="메모를 찾을 수 없습니다")
-        conn.execute("DELETE FROM memos WHERE id = ?", (memo_id,))
+        conn.execute("DELETE FROM memos WHERE id = ? AND user_id = ?", (memo_id, current_user["id"]))

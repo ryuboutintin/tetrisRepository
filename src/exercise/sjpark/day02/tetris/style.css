@@ -1,0 +1,285 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #0f0f1a;
+  color: #e0e0f0;
+  font-family: 'Segoe UI', sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.hidden { display: none !important; }
+
+/* ════════════════════════════════
+   랜딩 페이지
+   ════════════════════════════════ */
+#landing {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 40px 20px;
+}
+
+.landing-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  max-width: 420px;
+  width: 100%;
+}
+
+/* 타이틀 레인보우 글자 */
+.landing-title {
+  font-size: 72px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  user-select: none;
+}
+
+.t { display: inline-block; animation: float 2s ease-in-out infinite; }
+.t1 { color: #ff6b6b; animation-delay: 0s;    }
+.t2 { color: #ffa94d; animation-delay: 0.1s;  }
+.t3 { color: #ffe066; animation-delay: 0.2s;  }
+.t4 { color: #69db7c; animation-delay: 0.3s;  }
+.t5 { color: #74c0fc; animation-delay: 0.4s;  }
+.t6 { color: #da77f2; animation-delay: 0.5s;  }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
+}
+
+/* 환영 문구 */
+.landing-welcome {
+  color: #8080b0;
+  font-size: 15px;
+  text-align: center;
+}
+
+/* 최고 점수 */
+.landing-best {
+  background: #1a1a2e;
+  border: 2px solid #3a3a5c;
+  border-radius: 12px;
+  padding: 16px 40px;
+  text-align: center;
+  width: 100%;
+}
+
+.landing-best .label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8080b0;
+  margin-bottom: 6px;
+}
+
+.landing-best .best-val {
+  font-size: 36px;
+  font-weight: 700;
+  color: #ffe066;
+}
+
+/* 조작법 테이블 */
+.landing-controls {
+  background: #1a1a2e;
+  border: 2px solid #3a3a5c;
+  border-radius: 12px;
+  padding: 20px 28px;
+  width: 100%;
+}
+
+.landing-controls h3 {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8080b0;
+  margin-bottom: 14px;
+}
+
+.landing-controls table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.landing-controls tr + tr td {
+  padding-top: 10px;
+}
+
+.landing-controls td:first-child {
+  width: 100px;
+}
+
+.landing-controls td:last-child {
+  color: #9090c0;
+  font-size: 14px;
+}
+
+kbd {
+  display: inline-block;
+  background: #2a2a4a;
+  border: 1px solid #5050a0;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 13px;
+  font-family: inherit;
+  color: #c0b0ff;
+}
+
+/* 게임 시작 버튼 */
+#start-btn {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #4040a0, #6040c0);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  letter-spacing: 2px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+#start-btn:hover  { opacity: 0.88; }
+#start-btn:active { transform: scale(0.98); }
+
+/* ════════════════════════════════
+   게임 화면
+   ════════════════════════════════ */
+#app {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+#game-canvas {
+  border: 2px solid #3a3a5c;
+  background: #1a1a2e;
+  display: block;
+  box-shadow: 0 0 30px rgba(100, 80, 255, 0.3);
+}
+
+#side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 120px;
+}
+
+.panel-box {
+  background: #1a1a2e;
+  border: 2px solid #3a3a5c;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.panel-box h3 {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #8080b0;
+  margin-bottom: 8px;
+}
+
+.panel-box .value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #c0b0ff;
+}
+
+#next-canvas {
+  display: block;
+  margin-top: 6px;
+}
+
+#controls {
+  font-size: 12px;
+  color: #6060a0;
+  line-height: 1.9;
+}
+
+#controls span {
+  color: #9090c0;
+  font-weight: 600;
+}
+
+/* ════════════════════════════════
+   게임 오버 오버레이
+   ════════════════════════════════ */
+#overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.8);
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 20px;
+}
+
+#overlay.show { display: flex; }
+
+#overlay h2 {
+  font-size: 42px;
+  color: #ff6060;
+  text-shadow: 0 0 24px rgba(255, 80, 80, 0.7);
+}
+
+.overlay-scores {
+  background: #1a1a2e;
+  border: 2px solid #3a3a5c;
+  border-radius: 10px;
+  padding: 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 220px;
+}
+
+.ov-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+}
+
+.ov-row span  { color: #8080b0; }
+.ov-row strong { color: #c0b0ff; font-size: 20px; }
+
+.record-msg {
+  color: #ffe066;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+.overlay-btns {
+  display: flex;
+  gap: 12px;
+}
+
+.overlay-btns button {
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.overlay-btns button:hover { opacity: 0.82; }
+
+#restart-btn { background: #4040a0; color: #fff; }
+#home-btn    { background: #2a2a4a; color: #c0b0ff; border: 2px solid #4040a0; }

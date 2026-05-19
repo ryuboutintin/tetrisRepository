@@ -1,0 +1,266 @@
+:root {
+  --bg: #0b1020;
+  --bg-soft: rgba(14, 20, 41, 0.72);
+  --panel: rgba(18, 25, 51, 0.88);
+  --panel-border: rgba(255, 255, 255, 0.1);
+  --text: #f4f7ff;
+  --muted: rgba(244, 247, 255, 0.72);
+  --accent: #7cf7d4;
+  --accent-2: #7ea1ff;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(126, 161, 255, 0.25), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(124, 247, 212, 0.16), transparent 28%),
+    linear-gradient(160deg, #07101f, #0b1020 40%, #121a33);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 80%);
+  opacity: 0.55;
+}
+
+.app-shell {
+  width: min(1120px, calc(100% - 32px));
+  margin: 0 auto;
+  padding: 32px 0 40px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(280px, 0.8fr);
+  gap: 20px;
+  align-items: end;
+  margin-bottom: 20px;
+}
+
+.hero-copy,
+.stats-card,
+.board-frame,
+.controls-card {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.hero-copy {
+  border-radius: 28px;
+  padding: 28px 30px;
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.06em;
+}
+
+.lede {
+  margin: 14px 0 0;
+  max-width: 58ch;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.stats-card {
+  border-radius: 24px;
+  padding: 22px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.stats-card div {
+  padding: 14px 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stat-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stats-card strong {
+  font-size: 1.8rem;
+}
+
+.playground {
+  display: grid;
+  grid-template-columns: auto 280px;
+  gap: 20px;
+  align-items: start;
+}
+
+.board-frame {
+  position: relative;
+  border-radius: 28px;
+  padding: 18px;
+}
+
+#game {
+  display: block;
+  width: min(100%, 440px);
+  height: auto;
+  aspect-ratio: 1 / 2;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(6, 10, 22, 0.95), rgba(8, 13, 30, 0.98));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.overlay {
+  position: absolute;
+  inset: 18px;
+  display: grid;
+  place-items: center;
+  gap: 12px;
+  border-radius: 20px;
+  background: rgba(5, 9, 18, 0.72);
+  text-align: center;
+  transition: opacity 0.2s ease;
+}
+
+.overlay p {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.overlay button {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font: inherit;
+  font-weight: 700;
+  color: #07101f;
+  background: linear-gradient(135deg, var(--accent), #d5fff5);
+  cursor: pointer;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.controls-card {
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.controls-card h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+}
+
+.controls-card ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 12px;
+}
+
+.controls-card li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
+
+kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 38px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.88rem;
+}
+
+.hint {
+  margin: 18px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+@media (max-width: 920px) {
+  .hero,
+  .playground {
+    grid-template-columns: 1fr;
+  }
+
+  .controls-card {
+    order: 2;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell {
+    width: min(100% - 20px, 1120px);
+    padding-top: 20px;
+  }
+
+  .hero-copy,
+  .stats-card,
+  .board-frame,
+  .controls-card {
+    border-radius: 22px;
+  }
+
+  .hero-copy {
+    padding: 22px;
+  }
+
+  .stats-card {
+    grid-template-columns: 1fr;
+  }
+
+  .board-frame {
+    padding: 14px;
+  }
+
+  .overlay {
+    inset: 14px;
+  }
+}
