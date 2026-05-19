@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris MVP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="app-shell">
+    <section class="hero-panel">
+      <p class="eyebrow">Browser Arcade</p>
+      <h1>TETRIS</h1>
+      <p class="subtitle">브라우저에서 바로 실행되는 미니멀 MVP</p>
+
+      <div class="score-card">
+        <span class="label">SCORE</span>
+        <strong id="score">0</strong>
+      </div>
+
+      <div class="controls-card">
+        <p>조작법</p>
+        <ul>
+          <li>← → : 좌우 이동</li>
+          <li>↓ : 빠르게 내리기</li>
+          <li>↑ / Space : 회전</li>
+          <li>Enter : 재시작</li>
+        </ul>
+      </div>
+
+      <button id="restart-button" type="button">다시 시작</button>
+    </section>
+
+    <section class="game-panel">
+      <div class="board-frame">
+        <canvas id="tetris" width="300" height="600" aria-label="테트리스 게임 보드"></canvas>
+        <div id="overlay" class="overlay hidden">
+          <div class="overlay-card">
+            <h2 id="overlay-title">Game Over</h2>
+            <p id="overlay-message">Enter 키로 다시 시작하세요.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

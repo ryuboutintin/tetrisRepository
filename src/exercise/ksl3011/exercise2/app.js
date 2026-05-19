@@ -42,6 +42,7 @@ const authError    = document.getElementById('authError');
 const tabLogin     = document.getElementById('tabLogin');
 const tabRegister  = document.getElementById('tabRegister');
 const logoutBtn    = document.getElementById('logoutBtn');
+const userLabel    = document.getElementById('userLabel');
 
 // ── 토큰 유틸 ────────────────────────────────────────────────────────────────
 function getToken()    { return localStorage.getItem(TOKEN_KEY); }
@@ -99,9 +100,22 @@ authForm.addEventListener('submit', async e => {
       body: JSON.stringify({ username, password }),
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || '오류가 발생했습니다.');
+    if (!res.ok) {
+      let msg;
+      if (Array.isArray(data.detail)) {
+        msg = data.detail.map(e => (typeof e === 'string' ? e : e.msg || '유효성 검사 오류')).join(', ');
+      } else if (typeof data.detail === 'string') {
+        msg = data.detail;
+      } else {
+        msg = '오류가 발생했습니다.';
+      }
+      throw new Error(msg);
+    }
     setToken(data.access_token);
-    logoutBtn.textContent = username;
+    userLabel.textContent = username;
+    if (authMode === 'register') {
+      alert(`${username}님, 회원가입이 완료되었습니다! 환영합니다.`);
+    }
     hideAuthOverlay();
     loadMemos();
   } catch (err) {
@@ -537,7 +551,7 @@ async function loadTrash() {
 }
 
 if (getToken()) {
-  logoutBtn.textContent = getUsername() || '사용자';
+  userLabel.textContent = getUsername() || '사용자';
   loadMemos();
 } else {
   showAuthOverlay();
