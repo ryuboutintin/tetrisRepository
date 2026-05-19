@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETRIS — Welcome</title>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+    <div class="landing">
+        <section class="hero">
+            <h1 class="title">TETRIS</h1>
+            <p class="tagline">Classic Block Puzzle · Web Edition</p>
+            <a href="game.html" class="play-btn">▶ PLAY</a>
+        </section>
+
+        <section class="info-grid">
+            <article class="info-card">
+                <h2>HOW TO PLAY</h2>
+                <ul>
+                    <li>위에서 떨어지는 블록을 좌우로 옮기고 회전해 한 줄을 빈칸 없이 채우세요.</li>
+                    <li>줄이 채워지면 사라지면서 점수가 올라갑니다.</li>
+                    <li>블록이 화면 상단까지 쌓이면 게임 오버.</li>
+                    <li>레벨이 오를수록 블록 낙하 속도가 빨라집니다 (라인 10개마다 +1 레벨).</li>
+                </ul>
+            </article>
+
+            <article class="info-card">
+                <h2>CONTROLS</h2>
+                <table>
+                    <tr><th>← →</th><td>좌/우 이동</td></tr>
+                    <tr><th>↑</th><td>회전</td></tr>
+                    <tr><th>↓</th><td>소프트 드롭</td></tr>
+                    <tr><th>Space</th><td>하드 드롭</td></tr>
+                    <tr><th>C</th><td>홀드 (1개 보관·교체)</td></tr>
+                    <tr><th>P</th><td>일시정지</td></tr>
+                    <tr><th>M</th><td>BGM ON/OFF</td></tr>
+                </table>
+            </article>
+
+            <article class="info-card">
+                <h2>SCORING</h2>
+                <table>
+                    <tr><th>Single</th><td>1 줄 — 100 × 레벨</td></tr>
+                    <tr><th>Double</th><td>2 줄 — 300 × 레벨</td></tr>
+                    <tr><th>Triple</th><td>3 줄 — 500 × 레벨</td></tr>
+                    <tr><th>Tetris</th><td>4 줄 — 800 × 레벨</td></tr>
+                    <tr><th>Soft Drop</th><td>+1 점 / 칸</td></tr>
+                    <tr><th>Hard Drop</th><td>+2 점 / 칸</td></tr>
+                </table>
+            </article>
+
+            <article class="info-card">
+                <h2>PIECES</h2>
+                <p>표준 7 종 — <span class="hl-i">I</span> · <span class="hl-o">O</span> · <span class="hl-t">T</span> · <span class="hl-s">S</span> · <span class="hl-z">Z</span> · <span class="hl-l">L</span> · <span class="hl-j">J</span></p>
+                <p>보너스 3 종 — <span class="hl-plus">✚ Plus</span> · <span class="hl-u">∪ U</span> · <span class="hl-bar">━ Bar3</span></p>
+                <p class="muted">보너스 블록은 약 20% 확률로 등장합니다.</p>
+            </article>
+        </section>
+
+        <footer class="footer">
+            <small>BGM: Korobeiniki (Russian folk · public domain) · Synthesized via Web Audio API</small>
+        </footer>
+    </div>
+</body>
+</html>
