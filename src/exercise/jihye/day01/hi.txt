@@ -1,0 +1,50 @@
+    1  seyes
+    2  xeyes
+    3  sudo apt install x11-apps
+    4  xeyes
+    5  lsb_release -a
+    6  sudo apt update
+    7  sudo apt upgrade -y
+    8  pwd
+    9  mkdir ~/work 
+   10  cd ~/work 
+   11  exit
+   12  pwd
+   13  cd ../../
+   14  cd ~/work/
+   15  ls
+   16  pwd
+   17  git
+   18  git config --global user.name "jihye.choi"
+   19  git config --global user.email say7779@hanmail.net
+   20  git config pull.rebase false
+   21  git config --global pull.rebase false
+   22  git config --global --list
+   23  git clone https://github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   24  ssh-keygen 
+   25  cat ~/.ssh/id_rsa.pub 
+   26  git clone https://github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   27  cat ~/.ssh/id_rsa.pub
+   28  git clone https://github.com/weable-kosa/kosa-vibecoding-2026-2nd.git
+   29  git config --gloabal user.name
+   30  git config --global user.name
+   31  git clone git@github.com:weable-kosa/kosa-vibecoding-2026-2nd.git 
+   32  ls
+   33  history > hi.txt
+   34  git add hi.txt 
+   35  cd kosa-vibecoding-2026-2nd/
+   36  ls
+   37  cd src/exercise/jihye/
+   38  ls
+   39  git pull --no-edit
+   40  cd day01/
+   41  history > hi.txt
+   42  ls
+   43  cd ../
+   44  ll
+   45  chown xpert:xpert day01
+   46  sudo chown xpert:xpert day01
+   47  ls
+   48  ll
+   49  cd day01/
+   50  history > hi.txt

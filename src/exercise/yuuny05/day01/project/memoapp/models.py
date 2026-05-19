@@ -1,15 +1,8 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from database import Base
-
-memo_tags = Table(
-    "memo_tags",
-    Base.metadata,
-    Column("memo_id", Integer, ForeignKey("memos.id", ondelete="CASCADE")),
-    Column("tag_id", Integer, ForeignKey("tags.id", ondelete="CASCADE")),
-)
 
 
 class User(Base):
@@ -21,7 +14,19 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     memos = relationship("Memo", back_populates="owner", cascade="all, delete-orphan")
-    tags = relationship("Tag", back_populates="owner", cascade="all, delete-orphan")
+    refresh_tokens = relationship("RefreshToken", back_populates="owner", cascade="all, delete-orphan")
+
+
+class RefreshToken(Base):
+    __tablename__ = "refresh_tokens"
+
+    id = Column(Integer, primary_key=True, index=True)
+    token = Column(String, unique=True, nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    owner = relationship("User", back_populates="refresh_tokens")
 
 
 class Memo(Base):
@@ -30,21 +35,21 @@ class Memo(Base):
     id = Column(Integer, primary_key=True, index=True)
     title = Column(String(200), nullable=False)
     content = Column(String, nullable=False)
+    category = Column(String(100), nullable=True)   # 선택 카테고리 (찻집 목록)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
 
     owner = relationship("User", back_populates="memos")
-    tags = relationship("Tag", secondary=memo_tags, back_populates="memos")
+    tags = relationship("MemoTag", back_populates="memo", cascade="all, delete-orphan")
 
 
-class Tag(Base):
-    __tablename__ = "tags"
+class MemoTag(Base):
+    """메모에 자유 입력된 태그 문자열 1개를 저장하는 행."""
+    __tablename__ = "memo_tags"
 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(50), nullable=False)
-    color = Column(String(20), nullable=False, default="#ff69b4")
-    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String(50), nullable=False, index=True)
+    memo_id = Column(Integer, ForeignKey("memos.id", ondelete="CASCADE"), nullable=False)
 
-    owner = relationship("User", back_populates="tags")
-    memos = relationship("Memo", secondary=memo_tags, back_populates="tags")
+    memo = relationship("Memo", back_populates="tags")
