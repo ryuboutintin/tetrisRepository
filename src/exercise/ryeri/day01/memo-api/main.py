@@ -1,4 +1,5 @@
 import json
+import secrets
 import sqlite3
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -13,8 +14,9 @@ from passlib.context import CryptContext
 from pydantic import BaseModel
 
 SECRET_KEY = "change-this-secret-in-production-use-32-chars"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7일
+ALGORITHM  = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS   = 7
 
 app = FastAPI(title="메모장 API")
 
@@ -29,7 +31,7 @@ BASE_DIR = Path(__file__).parent
 DB_PATH  = BASE_DIR / "memos.db"
 STATIC   = BASE_DIR / "static" / "index.html"
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context   = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
@@ -62,7 +64,15 @@ def init_db() -> None:
                 updated_at TEXT NOT NULL
             )
         """)
-        # 기존 DB 마이그레이션
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS refresh_tokens (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER NOT NULL,
+                token      TEXT NOT NULL UNIQUE,
+                expires_at TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
         for sql in [
             "ALTER TABLE memos ADD COLUMN user_id INTEGER",
             "ALTER TABLE memos ADD COLUMN category TEXT NOT NULL DEFAULT ''",
@@ -88,10 +98,54 @@ def hash_password(password: str) -> str:
 
 def create_access_token(user_id: int) -> str:
     payload = {
-        "sub": str(user_id),
-        "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+        "sub":  str(user_id),
+        "type": "access",
+        "exp":  datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_refresh_token(user_id: int) -> str:
+    token      = secrets.token_urlsafe(32)
+    now        = datetime.utcnow().isoformat()
+    expires_at = (datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)).isoformat()
+    with get_db() as conn:
+        conn.execute(
+            "INSERT INTO refresh_tokens (user_id, token, expires_at, created_at) VALUES (?, ?, ?, ?)",
+            (user_id, token, expires_at, now),
+        )
+    return token
+
+
+def rotate_refresh_token(old_token: str) -> tuple[str, dict]:
+    """기존 리프레시 토큰을 검증·삭제하고 새 토큰을 발급한다 (토큰 로테이션)."""
+    now        = datetime.utcnow().isoformat()
+    new_token  = secrets.token_urlsafe(32)
+    expires_at = (datetime.utcnow() + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)).isoformat()
+
+    with get_db() as conn:
+        row = conn.execute(
+            "SELECT * FROM refresh_tokens WHERE token = ? AND expires_at > ?",
+            (old_token, now),
+        ).fetchone()
+        if not row:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="리프레시 토큰이 유효하지 않거나 만료됐습니다.",
+            )
+        user_id = row["user_id"]
+        conn.execute("DELETE FROM refresh_tokens WHERE token = ?", (old_token,))
+        conn.execute(
+            "INSERT INTO refresh_tokens (user_id, token, expires_at, created_at) VALUES (?, ?, ?, ?)",
+            (user_id, new_token, expires_at, now),
+        )
+
+    with get_db() as conn:
+        user = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+
+    if not user:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "사용자를 찾을 수 없습니다.")
+    return new_token, dict(user)
 
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
@@ -102,6 +156,8 @@ def get_current_user(token: str = Depends(oauth2_scheme)) -> dict:
     )
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        if payload.get("type") != "access":
+            raise exc
         user_id = payload.get("sub")
         if user_id is None:
             raise exc
@@ -120,10 +176,19 @@ class UserCreate(BaseModel):
     password: str
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str = "bearer"
-    username: str
+class TokenPair(BaseModel):
+    access_token:  str
+    refresh_token: str
+    token_type:    str = "bearer"
+    username:      str
+
+
+class RefreshRequest(BaseModel):
+    refresh_token: str
+
+
+class LogoutRequest(BaseModel):
+    refresh_token: str
 
 
 class MemoCreate(BaseModel):
@@ -178,7 +243,7 @@ def register(body: UserCreate):
     return {"message": "회원가입이 완료됐습니다."}
 
 
-@app.post("/auth/login", response_model=Token)
+@app.post("/auth/login", response_model=TokenPair)
 def login(form: OAuth2PasswordRequestForm = Depends()):
     with get_db() as conn:
         user = conn.execute(
@@ -187,10 +252,35 @@ def login(form: OAuth2PasswordRequestForm = Depends()):
     if not user or not verify_password(form.password, user["password_hash"]):
         raise HTTPException(401, "사용자 이름 또는 비밀번호가 틀립니다.")
     return {
-        "access_token": create_access_token(user["id"]),
-        "token_type": "bearer",
-        "username": user["username"],
+        "access_token":  create_access_token(user["id"]),
+        "refresh_token": create_refresh_token(user["id"]),
+        "token_type":    "bearer",
+        "username":      user["username"],
     }
+
+
+@app.post("/auth/refresh", response_model=TokenPair)
+def refresh(body: RefreshRequest):
+    """리프레시 토큰으로 새 액세스 토큰 + 새 리프레시 토큰을 발급한다."""
+    new_refresh, user = rotate_refresh_token(body.refresh_token)
+    return {
+        "access_token":  create_access_token(user["id"]),
+        "refresh_token": new_refresh,
+        "token_type":    "bearer",
+        "username":      user["username"],
+    }
+
+
+@app.post("/auth/logout", status_code=204)
+def logout_route(body: LogoutRequest):
+    """리프레시 토큰을 DB에서 삭제해 재사용을 막는다."""
+    with get_db() as conn:
+        conn.execute("DELETE FROM refresh_tokens WHERE token = ?", (body.refresh_token,))
+
+
+@app.get("/auth/me")
+def me(user: dict = Depends(get_current_user)):
+    return {"id": user["id"], "username": user["username"], "created_at": user["created_at"]}
 
 
 # ── CRUD ──────────────────────────────────────────────────────

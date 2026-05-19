@@ -18,11 +18,11 @@
       <form class="auth-form" id="authForm" autocomplete="off">
         <div class="auth-field">
           <input type="text" id="authUsername" placeholder="아이디 (3자 이상)"
-                 autocomplete="username" maxlength="30" />
+                 autocomplete="username" minlength="3" maxlength="30" required />
         </div>
         <div class="auth-field">
           <input type="password" id="authPassword" placeholder="비밀번호 (6자 이상)"
-                 autocomplete="current-password" />
+                 autocomplete="current-password" minlength="6" required />
         </div>
         <button type="submit" class="auth-submit" id="authSubmit">로그인</button>
         <p class="auth-error hidden" id="authError"></p>
@@ -56,13 +56,18 @@
 
       <!-- 사이드바 하단 -->
       <div class="sidebar-footer">
-        <button class="footer-btn" id="trashBtn" title="휴지통">휴지통</button>
-        <div class="footer-divider"></div>
-        <button class="footer-btn" id="exportBtn" title="JSON으로 내보내기">내보내기</button>
-        <label class="footer-btn" for="importFile" title="JSON 가져오기">가져오기</label>
-        <input type="file" id="importFile" accept=".json" hidden />
-        <div class="footer-divider"></div>
-        <button class="footer-btn footer-btn--user" id="logoutBtn" title="로그아웃"></button>
+        <div class="footer-tools">
+          <button class="footer-btn" id="trashBtn" title="휴지통">휴지통</button>
+          <div class="footer-divider"></div>
+          <button class="footer-btn" id="exportBtn" title="JSON으로 내보내기">내보내기</button>
+          <label class="footer-btn" for="importFile" title="JSON 가져오기">가져오기</label>
+          <input type="file" id="importFile" accept=".json" hidden />
+        </div>
+        <div class="footer-user">
+          <span class="footer-username" id="userLabel"></span>
+          <div class="footer-divider"></div>
+          <button class="footer-btn footer-btn--logout" id="logoutBtn">로그아웃</button>
+        </div>
       </div>
     </aside>
 
