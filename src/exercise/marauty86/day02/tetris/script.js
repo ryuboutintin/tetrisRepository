@@ -1,5 +1,7 @@
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
+const nextCanvas = document.getElementById('next-piece');
+const nextContext = nextCanvas.getContext('2d');
 const scoreElement = document.getElementById('score');
 const levelElement = document.getElementById('level');
 const finalScoreElement = document.getElementById('final-score');
@@ -8,6 +10,7 @@ const startScreen = document.getElementById('start-screen');
 const gameOverScreen = document.getElementById('game-over-screen');
 
 context.scale(20, 20);
+nextContext.scale(20, 20);
 
 // Colors & Pieces
 const colors = [null, '#FF0D72', '#0DC2FF', '#0DFF72', '#F538FF', '#FF8E0D', '#FFE138', '#3877FF'];
@@ -71,7 +74,7 @@ function createMatrix(w, h) {
     return matrix;
 }
 
-function drawMatrix(matrix, offset) {
+function drawMatrix(matrix, offset, ctx = context) {
     matrix.forEach((row, y) => {
         row.forEach((value, x) => {
             if (value !== 0) {
@@ -80,21 +83,33 @@ function drawMatrix(matrix, offset) {
                 const color = colors[value];
                 
                 // Main block body
-                context.fillStyle = color;
-                context.fillRect(cx, cy, 1, 1);
+                ctx.fillStyle = color;
+                ctx.fillRect(cx, cy, 1, 1);
                 
                 // Highlight (Top/Left for 3D effect)
-                context.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                context.fillRect(cx, cy, 1, 0.15); // Top
-                context.fillRect(cx, cy, 0.15, 1); // Left
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fillRect(cx, cy, 1, 0.15); // Top
+                ctx.fillRect(cx, cy, 0.15, 1); // Left
                 
                 // Shadow (Bottom/Right for 3D effect)
-                context.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                context.fillRect(cx, cy + 0.85, 1, 0.15); // Bottom
-                context.fillRect(cx + 0.85, cy, 0.15, 1); // Right
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                ctx.fillRect(cx, cy + 0.85, 1, 0.15); // Bottom
+                ctx.fillRect(cx + 0.85, cy, 0.15, 1); // Right
             }
         });
     });
+}
+
+function drawNextPiece() {
+    nextContext.fillStyle = '#000';
+    nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
+    if (!nextPieceMatrix) return;
+    
+    // Center the piece
+    const offsetX = (nextCanvas.width/20 - nextPieceMatrix[0].length) / 2;
+    const offsetY = (nextCanvas.height/20 - nextPieceMatrix.length) / 2;
+    
+    drawMatrix(nextPieceMatrix, {x: offsetX, y: offsetY}, nextContext);
 }
 
 function drawGrid() {
@@ -118,8 +133,9 @@ function draw() {
     context.fillStyle = '#000';
     context.fillRect(0, 0, canvas.width, canvas.height);
     drawGrid();
-    drawMatrix(arena, {x: 0, y: 0});
-    drawMatrix(player.matrix, player.pos);
+    drawMatrix(arena, {x: 0, y: 0}, context);
+    drawMatrix(player.matrix, player.pos, context);
+    drawNextPiece();
 }
 
 function playerReset() {
@@ -175,7 +191,8 @@ function arenaSweep() {
         player.score += rowCount * 10;
         if (player.score >= player.level * 100) {
             player.level++;
-            dropInterval = Math.max(100, dropInterval - 100);
+            // Exponential speed increase: 1000ms base, 15% reduction per level, min 50ms
+            dropInterval = Math.max(50, 1000 * Math.pow(0.85, player.level - 1));
         }
         rowCount *= 2;
     }
