@@ -143,6 +143,35 @@ body {
 }
 
 
+/* 필터 */
+.filter-section {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.filter-section select,
+.filter-section input {
+  flex: 1;
+  min-width: 120px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 0.875rem;
+  font-family: inherit;
+  color: #1a1a2e;
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.filter-section select:focus,
+.filter-section input:focus {
+  border-color: #4f46e5;
+}
+
 /* 입력 폼 */
 .form-section {
   background: #fff;
@@ -174,6 +203,15 @@ body {
 .form-section textarea:focus {
   border-color: #4f46e5;
   background: #fff;
+}
+
+.form-meta {
+  display: flex;
+  gap: 8px;
+}
+
+.form-meta input {
+  flex: 1;
 }
 
 .form-actions {
@@ -315,9 +353,60 @@ body {
   text-align: right;
 }
 
+/* 카테고리 / 태그 */
+.memo-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-badge {
+  display: inline-block;
+  background: #ede9fe;
+  color: #5b21b6;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 99px;
+}
+
+.tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag-chip {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tag-chip:hover {
+  background: #e0e7ff;
+  color: #4f46e5;
+}
+
 /* 인라인 편집 */
+.edit-meta {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-meta input {
+  flex: 1;
+}
+
 .edit-input,
-.edit-textarea {
+.edit-textarea,
+.edit-category,
+.edit-tags {
   width: 100%;
   border: 1.5px solid #4f46e5;
   border-radius: 8px;
@@ -328,6 +417,7 @@ body {
   background: #f8fafc;
   resize: none;
   outline: none;
+  box-sizing: border-box;
 }
 
 .edit-actions {
