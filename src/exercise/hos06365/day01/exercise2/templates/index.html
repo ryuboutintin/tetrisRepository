@@ -3,19 +3,20 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Memo CRUD</title>
+    <title>Memo Auth</title>
     <style>
       :root {
         color-scheme: light;
-        --bg: #f6f7f9;
+        --bg: #f5f6f8;
         --panel: #ffffff;
-        --text: #20242a;
-        --muted: #69717d;
-        --line: #d9dee5;
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --danger: #dc2626;
-        --danger-hover: #b91c1c;
+        --text: #1f252d;
+        --muted: #66717f;
+        --line: #d8dee7;
+        --primary: #0f766e;
+        --primary-hover: #115e59;
+        --accent: #365bb5;
+        --danger: #c92525;
+        --danger-bg: #fee2e2;
       }
 
       * {
@@ -36,9 +37,9 @@
       }
 
       main {
-        width: min(100% - 32px, 920px);
+        width: min(100% - 32px, 1040px);
         margin: 0 auto;
-        padding: 32px 0;
+        padding: 28px 0;
       }
 
       header {
@@ -46,7 +47,7 @@
         align-items: end;
         justify-content: space-between;
         gap: 16px;
-        margin-bottom: 20px;
+        margin-bottom: 18px;
       }
 
       h1 {
@@ -55,20 +56,23 @@
         line-height: 1.2;
       }
 
-      .count {
+      .count,
+      .meta,
+      .helper {
         color: var(--muted);
-        font-size: 14px;
+        font-size: 13px;
       }
 
       .layout {
         display: grid;
-        grid-template-columns: 320px 1fr;
+        grid-template-columns: 340px 1fr;
         gap: 18px;
         align-items: start;
       }
 
       .panel,
-      .memo {
+      .memo,
+      .auth-box {
         background: var(--panel);
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -80,7 +84,19 @@
         top: 18px;
       }
 
-      form {
+      .auth-box {
+        width: min(100%, 420px);
+        margin: 56px auto 0;
+        padding: 22px;
+      }
+
+      .auth-box h2 {
+        margin: 0 0 14px;
+        font-size: 21px;
+      }
+
+      form,
+      .field-stack {
         display: grid;
         gap: 12px;
       }
@@ -93,7 +109,8 @@
       }
 
       input,
-      textarea {
+      textarea,
+      select {
         width: 100%;
         border: 1px solid var(--line);
         border-radius: 6px;
@@ -101,6 +118,7 @@
         font: inherit;
         padding: 10px 11px;
         outline: none;
+        background: #fff;
       }
 
       textarea {
@@ -109,14 +127,23 @@
       }
 
       input:focus,
-      textarea:focus {
+      textarea:focus,
+      select:focus {
         border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgb(37 99 235 / 14%);
+        box-shadow: 0 0 0 3px rgb(15 118 110 / 15%);
       }
 
-      .actions {
+      .actions,
+      .top-actions,
+      .memo-buttons,
+      .tabs,
+      .filters {
         display: flex;
         gap: 8px;
+      }
+
+      .top-actions {
+        align-items: center;
       }
 
       button {
@@ -148,12 +175,26 @@
       }
 
       .danger {
-        background: #fee2e2;
+        background: var(--danger-bg);
         color: var(--danger);
       }
 
       .danger:hover {
         background: var(--danger);
+        color: #fff;
+      }
+
+      .tabs {
+        margin-bottom: 14px;
+      }
+
+      .tab {
+        flex: 1;
+        background: #eef1f5;
+      }
+
+      .tab.active {
+        background: var(--accent);
         color: #fff;
       }
 
@@ -188,14 +229,7 @@
         overflow-wrap: anywhere;
       }
 
-      .meta {
-        color: var(--muted);
-        font-size: 12px;
-      }
-
       .memo-buttons {
-        display: flex;
-        gap: 8px;
         flex-shrink: 0;
       }
 
@@ -203,6 +237,39 @@
         min-height: 34px;
         padding: 0 10px;
         font-size: 13px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .chip {
+        border: 1px solid #cbd5e1;
+        border-radius: 999px;
+        color: #334155;
+        display: inline-flex;
+        font-size: 12px;
+        line-height: 1;
+        padding: 6px 9px;
+      }
+
+      .category {
+        background: #e6f6f3;
+        border-color: #a7d8cf;
+        color: #0f5f59;
+        font-weight: 700;
+      }
+
+      .filters {
+        align-items: end;
+        margin-bottom: 12px;
+      }
+
+      .filters label {
+        flex: 1;
       }
 
       .empty {
@@ -219,14 +286,19 @@
         font-size: 14px;
       }
 
-      @media (max-width: 760px) {
+      [hidden] {
+        display: none !important;
+      }
+
+      @media (max-width: 780px) {
         main {
-          width: min(100% - 24px, 920px);
+          width: min(100% - 24px, 1040px);
           padding: 22px 0;
         }
 
         header,
-        .memo-head {
+        .memo-head,
+        .filters {
           display: grid;
         }
 
@@ -242,53 +314,158 @@
   </head>
   <body>
     <main>
-      <header>
-        <div>
-          <h1>메모장</h1>
-          <div class="count" id="memoCount">0개의 메모</div>
+      <section class="auth-box" id="authView">
+        <div class="tabs" role="tablist" aria-label="인증 모드">
+          <button class="tab active" id="loginTab" type="button">로그인</button>
+          <button class="tab" id="registerTab" type="button">회원가입</button>
         </div>
-      </header>
+        <h2 id="authTitle">로그인</h2>
+        <form id="authForm">
+          <label>
+            아이디
+            <input id="username" name="username" minlength="3" maxlength="50" required autocomplete="username" />
+          </label>
+          <label>
+            비밀번호
+            <input id="password" name="password" type="password" minlength="6" maxlength="128" required autocomplete="current-password" />
+          </label>
+          <div class="helper">아이디는 한글, 영문, 숫자, 밑줄, 하이픈을 사용할 수 있습니다.</div>
+          <div class="error" id="authError"></div>
+          <button class="primary" id="authSubmit" type="submit">로그인</button>
+        </form>
+      </section>
 
-      <section class="layout" aria-label="메모 CRUD">
-        <aside class="panel">
-          <form id="memoForm">
-            <input type="hidden" id="memoId" />
-            <label>
-              제목
-              <input id="title" name="title" maxlength="100" required autocomplete="off" />
-            </label>
-            <label>
-              내용
-              <textarea id="content" name="content" maxlength="2000" required></textarea>
-            </label>
-            <div class="error" id="errorMessage"></div>
-            <div class="actions">
-              <button class="primary" id="submitButton" type="submit">추가</button>
-              <button class="secondary" id="cancelButton" type="button" hidden>취소</button>
+      <section id="appView" hidden>
+        <header>
+          <div>
+            <h1>메모장</h1>
+            <div class="count" id="memoCount">0개의 메모</div>
+          </div>
+          <div class="top-actions">
+            <span class="meta" id="userLabel"></span>
+            <button class="secondary" id="logoutButton" type="button">로그아웃</button>
+          </div>
+        </header>
+
+        <section class="layout" aria-label="메모 앱">
+          <aside class="panel">
+            <form id="memoForm">
+              <input type="hidden" id="memoId" />
+              <label>
+                제목
+                <input id="title" name="title" maxlength="100" required autocomplete="off" />
+              </label>
+              <label>
+                카테고리
+                <input id="category" name="category" maxlength="60" placeholder="예: 업무, 개인" autocomplete="off" />
+              </label>
+              <label>
+                태그
+                <input id="tags" name="tags" maxlength="240" placeholder="쉼표로 구분: 회의, 아이디어" autocomplete="off" />
+              </label>
+              <label>
+                내용
+                <textarea id="content" name="content" maxlength="2000" required></textarea>
+              </label>
+              <div class="error" id="errorMessage"></div>
+              <div class="actions">
+                <button class="primary" id="submitButton" type="submit">추가</button>
+                <button class="secondary" id="cancelButton" type="button" hidden>취소</button>
+              </div>
+            </form>
+          </aside>
+
+          <section>
+            <div class="filters" aria-label="메모 필터">
+              <label>
+                카테고리
+                <select id="categoryFilter">
+                  <option value="">전체 카테고리</option>
+                </select>
+              </label>
+              <label>
+                태그 검색
+                <input id="tagFilter" placeholder="태그 입력" autocomplete="off" />
+              </label>
             </div>
-          </form>
-        </aside>
-
-        <section class="memo-list" id="memoList" aria-live="polite"></section>
+            <div class="memo-list" id="memoList" aria-live="polite"></div>
+          </section>
+        </section>
       </section>
     </main>
 
     <script>
+      const authView = document.querySelector("#authView");
+      const appView = document.querySelector("#appView");
+      const authForm = document.querySelector("#authForm");
+      const authTitle = document.querySelector("#authTitle");
+      const authSubmit = document.querySelector("#authSubmit");
+      const authError = document.querySelector("#authError");
+      const loginTab = document.querySelector("#loginTab");
+      const registerTab = document.querySelector("#registerTab");
+      const username = document.querySelector("#username");
+      const password = document.querySelector("#password");
+      const userLabel = document.querySelector("#userLabel");
+      const logoutButton = document.querySelector("#logoutButton");
+
       const form = document.querySelector("#memoForm");
       const memoId = document.querySelector("#memoId");
       const title = document.querySelector("#title");
+      const category = document.querySelector("#category");
+      const tags = document.querySelector("#tags");
       const content = document.querySelector("#content");
       const memoList = document.querySelector("#memoList");
       const memoCount = document.querySelector("#memoCount");
       const submitButton = document.querySelector("#submitButton");
       const cancelButton = document.querySelector("#cancelButton");
       const errorMessage = document.querySelector("#errorMessage");
+      const categoryFilter = document.querySelector("#categoryFilter");
+      const tagFilter = document.querySelector("#tagFilter");
 
+      let authMode = "login";
       let memos = [];
 
-      function showError(message) {
-        errorMessage.textContent = message;
-        errorMessage.style.display = message ? "block" : "none";
+      function getToken() {
+        return localStorage.getItem("memoAccessToken");
+      }
+
+      function setSession(data) {
+        localStorage.setItem("memoAccessToken", data.access_token);
+        localStorage.setItem("memoUsername", data.username);
+      }
+
+      function clearSession() {
+        localStorage.removeItem("memoAccessToken");
+        localStorage.removeItem("memoUsername");
+      }
+
+      function showMessage(element, message) {
+        element.textContent = message;
+        element.style.display = message ? "block" : "none";
+      }
+
+      function setAuthMode(mode) {
+        authMode = mode;
+        const isLogin = mode === "login";
+        loginTab.classList.toggle("active", isLogin);
+        registerTab.classList.toggle("active", !isLogin);
+        authTitle.textContent = isLogin ? "로그인" : "회원가입";
+        authSubmit.textContent = isLogin ? "로그인" : "가입하기";
+        password.autocomplete = isLogin ? "current-password" : "new-password";
+        showMessage(authError, "");
+      }
+
+      function showApp(usernameValue) {
+        authView.hidden = true;
+        appView.hidden = false;
+        userLabel.textContent = usernameValue;
+      }
+
+      function showAuth() {
+        appView.hidden = true;
+        authView.hidden = false;
+        memos = [];
+        renderMemos();
       }
 
       function resetForm() {
@@ -296,18 +473,53 @@
         memoId.value = "";
         submitButton.textContent = "추가";
         cancelButton.hidden = true;
-        showError("");
+        showMessage(errorMessage, "");
+      }
+
+      function parseTags(value) {
+        return value
+          .split(",")
+          .map((tag) => tag.trim().replace(/^#/, ""))
+          .filter(Boolean)
+          .filter((tag, index, list) => list.indexOf(tag) === index)
+          .slice(0, 12);
+      }
+
+      function filteredMemos() {
+        const selectedCategory = categoryFilter.value;
+        const selectedTag = tagFilter.value.trim().replace(/^#/, "").toLowerCase();
+        return memos.filter((memo) => {
+          const categoryMatch = !selectedCategory || memo.category === selectedCategory;
+          const tagMatch =
+            !selectedTag || memo.tags.some((tag) => tag.toLowerCase().includes(selectedTag));
+          return categoryMatch && tagMatch;
+        });
+      }
+
+      function renderFilters() {
+        const current = categoryFilter.value;
+        const categories = [...new Set(memos.map((memo) => memo.category).filter(Boolean))].sort();
+        categoryFilter.innerHTML = '<option value="">전체 카테고리</option>';
+        for (const item of categories) {
+          const option = document.createElement("option");
+          option.value = item;
+          option.textContent = item;
+          categoryFilter.append(option);
+        }
+        categoryFilter.value = categories.includes(current) ? current : "";
       }
 
       function renderMemos() {
+        renderFilters();
+        const visibleMemos = filteredMemos();
         memoCount.textContent = `${memos.length}개의 메모`;
 
-        if (memos.length === 0) {
-          memoList.innerHTML = '<div class="empty">등록된 메모가 없습니다.</div>';
+        if (visibleMemos.length === 0) {
+          memoList.innerHTML = '<div class="empty">표시할 메모가 없습니다.</div>';
           return;
         }
 
-        memoList.innerHTML = memos
+        memoList.innerHTML = visibleMemos
           .map(
             (memo) => `
               <article class="memo">
@@ -315,6 +527,10 @@
                   <div>
                     <h2>${escapeHtml(memo.title)}</h2>
                     <div class="meta">수정: ${formatDate(memo.updated_at)}</div>
+                    <div class="chips">
+                      ${memo.category ? `<span class="chip category">${escapeHtml(memo.category)}</span>` : ""}
+                      ${memo.tags.map((tag) => `<span class="chip">#${escapeHtml(tag)}</span>`).join("")}
+                    </div>
                   </div>
                   <div class="memo-buttons">
                     <button class="secondary" type="button" onclick="startEdit(${memo.id})">수정</button>
@@ -329,7 +545,7 @@
       }
 
       function escapeHtml(value) {
-        return value.replace(/[&<>"']/g, (char) => {
+        return String(value).replace(/[&<>"']/g, (char) => {
           const entities = {
             "&": "&amp;",
             "<": "&lt;",
@@ -348,15 +564,45 @@
         });
       }
 
+      function formatApiError(data) {
+        if (typeof data.detail === "string") {
+          return data.detail;
+        }
+
+        if (Array.isArray(data.detail)) {
+          return data.detail
+            .map((item) => {
+              const field = item.loc?.at(-1);
+              if (field === "username") {
+                return "아이디는 3자 이상이고 한글, 영문, 숫자, 밑줄, 하이픈만 사용할 수 있습니다.";
+              }
+              if (field === "password") {
+                return "비밀번호는 6자 이상 입력하세요.";
+              }
+              return item.msg || "입력값을 확인하세요.";
+            })
+            .join(" ");
+        }
+
+        return "요청을 처리하지 못했습니다.";
+      }
+
       async function requestJson(url, options = {}) {
-        const response = await fetch(url, {
-          headers: { "Content-Type": "application/json" },
-          ...options,
-        });
+        const headers = { "Content-Type": "application/json", ...options.headers };
+        const token = getToken();
+        if (token) {
+          headers.Authorization = `Bearer ${token}`;
+        }
+        const response = await fetch(url, { ...options, headers });
+
+        if (response.status === 401) {
+          clearSession();
+          showAuth();
+        }
 
         if (!response.ok) {
           const data = await response.json().catch(() => ({}));
-          throw new Error(data.detail || "요청을 처리하지 못했습니다.");
+          throw new Error(formatApiError(data));
         }
 
         if (response.status === 204) {
@@ -377,6 +623,8 @@
 
         memoId.value = memo.id;
         title.value = memo.title;
+        category.value = memo.category || "";
+        tags.value = memo.tags.join(", ");
         content.value = memo.content;
         submitButton.textContent = "수정";
         cancelButton.hidden = false;
@@ -393,21 +641,44 @@
           }
           await loadMemos();
         } catch (error) {
-          showError(error.message);
+          showMessage(errorMessage, error.message);
         }
       }
 
+      authForm.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        showMessage(authError, "");
+
+        try {
+          const data = await requestJson(`/api/auth/${authMode}`, {
+            method: "POST",
+            body: JSON.stringify({
+              username: username.value.trim(),
+              password: password.value,
+            }),
+          });
+          setSession(data);
+          authForm.reset();
+          showApp(data.username);
+          await loadMemos();
+        } catch (error) {
+          showMessage(authError, error.message);
+        }
+      });
+
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
-        showError("");
+        showMessage(errorMessage, "");
 
         const payload = {
           title: title.value.trim(),
           content: content.value.trim(),
+          category: category.value.trim(),
+          tags: parseTags(tags.value),
         };
 
         if (!payload.title || !payload.content) {
-          showError("제목과 내용을 입력하세요.");
+          showMessage(errorMessage, "제목과 내용을 입력하세요.");
           return;
         }
 
@@ -420,12 +691,35 @@
           resetForm();
           await loadMemos();
         } catch (error) {
-          showError(error.message);
+          showMessage(errorMessage, error.message);
         }
       });
 
+      loginTab.addEventListener("click", () => setAuthMode("login"));
+      registerTab.addEventListener("click", () => setAuthMode("register"));
       cancelButton.addEventListener("click", resetForm);
-      loadMemos().catch((error) => showError(error.message));
+      categoryFilter.addEventListener("change", renderMemos);
+      tagFilter.addEventListener("input", renderMemos);
+      logoutButton.addEventListener("click", () => {
+        clearSession();
+        resetForm();
+        showAuth();
+      });
+
+      (async function boot() {
+        const token = getToken();
+        const savedUsername = localStorage.getItem("memoUsername");
+        if (!token || !savedUsername) {
+          showAuth();
+          return;
+        }
+        showApp(savedUsername);
+        try {
+          await loadMemos();
+        } catch (error) {
+          showMessage(authError, error.message);
+        }
+      })();
     </script>
   </body>
 </html>
