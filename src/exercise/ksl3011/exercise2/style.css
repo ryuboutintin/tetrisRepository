@@ -243,11 +243,18 @@ body {
 /* ── 사이드바 하단 ── */
 .sidebar-footer {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 2px;
   padding: 8px 10px;
   border-top: 1px solid var(--border);
   flex-shrink: 0;
+}
+
+.footer-tools,
+.footer-user {
+  display: flex;
+  align-items: center;
+  gap: 2px;
 }
 
 .footer-btn {
@@ -471,14 +478,19 @@ body {
 .act-save:active { transform: scale(0.97); }
 
 /* ── 로그아웃 버튼 (유저명 표시) ── */
-.footer-btn--user {
+.footer-username {
   max-width: 80px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: 12px;
   color: var(--text-sub);
+  padding: 0 4px;
 }
-.footer-btn--user:hover { color: var(--danger); background: var(--danger-dim); }
+.footer-btn--logout {
+  color: var(--text-muted);
+}
+.footer-btn--logout:hover { color: var(--danger); background: var(--danger-dim); }
 
 /* ── 인증 오버레이 ── */
 .auth-overlay {

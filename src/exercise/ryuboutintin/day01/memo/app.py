@@ -27,7 +27,8 @@ STATIC_DIR = BASE_DIR / "static"
 DB_PATH = BASE_DIR / "memo.db"
 JWT_SECRET = os.getenv("MEMO_JWT_SECRET", "dev-secret-change-me")
 JWT_ALGORITHM = "HS256"
-TOKEN_EXPIRE_MINUTES = 60 * 12
+ACCESS_TOKEN_EXPIRE_MINUTES = 15
+REFRESH_TOKEN_EXPIRE_DAYS = 7
 bearer_scheme = HTTPBearer(auto_error=False)
 
 
@@ -45,15 +46,30 @@ class UserCredentials(BaseModel):
     password: str = Field(min_length=4, max_length=128)
 
 
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str = Field(min_length=20)
+
+
 class User(BaseModel):
     id: int
     username: str
     created_at: str
 
 
-class AuthResponse(BaseModel):
+class TokenBundle(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: str = "bearer"
+    access_token_expires_in: int
+    refresh_token_expires_in: int
+
+
+class AuthResponse(TokenBundle):
+    user: User
+
+
+class ProtectedMessage(BaseModel):
+    message: str
     user: User
 
 
@@ -138,6 +154,19 @@ def init_db() -> None:
             )
             """
         )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS refresh_tokens (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                token_hash TEXT NOT NULL UNIQUE,
+                expires_at TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                revoked_at TEXT,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
+            """
+        )
         if not column_exists(connection, "memos", "user_id"):
             connection.execute("ALTER TABLE memos ADD COLUMN user_id INTEGER")
         if not column_exists(connection, "memos", "category"):
@@ -156,13 +185,15 @@ def b64url_decode(data: str) -> bytes:
     return base64.urlsafe_b64decode(data + padding)
 
 
-def create_access_token(user_id: int, username: str) -> str:
+def create_token(user_id: int, username: str, token_type: str, expires_delta: timedelta) -> str:
     header = {"alg": JWT_ALGORITHM, "typ": "JWT"}
     now = datetime.now(timezone.utc)
     payload = {
         "sub": str(user_id),
         "username": username,
-        "exp": int((now + timedelta(minutes=TOKEN_EXPIRE_MINUTES)).timestamp()),
+        "type": token_type,
+        "jti": secrets.token_urlsafe(16),
+        "exp": int((now + expires_delta).timestamp()),
         "iat": int(now.timestamp()),
     }
     header_part = b64url_encode(json.dumps(header, separators=(",", ":")).encode("utf-8"))
@@ -172,7 +203,25 @@ def create_access_token(user_id: int, username: str) -> str:
     return f"{header_part}.{payload_part}.{b64url_encode(signature)}"
 
 
-def decode_access_token(token: str) -> dict[str, Any]:
+def create_access_token(user_id: int, username: str) -> str:
+    return create_token(
+        user_id=user_id,
+        username=username,
+        token_type="access",
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
+    )
+
+
+def create_refresh_token(user_id: int, username: str) -> str:
+    return create_token(
+        user_id=user_id,
+        username=username,
+        token_type="refresh",
+        expires_delta=timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS),
+    )
+
+
+def decode_token(token: str, expected_type: str) -> dict[str, Any]:
     try:
         header_part, payload_part, signature_part = token.split(".")
     except ValueError as exc:
@@ -194,6 +243,8 @@ def decode_access_token(token: str) -> dict[str, Any]:
 
     if payload.get("exp", 0) < int(datetime.now(timezone.utc).timestamp()):
         raise HTTPException(status_code=401, detail="Token has expired")
+    if payload.get("type") != expected_type:
+        raise HTTPException(status_code=401, detail=f"Invalid token type: expected {expected_type}")
     return payload
 
 
@@ -220,6 +271,10 @@ def verify_password(password: str, stored_password_hash: str) -> bool:
         100_000,
     ).hex()
     return hmac.compare_digest(candidate, password_hash)
+
+
+def hash_token(token: str) -> str:
+    return hashlib.sha256(token.encode("utf-8")).hexdigest()
 
 
 def normalize_tags(tags: list[str]) -> list[str]:
@@ -258,12 +313,74 @@ def get_user_by_username(connection: sqlite3.Connection, username: str) -> sqlit
     ).fetchone()
 
 
-def build_auth_response(row: sqlite3.Row) -> AuthResponse:
-    user = User(id=row["id"], username=row["username"], created_at=row["created_at"])
-    return AuthResponse(
-        access_token=create_access_token(user.id, user.username),
-        user=user,
+def store_refresh_token(connection: sqlite3.Connection, user_id: int, refresh_token: str) -> None:
+    expires_at = (
+        datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
+    ).isoformat()
+    connection.execute(
+        """
+        INSERT INTO refresh_tokens (user_id, token_hash, expires_at)
+        VALUES (?, ?, ?)
+        """,
+        (user_id, hash_token(refresh_token), expires_at),
     )
+
+
+def revoke_refresh_token(connection: sqlite3.Connection, refresh_token: str) -> None:
+    connection.execute(
+        """
+        UPDATE refresh_tokens
+        SET revoked_at = CURRENT_TIMESTAMP
+        WHERE token_hash = ? AND revoked_at IS NULL
+        """,
+        (hash_token(refresh_token),),
+    )
+
+
+def build_token_bundle(connection: sqlite3.Connection, row: sqlite3.Row) -> TokenBundle:
+    access_token = create_access_token(row["id"], row["username"])
+    refresh_token = create_refresh_token(row["id"], row["username"])
+    store_refresh_token(connection, row["id"], refresh_token)
+    return TokenBundle(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        access_token_expires_in=ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        refresh_token_expires_in=REFRESH_TOKEN_EXPIRE_DAYS * 24 * 60 * 60,
+    )
+
+
+def build_auth_response(connection: sqlite3.Connection, row: sqlite3.Row) -> AuthResponse:
+    user = User(id=row["id"], username=row["username"], created_at=row["created_at"])
+    tokens = build_token_bundle(connection, row)
+    return AuthResponse(user=user, **tokens.model_dump())
+
+
+def validate_refresh_token(connection: sqlite3.Connection, refresh_token: str) -> sqlite3.Row:
+    payload = decode_token(refresh_token, expected_type="refresh")
+    user_id = payload.get("sub")
+    if user_id is None:
+        raise HTTPException(status_code=401, detail="Invalid token subject")
+
+    row = connection.execute(
+        """
+        SELECT rt.user_id, rt.expires_at, rt.revoked_at, u.username, u.created_at
+        FROM refresh_tokens rt
+        JOIN users u ON u.id = rt.user_id
+        WHERE rt.token_hash = ?
+        """,
+        (hash_token(refresh_token),),
+    ).fetchone()
+    if row is None:
+        raise HTTPException(status_code=401, detail="Refresh token not recognized")
+    if row["revoked_at"] is not None:
+        raise HTTPException(status_code=401, detail="Refresh token has been revoked")
+
+    expires_at = datetime.fromisoformat(row["expires_at"])
+    if expires_at <= datetime.now(timezone.utc):
+        raise HTTPException(status_code=401, detail="Refresh token has expired")
+    if int(user_id) != row["user_id"]:
+        raise HTTPException(status_code=401, detail="Refresh token user mismatch")
+    return row
 
 
 def get_current_user(
@@ -276,7 +393,7 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    payload = decode_access_token(credentials.credentials)
+    payload = decode_token(credentials.credentials, expected_type="access")
     user_id = payload.get("sub")
     if user_id is None:
         raise HTTPException(status_code=401, detail="Invalid token subject")
@@ -308,12 +425,12 @@ app = FastAPI(
     title="Memo CRUD API",
     description=(
         "간단한 메모 CRUD API입니다. `/docs`의 Swagger UI에서 "
-        "회원가입, 로그인, 메모 생성, 조회, 수정, 삭제 요청을 직접 실행할 수 있습니다."
+        "회원가입, 로그인, 토큰 갱신, 보호 엔드포인트, 메모 CRUD를 직접 실행할 수 있습니다."
     ),
-    version="2.0.0",
+    version="3.0.0",
     lifespan=lifespan,
     openapi_tags=[
-        {"name": "auth", "description": "회원가입 및 JWT 로그인 API"},
+        {"name": "auth", "description": "회원가입, JWT 로그인, 토큰 갱신 API"},
         {"name": "memos", "description": "인증된 사용자 전용 메모 CRUD API"},
     ],
 )
@@ -338,7 +455,7 @@ def serve_index() -> FileResponse:
     status_code=201,
     tags=["auth"],
     summary="회원가입",
-    description="사용자를 생성하고 즉시 JWT 토큰을 발급합니다.",
+    description="사용자를 생성하고 즉시 액세스 토큰과 리프레시 토큰을 발급합니다.",
 )
 def register(payload: UserCredentials) -> AuthResponse:
     username = payload.username.strip()
@@ -353,11 +470,12 @@ def register(payload: UserCredentials) -> AuthResponse:
             """,
             (username, hash_password(payload.password)),
         )
-        connection.commit()
         row = get_user_by_username(connection, username)
-    if row is None:
-        raise HTTPException(status_code=500, detail="Failed to create user")
-    return build_auth_response(row)
+        if row is None:
+            raise HTTPException(status_code=500, detail="Failed to create user")
+        response = build_auth_response(connection, row)
+        connection.commit()
+    return response
 
 
 @app.post(
@@ -365,15 +483,47 @@ def register(payload: UserCredentials) -> AuthResponse:
     response_model=AuthResponse,
     tags=["auth"],
     summary="로그인",
-    description="사용자 이름과 비밀번호를 검증한 뒤 JWT 토큰을 발급합니다.",
+    description="사용자 이름과 비밀번호를 검증한 뒤 액세스 토큰과 리프레시 토큰을 발급합니다.",
 )
 def login(payload: UserCredentials) -> AuthResponse:
     username = payload.username.strip()
     with closing(get_connection()) as connection:
         row = get_user_by_username(connection, username)
-    if row is None or not verify_password(payload.password, row["password_hash"]):
-        raise HTTPException(status_code=401, detail="Invalid username or password")
-    return build_auth_response(row)
+        if row is None or not verify_password(payload.password, row["password_hash"]):
+            raise HTTPException(status_code=401, detail="Invalid username or password")
+        response = build_auth_response(connection, row)
+        connection.commit()
+    return response
+
+
+@app.post(
+    "/api/auth/refresh",
+    response_model=TokenBundle,
+    tags=["auth"],
+    summary="토큰 갱신",
+    description="유효한 리프레시 토큰으로 새 액세스 토큰과 새 리프레시 토큰을 발급합니다.",
+)
+def refresh_access_token(payload: RefreshTokenRequest) -> TokenBundle:
+    with closing(get_connection()) as connection:
+        row = validate_refresh_token(connection, payload.refresh_token)
+        revoke_refresh_token(connection, payload.refresh_token)
+        tokens = build_token_bundle(connection, row)
+        connection.commit()
+    return tokens
+
+
+@app.post(
+    "/api/auth/logout",
+    status_code=204,
+    tags=["auth"],
+    summary="로그아웃",
+    description="현재 리프레시 토큰을 폐기합니다.",
+)
+def logout(payload: RefreshTokenRequest) -> None:
+    with closing(get_connection()) as connection:
+        validate_refresh_token(connection, payload.refresh_token)
+        revoke_refresh_token(connection, payload.refresh_token)
+        connection.commit()
 
 
 @app.get(
@@ -381,10 +531,21 @@ def login(payload: UserCredentials) -> AuthResponse:
     response_model=User,
     tags=["auth"],
     summary="내 정보 조회",
-    description="현재 토큰에 연결된 사용자 정보를 반환합니다.",
+    description="현재 액세스 토큰에 연결된 사용자 정보를 반환합니다.",
 )
 def me(current_user: CurrentUser) -> User:
     return current_user
+
+
+@app.get(
+    "/api/auth/protected",
+    response_model=ProtectedMessage,
+    tags=["auth"],
+    summary="보호 엔드포인트",
+    description="유효한 액세스 토큰이 있어야 접근할 수 있는 예시 엔드포인트입니다.",
+)
+def protected(current_user: CurrentUser) -> ProtectedMessage:
+    return ProtectedMessage(message="Access token is valid", user=current_user)
 
 
 @app.get(
@@ -465,7 +626,6 @@ def create_memo(payload: MemoCreate, current_user: CurrentUser) -> Memo:
                 json.dumps(tags, ensure_ascii=False),
             ),
         )
-        connection.commit()
         memo_id = cursor.lastrowid
         row = connection.execute(
             """
@@ -475,6 +635,7 @@ def create_memo(payload: MemoCreate, current_user: CurrentUser) -> Memo:
             """,
             (memo_id, current_user.id),
         ).fetchone()
+        connection.commit()
     if row is None:
         raise HTTPException(status_code=500, detail="Failed to create memo")
     return serialize_memo(row)
@@ -506,7 +667,6 @@ def update_memo(memo_id: int, payload: MemoUpdate, current_user: CurrentUser) ->
                 current_user.id,
             ),
         )
-        connection.commit()
         if cursor.rowcount == 0:
             raise HTTPException(status_code=404, detail="Memo not found")
         row = connection.execute(
@@ -517,6 +677,7 @@ def update_memo(memo_id: int, payload: MemoUpdate, current_user: CurrentUser) ->
             """,
             (memo_id, current_user.id),
         ).fetchone()
+        connection.commit()
     if row is None:
         raise HTTPException(status_code=404, detail="Memo not found")
     return serialize_memo(row)
