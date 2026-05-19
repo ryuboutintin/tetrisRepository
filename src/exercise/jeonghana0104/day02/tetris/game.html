@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETRIS — Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="app-header">
+            <h1 class="title">TETRIS</h1>
+            <a class="back-link" href="index.html">← Back to menu</a>
+        </header>
+
+        <main class="game-layout">
+            <aside class="side-panel left">
+                <div class="panel-card">
+                    <h3>HOLD</h3>
+                    <canvas id="hold" width="120" height="120"></canvas>
+                </div>
+
+                <div class="panel-card controls">
+                    <h3>CONTROLS</h3>
+                    <ul>
+                        <li><kbd>&larr;</kbd> <kbd>&rarr;</kbd> Move</li>
+                        <li><kbd>&darr;</kbd> Soft Drop</li>
+                        <li><kbd>Space</kbd> Hard Drop</li>
+                        <li><kbd>&uarr;</kbd> Rotate</li>
+                        <li><kbd>C</kbd> Hold</li>
+                        <li><kbd>P</kbd> Pause</li>
+                        <li><kbd>M</kbd> Mute</li>
+                    </ul>
+                </div>
+            </aside>
+
+            <section class="board-panel">
+                <canvas id="board" width="300" height="600"></canvas>
+                <div id="overlay" class="overlay hidden">
+                    <div class="overlay-content">
+                        <h2 id="overlay-title">GAME OVER</h2>
+                        <p id="overlay-text">Press Start to play again</p>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="side-panel right">
+                <div class="panel-card">
+                    <h3>NEXT</h3>
+                    <canvas id="next" width="120" height="120"></canvas>
+                </div>
+
+                <div class="panel-card stats">
+                    <div class="stat">
+                        <span class="stat-label">SCORE</span>
+                        <span id="score" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">LINES</span>
+                        <span id="lines" class="stat-value">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">LEVEL</span>
+                        <span id="level" class="stat-value">1</span>
+                    </div>
+                </div>
+
+                <button id="start-btn" class="primary-btn">START</button>
+                <button id="audio-btn" class="audio-btn" aria-label="Toggle music">🔊 BGM</button>
+            </aside>
+        </main>
+    </div>
+
+    <script src="js/tetrominoes.js"></script>
+    <script src="js/board.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
