@@ -21,40 +21,190 @@
         url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext y='20' font-size='14' opacity='0.07'%3E♡%3C/text%3E%3Ctext x='30' y='50' font-size='10' opacity='0.07'%3E★%3C/text%3E%3C/svg%3E");
     }
 
-    .container {
-      max-width: 680px;
-      margin: 0 auto;
+    .container { max-width: 700px; margin: 0 auto; }
+
+    /* ── 헤더 ── */
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .deco-top { font-size: 22px; letter-spacing: 6px; color: #ff69b4; margin-bottom: 6px; }
+    h1 { font-size: 38px; font-weight: 800; color: #ff1493; text-shadow: 3px 3px 0 #ffb7d5, 5px 5px 0 #ffd6e8; letter-spacing: 2px; margin-bottom: 6px; }
+    .header .sub { font-size: 13px; color: #ff69b4; letter-spacing: 3px; }
+    .header .deco-bottom { font-size: 18px; letter-spacing: 4px; color: #ffb7d5; margin-top: 6px; }
+
+    /* ── 유저바 ── */
+    .user-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; border: 2px solid #ffb7d5; border-radius: 99px;
+      padding: 8px 18px; margin-bottom: 22px;
+      box-shadow: 3px 3px 0 #ffb7d5;
+    }
+    .user-bar .username { font-size: 13px; font-weight: 800; color: #ff1493; }
+    .user-bar .username::before { content: '♡ '; }
+
+    /* ── 카드 공통 ── */
+    .card {
+      background: #fff; border-radius: 24px;
+      border: 2.5px solid #ffb7d5;
+      box-shadow: 4px 4px 0 #ffb7d5, 6px 6px 0 #ffd6e8;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #ff69b4, #ff1493, #da70d6, #ff69b4);
+      background-size: 200% 100%; animation: shimmer 2s linear infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+
+    /* ── 버튼 ── */
+    button {
+      padding: 9px 22px; border: none; border-radius: 99px;
+      font-size: 13px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: inherit; letter-spacing: 0.5px;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, #ff69b4, #ff1493); color: #fff;
+      border: 2px solid #ff1493;
+      box-shadow: 0 4px 0 #c0006e, 0 6px 12px rgba(255,20,147,0.3);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 0 #c0006e, 0 8px 18px rgba(255,20,147,0.4); }
+    .btn-cancel {
+      background: #fff; color: #ffaacf; border: 2px solid #ffb7d5;
+      box-shadow: 0 4px 0 #ffb7d5;
+    }
+    .btn-sm {
+      padding: 6px 14px; font-size: 12px;
+      background: #fff0f8; color: #ff1493;
+      border: 2px solid #ffb7d5; box-shadow: 0 3px 0 #ffb7d5;
+    }
+    .btn-sm.danger { color: #da70d6; border-color: #e8b4f0; box-shadow: 0 3px 0 #e8b4f0; }
+    .btn-sm.active { background: linear-gradient(135deg, #ff69b4, #ff1493); color: #fff; border-color: #ff1493; }
+    .btn-logout {
+      background: #fff0f8; color: #ffaacf; border: 2px solid #ffb7d5;
+      padding: 6px 16px; font-size: 12px;
+      box-shadow: 0 3px 0 #ffb7d5;
     }
 
-    /* 헤더 */
-    .header {
-      text-align: center;
-      margin-bottom: 32px;
+    /* ── 인풋 ── */
+    input[type="text"], input[type="password"], textarea {
+      width: 100%; background: #fff5f9; border: 2px solid #ffb7d5;
+      border-radius: 14px; padding: 11px 16px; font-size: 14px;
+      color: #b5004d; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit; caret-color: #ff1493;
     }
-
-    .header .deco-top {
-      font-size: 22px;
-      letter-spacing: 6px;
-      color: #ff69b4;
-      margin-bottom: 6px;
+    input::placeholder, textarea::placeholder { color: #ffaacf; }
+    input:focus, textarea:focus {
+      border-color: #ff1493; box-shadow: 0 0 0 3px rgba(255,20,147,0.12); background: #fff;
     }
+    textarea { height: 100px; resize: vertical; }
 
-    h1 {
-      font-size: 38px;
-      font-weight: 800;
-      color: #ff1493;
-      text-shadow: 3px 3px 0 #ffb7d5, 5px 5px 0 #ffd6e8;
-      letter-spacing: 2px;
-      margin-bottom: 6px;
+    /* ── 에러 / 정보 메시지 ── */
+    .msg-box {
+      border-radius: 12px; padding: 10px 14px;
+      font-size: 13px; font-weight: 700; margin-bottom: 12px;
     }
+    .msg-error { background: #fff0f8; color: #ff1493; border: 2px solid #ffb7d5; }
+    .msg-info { background: #f0fff8; color: #00b060; border: 2px solid #b0f0d0; }
 
-    .header .sub {
-      font-size: 13px;
-      color: #ff69b4;
-      letter-spacing: 3px;
+    /* ── AUTH 화면 ── */
+    .auth-wrap {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 70vh;
     }
+    .auth-card { width: 100%; max-width: 380px; padding: 32px 28px; }
+    .auth-title { font-size: 22px; font-weight: 800; color: #ff1493; text-align: center; margin-bottom: 6px; }
+    .auth-sub { font-size: 12px; color: #ff69b4; text-align: center; letter-spacing: 2px; margin-bottom: 22px; }
+    .auth-card input { margin-bottom: 12px; display: block; }
+    .auth-card .btn-primary { width: 100%; margin-top: 4px; }
+    .auth-toggle {
+      text-align: center; margin-top: 16px;
+      font-size: 12px; color: #ffaacf;
+    }
+    .auth-toggle span { color: #ff1493; cursor: pointer; font-weight: 800; text-decoration: underline; }
 
-    /* 마크다운 렌더링 */
+    /* ── 태그 관리 섹션 ── */
+    .tag-manager { padding: 20px 22px; margin-bottom: 20px; }
+    .section-label {
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 13px; font-weight: 800; color: #ff1493; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 14px; cursor: pointer;
+    }
+    .section-label .toggle-icon { font-size: 16px; transition: transform 0.2s; }
+    .section-label .toggle-icon.open { transform: rotate(180deg); }
+    .tag-list-existing {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;
+    }
+    .tag-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      border: 2px solid transparent; cursor: default;
+    }
+    .tag-chip .del-btn {
+      background: none; border: none; padding: 0; font-size: 13px;
+      line-height: 1; cursor: pointer; opacity: 0.6;
+      transform: none; box-shadow: none;
+    }
+    .tag-chip .del-btn:hover { opacity: 1; transform: none; }
+    .tag-create-row {
+      display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+    }
+    .tag-create-row input[type="text"] { flex: 1; min-width: 120px; }
+    .color-options { display: flex; gap: 6px; align-items: center; }
+    .color-dot {
+      width: 22px; height: 22px; border-radius: 50%; cursor: pointer;
+      border: 3px solid transparent; transition: border-color 0.15s, transform 0.15s;
+      flex-shrink: 0;
+    }
+    .color-dot:hover { transform: scale(1.2); }
+    .color-dot.selected { border-color: #333; }
+
+    /* ── 필터 태그 바 ── */
+    .filter-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; align-items: center; }
+    .filter-label { font-size: 12px; color: #ff69b4; font-weight: 700; }
+    .filter-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 14px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      cursor: pointer; border: 2px solid #ffb7d5; background: #fff;
+      color: #ff69b4; transition: all 0.15s;
+    }
+    .filter-chip:hover { transform: translateY(-1px); }
+    .filter-chip.active { background: linear-gradient(135deg, #ff69b4, #ff1493); color: #fff; border-color: #ff1493; }
+
+    /* ── 폼 카드 ── */
+    .form-card { padding: 26px 24px; margin-bottom: 24px; }
+    .form-label { font-size: 13px; font-weight: 800; color: #ff1493; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+    .form-card input[type="text"] { margin-bottom: 10px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+
+    /* ── 태그 선택기 ── */
+    .tag-picker { margin: 10px 0; }
+    .tag-picker-label { font-size: 12px; color: #ff69b4; font-weight: 700; margin-bottom: 8px; }
+    .tag-picker-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag-pick-item {
+      display: inline-flex; align-items: center;
+      padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      cursor: pointer; border: 2px solid transparent;
+      transition: all 0.15s; opacity: 0.5;
+    }
+    .tag-pick-item.selected { opacity: 1; box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+    .tag-pick-item:hover { opacity: 0.85; }
+
+    /* ── 카운트 바 ── */
+    .count-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 0 4px; }
+    .count-text { font-size: 12px; color: #ff69b4; font-weight: 700; }
+
+    /* ── 메모 리스트 ── */
+    .memo-list { display: flex; flex-direction: column; gap: 16px; }
+    .memo-card { padding: 20px 22px; transition: transform 0.2s, box-shadow 0.2s; }
+    .memo-card:hover { transform: translateY(-3px); box-shadow: 6px 8px 0 #ffb7d5, 8px 10px 0 #ffd6e8; }
+    .memo-card.editing { border-color: #ff1493; box-shadow: 4px 4px 0 #ff1493; }
+    .memo-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .memo-title { font-size: 16px; font-weight: 800; color: #b5004d; }
+    .memo-title::before { content: '♡ '; color: #ff69b4; }
+    .memo-date { font-size: 11px; color: #ffaacf; white-space: nowrap; margin-left: 10px; background: #fff0f8; padding: 3px 10px; border-radius: 99px; border: 1px solid #ffb7d5; flex-shrink: 0; }
+    .memo-tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
     .memo-content { font-size: 13px; color: #c06090; line-height: 1.8; margin-bottom: 14px; }
     .memo-content h1, .memo-content h2, .memo-content h3 { color: #b5004d; font-weight: 800; margin: 8px 0 4px; }
     .memo-content h1 { font-size: 18px; }
@@ -62,301 +212,138 @@
     .memo-content h3 { font-size: 13px; }
     .memo-content p { margin-bottom: 6px; }
     .memo-content ul, .memo-content ol { padding-left: 20px; margin-bottom: 6px; }
-    .memo-content li { margin-bottom: 2px; }
     .memo-content strong { color: #ff1493; font-weight: 800; }
-    .memo-content em { color: #da70d6; font-style: italic; }
+    .memo-content em { color: #da70d6; }
     .memo-content code { background: #fff0f8; border: 1px solid #ffb7d5; border-radius: 6px; padding: 1px 6px; font-size: 12px; color: #b5004d; }
     .memo-content pre { background: #fff0f8; border: 2px solid #ffb7d5; border-radius: 12px; padding: 12px; overflow-x: auto; margin-bottom: 8px; }
     .memo-content pre code { background: none; border: none; padding: 0; }
     .memo-content blockquote { border-left: 3px solid #ff69b4; padding-left: 12px; color: #da70d6; margin: 6px 0; }
-    .memo-content a { color: #ff1493; text-decoration: underline; }
+    .memo-content a { color: #ff1493; }
     .memo-content hr { border: none; border-top: 2px dashed #ffb7d5; margin: 10px 0; }
     .memo-content table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
     .memo-content th { background: #fff0f8; color: #b5004d; border: 1px solid #ffb7d5; padding: 6px 10px; }
     .memo-content td { border: 1px solid #ffb7d5; padding: 5px 10px; }
-
-    .header .deco-bottom {
-      font-size: 18px;
-      letter-spacing: 4px;
-      color: #ffb7d5;
-      margin-top: 6px;
-    }
-
-    /* 카드 공통 */
-    .card {
-      background: #fff;
-      border-radius: 24px;
-      border: 2.5px solid #ffb7d5;
-      box-shadow: 4px 4px 0 #ffb7d5, 6px 6px 0 #ffd6e8;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, #ff69b4, #ff1493, #da70d6, #ff69b4);
-      background-size: 200% 100%;
-      animation: shimmer 2s linear infinite;
-    }
-
-    @keyframes shimmer {
-      0% { background-position: 0% 0%; }
-      100% { background-position: 200% 0%; }
-    }
-
-    /* 입력 폼 */
-    .form-card {
-      padding: 26px 24px;
-      margin-bottom: 28px;
-    }
-
-    .form-label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 13px;
-      font-weight: 800;
-      color: #ff1493;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-bottom: 16px;
-    }
-
-    .form-card input,
-    .form-card textarea,
-    .edit-form input,
-    .edit-form textarea {
-      width: 100%;
-      background: #fff5f9;
-      border: 2px solid #ffb7d5;
-      border-radius: 14px;
-      padding: 11px 16px;
-      font-size: 14px;
-      color: #b5004d;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-      font-family: inherit;
-      caret-color: #ff1493;
-    }
-
-    .form-card input::placeholder,
-    .form-card textarea::placeholder,
-    .edit-form input::placeholder,
-    .edit-form textarea::placeholder { color: #ffaacf; }
-
-    .form-card input:focus,
-    .form-card textarea:focus,
-    .edit-form input:focus,
-    .edit-form textarea:focus {
-      border-color: #ff1493;
-      box-shadow: 0 0 0 3px rgba(255, 20, 147, 0.12);
-      background: #fff;
-    }
-
-    .form-card input { margin-bottom: 10px; }
-    .form-card textarea,
-    .edit-form textarea { height: 100px; resize: vertical; }
-    .edit-form input { margin-bottom: 10px; }
-
-    /* 버튼 */
-    .btn-row {
-      display: flex;
-      gap: 8px;
-      margin-top: 14px;
-      justify-content: flex-end;
-    }
-
-    button {
-      padding: 9px 22px;
-      border: none;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.15s, box-shadow 0.15s;
-      font-family: inherit;
-      letter-spacing: 0.5px;
-    }
-
-    button:hover { transform: translateY(-2px); }
-    button:active { transform: translateY(0); }
-
-    .btn-primary {
-      background: linear-gradient(135deg, #ff69b4, #ff1493);
-      color: #fff;
-      border: 2px solid #ff1493;
-      box-shadow: 0 4px 0 #c0006e, 0 6px 12px rgba(255,20,147,0.3);
-    }
-
-    .btn-primary:hover { box-shadow: 0 6px 0 #c0006e, 0 8px 18px rgba(255,20,147,0.4); }
-    .btn-primary:active { box-shadow: 0 2px 0 #c0006e; }
-
-    .btn-cancel {
-      background: #fff;
-      color: #ffaacf;
-      border: 2px solid #ffb7d5;
-      box-shadow: 0 4px 0 #ffb7d5;
-    }
-
-    .btn-cancel:active { box-shadow: 0 2px 0 #ffb7d5; }
-
-    .btn-edit {
-      background: #fff0f8;
-      color: #ff1493;
-      border: 2px solid #ffb7d5;
-      padding: 7px 16px;
-      font-size: 12px;
-      box-shadow: 0 3px 0 #ffb7d5;
-    }
-
-    .btn-edit:active { box-shadow: 0 1px 0 #ffb7d5; }
-
-    .btn-delete {
-      background: #fff0f8;
-      color: #da70d6;
-      border: 2px solid #e8b4f0;
-      padding: 7px 16px;
-      font-size: 12px;
-      box-shadow: 0 3px 0 #e8b4f0;
-    }
-
-    .btn-delete:active { box-shadow: 0 1px 0 #e8b4f0; }
-
-    /* 메모 카운트 */
-    .count-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 14px;
-      padding: 0 4px;
-    }
-
-    .count-text {
-      font-size: 12px;
-      color: #ff69b4;
-      font-weight: 700;
-    }
-
-    /* 메모 리스트 */
-    .memo-list { display: flex; flex-direction: column; gap: 16px; }
-
-    .memo-card {
-      padding: 20px 22px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .memo-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 6px 8px 0 #ffb7d5, 8px 10px 0 #ffd6e8;
-    }
-
-    .memo-card.editing {
-      border-color: #ff1493;
-      box-shadow: 4px 4px 0 #ff1493;
-    }
-
-    .memo-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .memo-title {
-      font-size: 16px;
-      font-weight: 800;
-      color: #b5004d;
-    }
-
-    .memo-title::before { content: '♡ '; color: #ff69b4; }
-
-    .memo-date {
-      font-size: 11px;
-      color: #ffaacf;
-      white-space: nowrap;
-      margin-left: 10px;
-      background: #fff0f8;
-      padding: 3px 10px;
-      border-radius: 99px;
-      border: 1px solid #ffb7d5;
-      flex-shrink: 0;
-    }
-
-    .memo-content {
-      font-size: 13px;
-      color: #c06090;
-      white-space: pre-wrap;
-      line-height: 1.8;
-      margin-bottom: 14px;
-    }
-
     .memo-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .edit-form input[type="text"] { margin-bottom: 10px; }
 
-    /* 빈 상태 */
-    .empty {
-      text-align: center;
-      padding: 56px 0;
-    }
+    /* ── 빈 상태 ── */
+    .empty { text-align: center; padding: 56px 0; }
+    .empty-icon { font-size: 52px; display: block; margin-bottom: 14px; animation: bounce 1.8s ease-in-out infinite; }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .empty p { color: #ffaacf; font-size: 14px; font-weight: 700; line-height: 2; }
 
-    .empty-icon {
-      font-size: 52px;
-      display: block;
-      margin-bottom: 14px;
-      animation: bounce 1.8s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-
-    .empty p {
-      color: #ffaacf;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 2;
-    }
-
-    /* 에러 */
-    .error-msg {
-      background: #fff0f8;
-      color: #ff1493;
-      border: 2px solid #ffb7d5;
-      padding: 10px 14px;
-      border-radius: 12px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
-    /* 구분선 */
-    .divider {
-      text-align: center;
-      color: #ffb7d5;
-      font-size: 18px;
-      letter-spacing: 6px;
-      margin-bottom: 20px;
-    }
+    /* ── 구분선 ── */
+    .divider { text-align: center; color: #ffb7d5; font-size: 18px; letter-spacing: 6px; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-  <div id="app" class="container">
-    <div class="header">
-      <div class="deco-top">✦ ♡ ✦ ♡ ✦</div>
-      <h1>메모장</h1>
-      <div class="sub">～ 귀여운 메모앱 ～</div>
-      <div class="deco-bottom">☆ ★ ☆ ★ ☆</div>
+<div id="app" class="container">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="deco-top">✦ ♡ ✦ ♡ ✦</div>
+    <h1>메모장</h1>
+    <div class="sub">～ 귀여운 메모앱 ～</div>
+    <div class="deco-bottom">☆ ★ ☆ ★ ☆</div>
+  </div>
+
+  <!-- ══ 인증 화면 ══ -->
+  <div v-if="!token" class="auth-wrap">
+    <div class="auth-card card">
+      <div class="auth-title">{{ authMode === 'login' ? '✨ 로그인' : '🌸 회원가입' }}</div>
+      <div class="auth-sub">{{ authMode === 'login' ? '반가워요 ♡' : '새로운 시작 ♡' }}</div>
+      <div v-if="authError" class="msg-box msg-error">⚠️ {{ authError }}</div>
+      <input type="text" v-model="authForm.username" placeholder="아이디" @keyup.enter="authMode==='login'?login():register()" />
+      <input type="password" v-model="authForm.password" placeholder="비밀번호" @keyup.enter="authMode==='login'?login():register()" />
+      <button class="btn-primary" @click="authMode==='login'?login():register()">
+        {{ authMode === 'login' ? '✨ 로그인' : '🌸 가입하기' }}
+      </button>
+      <div class="auth-toggle" v-if="authMode==='login'">
+        계정이 없어요!
+        <span @click="switchAuth('register')">회원가입</span>
+      </div>
+      <div class="auth-toggle" v-else>
+        이미 계정이 있어요!
+        <span @click="switchAuth('login')">로그인</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 앱 화면 ══ -->
+  <template v-else>
+
+    <!-- 유저바 -->
+    <div class="user-bar">
+      <span class="username">{{ currentUser }}</span>
+      <button class="btn-logout" @click="logout">로그아웃</button>
     </div>
 
-    <!-- 새 메모 작성 -->
+    <!-- 태그 관리 -->
+    <div class="tag-manager card" style="margin-bottom:20px">
+      <div class="section-label" @click="showTagManager=!showTagManager">
+        <span>🏷️ 태그 관리</span>
+        <span class="toggle-icon" :class="{open:showTagManager}">▼</span>
+      </div>
+      <template v-if="showTagManager">
+        <div class="tag-list-existing" v-if="allTags.length">
+          <span
+            v-for="tag in allTags" :key="tag.id"
+            class="tag-chip"
+            :style="{ background: tag.color+'22', color: tag.color, borderColor: tag.color }"
+          >
+            {{ tag.name }}
+            <button class="del-btn" @click="deleteTag(tag.id)" title="태그 삭제">✕</button>
+          </span>
+        </div>
+        <div v-else style="font-size:12px;color:#ffaacf;margin-bottom:12px;">태그가 없어요 ~ 만들어봐요 ♡</div>
+        <div v-if="tagError" class="msg-box msg-error" style="font-size:12px;padding:7px 12px">⚠️ {{ tagError }}</div>
+        <div class="tag-create-row">
+          <input type="text" v-model="newTagName" placeholder="새 태그 이름" style="height:38px;padding:7px 14px" @keyup.enter="createTag" />
+          <div class="color-options">
+            <div
+              v-for="c in tagColors" :key="c"
+              class="color-dot"
+              :class="{ selected: newTagColor === c }"
+              :style="{ background: c }"
+              @click="newTagColor = c"
+            ></div>
+          </div>
+          <button class="btn-sm" @click="createTag">+ 추가</button>
+        </div>
+      </template>
+    </div>
+
+    <!-- 태그 필터 -->
+    <div class="filter-bar" v-if="allTags.length">
+      <span class="filter-label">필터:</span>
+      <span class="filter-chip" :class="{ active: filterTagId === null }" @click="setFilter(null)">전체</span>
+      <span
+        v-for="tag in allTags" :key="tag.id"
+        class="filter-chip"
+        :class="{ active: filterTagId === tag.id }"
+        :style="filterTagId===tag.id ? {} : { borderColor: tag.color, color: tag.color }"
+        @click="setFilter(tag.id)"
+      >{{ tag.name }}</span>
+    </div>
+
+    <!-- 새 메모 작성 폼 -->
     <div class="form-card card">
       <div class="form-label">✏️ 새 메모 작성</div>
-      <div v-if="errorMsg" class="error-msg">⚠️ {{ errorMsg }}</div>
-      <input v-model="newMemo.title" placeholder="✦ 제목을 입력해줘 ✦" @keyup.enter="$refs.contentInput.focus()" />
+      <div v-if="errorMsg" class="msg-box msg-error">⚠️ {{ errorMsg }}</div>
+      <input type="text" v-model="newMemo.title" placeholder="✦ 제목을 입력해줘 ✦" @keyup.enter="$refs.contentInput.focus()" />
       <textarea v-model="newMemo.content" placeholder="내용을 적어줘... ♡ (마크다운 지원)" ref="contentInput"></textarea>
+      <div class="tag-picker" v-if="allTags.length">
+        <div class="tag-picker-label">🏷️ 태그 선택</div>
+        <div class="tag-picker-chips">
+          <span
+            v-for="tag in allTags" :key="tag.id"
+            class="tag-pick-item"
+            :class="{ selected: newMemo.tagIds.includes(tag.id) }"
+            :style="{ background: tag.color+'22', color: tag.color, borderColor: tag.color }"
+            @click="toggleTag(newMemo.tagIds, tag.id)"
+          >{{ tag.name }}</span>
+        </div>
+      </div>
       <div class="btn-row">
         <button class="btn-primary" @click="createMemo">✨ 저장하기 ✨</button>
       </div>
@@ -367,25 +354,37 @@
     <!-- 메모 카운트 -->
     <div class="count-bar" v-if="memos.length > 0">
       <span class="count-text">🌸 메모 {{ memos.length }}개</span>
+      <span class="count-text" v-if="filterTagId">· {{ allTags.find(t=>t.id===filterTagId)?.name }} 필터 적용 중</span>
     </div>
 
     <!-- 메모 목록 -->
     <div class="memo-list">
       <div v-if="memos.length === 0" class="empty card">
         <span class="empty-icon">🎀</span>
-        <p>아직 메모가 없어요~<br>첫 번째 메모를 써봐요 ♡</p>
+        <p>{{ filterTagId ? '이 태그의 메모가 없어요~' : '아직 메모가 없어요~' }}<br>첫 번째 메모를 써봐요 ♡</p>
       </div>
 
       <div
-        v-for="memo in memos"
-        :key="memo.id"
+        v-for="memo in memos" :key="memo.id"
         class="memo-card card"
         :class="{ editing: editingId === memo.id }"
       >
         <!-- 수정 모드 -->
         <div v-if="editingId === memo.id" class="edit-form">
-          <input v-model="editForm.title" placeholder="제목" />
+          <input type="text" v-model="editForm.title" placeholder="제목" />
           <textarea v-model="editForm.content" placeholder="내용"></textarea>
+          <div class="tag-picker" v-if="allTags.length">
+            <div class="tag-picker-label">🏷️ 태그 선택</div>
+            <div class="tag-picker-chips">
+              <span
+                v-for="tag in allTags" :key="tag.id"
+                class="tag-pick-item"
+                :class="{ selected: editForm.tagIds.includes(tag.id) }"
+                :style="{ background: tag.color+'22', color: tag.color, borderColor: tag.color }"
+                @click="toggleTag(editForm.tagIds, tag.id)"
+              >{{ tag.name }}</span>
+            </div>
+          </div>
           <div class="btn-row">
             <button class="btn-cancel" @click="cancelEdit">취소</button>
             <button class="btn-primary" @click="updateMemo(memo.id)">✨ 저장</button>
@@ -398,90 +397,227 @@
             <span class="memo-title">{{ memo.title }}</span>
             <span class="memo-date">{{ formatDate(memo.updated_at || memo.created_at) }}</span>
           </div>
+          <div class="memo-tags-row" v-if="memo.tags && memo.tags.length">
+            <span
+              v-for="tag in memo.tags" :key="tag.id"
+              class="tag-chip"
+              :style="{ background: tag.color+'22', color: tag.color, borderColor: tag.color }"
+              style="cursor:pointer"
+              @click="setFilter(tag.id)"
+            >{{ tag.name }}</span>
+          </div>
           <div class="memo-content" v-html="renderMd(memo.content)"></div>
           <div class="memo-actions">
-            <button class="btn-edit" @click="startEdit(memo)">✏️ 수정</button>
-            <button class="btn-delete" @click="deleteMemo(memo.id)">🗑️ 삭제</button>
+            <button class="btn-sm" @click="startEdit(memo)">✏️ 수정</button>
+            <button class="btn-sm danger" @click="deleteMemo(memo.id)">🗑️ 삭제</button>
           </div>
         </template>
       </div>
     </div>
-  </div>
 
-  <script>
-    const API = 'http://localhost:8000';
-    const { createApp, ref, onMounted } = Vue;
+  </template>
+</div>
 
-    createApp({
-      setup() {
-        const memos = ref([]);
-        const newMemo = ref({ title: '', content: '' });
-        const editingId = ref(null);
-        const editForm = ref({ title: '', content: '' });
-        const errorMsg = ref('');
+<script>
+  const API = 'http://localhost:8000';
+  const { createApp, ref, onMounted } = Vue;
 
-        async function fetchMemos() {
-          const res = await fetch(`${API}/memos`);
-          memos.value = await res.json();
-        }
+  createApp({
+    setup() {
+      const token = ref(localStorage.getItem('memo_token') || '');
+      const currentUser = ref(localStorage.getItem('memo_user') || '');
+      const authMode = ref('login');
+      const authForm = ref({ username: '', password: '' });
+      const authError = ref('');
 
-        async function createMemo() {
-          errorMsg.value = '';
-          if (!newMemo.value.title.trim() || !newMemo.value.content.trim()) {
-            errorMsg.value = '제목과 내용을 모두 입력해주세요!';
-            return;
-          }
-          await fetch(`${API}/memos`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newMemo.value),
-          });
-          newMemo.value = { title: '', content: '' };
-          await fetchMemos();
-        }
+      const memos = ref([]);
+      const allTags = ref([]);
+      const filterTagId = ref(null);
 
-        function startEdit(memo) {
-          editingId.value = memo.id;
-          editForm.value = { title: memo.title, content: memo.content };
-        }
+      const newMemo = ref({ title: '', content: '', tagIds: [] });
+      const editingId = ref(null);
+      const editForm = ref({ title: '', content: '', tagIds: [] });
+      const errorMsg = ref('');
 
-        function cancelEdit() { editingId.value = null; }
+      const showTagManager = ref(false);
+      const newTagName = ref('');
+      const newTagColor = ref('#ff69b4');
+      const tagError = ref('');
 
-        async function updateMemo(id) {
-          if (!editForm.value.title.trim() || !editForm.value.content.trim()) return;
-          await fetch(`${API}/memos/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(editForm.value),
-          });
-          editingId.value = null;
-          await fetchMemos();
-        }
+      const tagColors = ['#ff69b4','#da70d6','#87ceeb','#90ee90','#ffa07a','#ffd700','#b0c4de','#f08080'];
 
-        function renderMd(text) {
-          return marked.parse(text || '');
-        }
-
-        async function deleteMemo(id) {
-          if (!confirm('이 메모를 삭제할까요? ♡')) return;
-          await fetch(`${API}/memos/${id}`, { method: 'DELETE' });
-          await fetchMemos();
-        }
-
-        function formatDate(dateStr) {
-          if (!dateStr) return '';
-          const d = new Date(dateStr);
-          return d.toLocaleDateString('ko-KR', {
-            month: '2-digit', day: '2-digit',
-            hour: '2-digit', minute: '2-digit',
-          });
-        }
-
-        onMounted(fetchMemos);
-
-        return { memos, newMemo, editingId, editForm, errorMsg, createMemo, startEdit, cancelEdit, updateMemo, deleteMemo, formatDate, renderMd };
+      function authHeaders() {
+        return { 'Authorization': `Bearer ${token.value}`, 'Content-Type': 'application/json' };
       }
-    }).mount('#app');
-  </script>
+
+      function switchAuth(mode) {
+        authMode.value = mode;
+        authError.value = '';
+        authForm.value = { username: '', password: '' };
+      }
+
+      async function login() {
+        authError.value = '';
+        const form = new URLSearchParams();
+        form.append('username', authForm.value.username.trim());
+        form.append('password', authForm.value.password);
+        const res = await fetch(`${API}/auth/token`, { method: 'POST', body: form });
+        if (!res.ok) {
+          const e = await res.json();
+          authError.value = e.detail || '로그인 실패';
+          return;
+        }
+        const data = await res.json();
+        token.value = data.access_token;
+        currentUser.value = authForm.value.username.trim();
+        localStorage.setItem('memo_token', token.value);
+        localStorage.setItem('memo_user', currentUser.value);
+        authForm.value = { username: '', password: '' };
+        await fetchTags();
+        await fetchMemos();
+      }
+
+      async function register() {
+        authError.value = '';
+        const res = await fetch(`${API}/auth/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: authForm.value.username.trim(), password: authForm.value.password }),
+        });
+        if (!res.ok) {
+          const e = await res.json();
+          authError.value = e.detail || '회원가입 실패';
+          return;
+        }
+        authMode.value = 'login';
+        authError.value = '';
+        const username = authForm.value.username;
+        authForm.value = { username, password: '' };
+      }
+
+      function logout() {
+        token.value = '';
+        currentUser.value = '';
+        localStorage.removeItem('memo_token');
+        localStorage.removeItem('memo_user');
+        memos.value = [];
+        allTags.value = [];
+        filterTagId.value = null;
+      }
+
+      async function fetchMemos() {
+        const url = filterTagId.value ? `${API}/memos?tag_id=${filterTagId.value}` : `${API}/memos`;
+        const res = await fetch(url, { headers: authHeaders() });
+        if (res.status === 401) { logout(); return; }
+        memos.value = await res.json();
+      }
+
+      async function setFilter(tagId) {
+        filterTagId.value = tagId;
+        await fetchMemos();
+      }
+
+      async function createMemo() {
+        errorMsg.value = '';
+        if (!newMemo.value.title.trim() || !newMemo.value.content.trim()) {
+          errorMsg.value = '제목과 내용을 모두 입력해주세요!';
+          return;
+        }
+        await fetch(`${API}/memos`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ title: newMemo.value.title, content: newMemo.value.content, tag_ids: newMemo.value.tagIds }),
+        });
+        newMemo.value = { title: '', content: '', tagIds: [] };
+        await fetchMemos();
+      }
+
+      function startEdit(memo) {
+        editingId.value = memo.id;
+        editForm.value = { title: memo.title, content: memo.content, tagIds: memo.tags.map(t => t.id) };
+      }
+
+      function cancelEdit() { editingId.value = null; }
+
+      async function updateMemo(id) {
+        if (!editForm.value.title.trim() || !editForm.value.content.trim()) return;
+        await fetch(`${API}/memos/${id}`, {
+          method: 'PUT',
+          headers: authHeaders(),
+          body: JSON.stringify({ title: editForm.value.title, content: editForm.value.content, tag_ids: editForm.value.tagIds }),
+        });
+        editingId.value = null;
+        await fetchMemos();
+      }
+
+      async function deleteMemo(id) {
+        if (!confirm('이 메모를 삭제할까요? ♡')) return;
+        await fetch(`${API}/memos/${id}`, { method: 'DELETE', headers: authHeaders() });
+        await fetchMemos();
+      }
+
+      async function fetchTags() {
+        const res = await fetch(`${API}/tags`, { headers: authHeaders() });
+        if (res.ok) allTags.value = await res.json();
+      }
+
+      async function createTag() {
+        tagError.value = '';
+        if (!newTagName.value.trim()) { tagError.value = '태그 이름을 입력해주세요'; return; }
+        const res = await fetch(`${API}/tags`, {
+          method: 'POST',
+          headers: authHeaders(),
+          body: JSON.stringify({ name: newTagName.value.trim(), color: newTagColor.value }),
+        });
+        if (!res.ok) {
+          const e = await res.json();
+          tagError.value = e.detail || '태그 생성 실패';
+          return;
+        }
+        newTagName.value = '';
+        await fetchTags();
+      }
+
+      async function deleteTag(id) {
+        if (!confirm('이 태그를 삭제할까요?')) return;
+        await fetch(`${API}/tags/${id}`, { method: 'DELETE', headers: authHeaders() });
+        if (filterTagId.value === id) filterTagId.value = null;
+        await fetchTags();
+        await fetchMemos();
+      }
+
+      function toggleTag(list, id) {
+        const idx = list.indexOf(id);
+        if (idx === -1) list.push(id);
+        else list.splice(idx, 1);
+      }
+
+      function renderMd(text) { return marked.parse(text || ''); }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        return new Date(dateStr).toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+      }
+
+      onMounted(async () => {
+        if (token.value) {
+          await fetchTags();
+          await fetchMemos();
+        }
+      });
+
+      return {
+        token, currentUser, authMode, authForm, authError,
+        memos, allTags, filterTagId,
+        newMemo, editingId, editForm, errorMsg,
+        showTagManager, newTagName, newTagColor, tagError, tagColors,
+        switchAuth, login, register, logout,
+        fetchMemos, setFilter, createMemo, startEdit, cancelEdit, updateMemo, deleteMemo,
+        fetchTags, createTag, deleteTag, toggleTag,
+        renderMd, formatDate,
+      };
+    }
+  }).mount('#app');
+</script>
 </body>
 </html>
