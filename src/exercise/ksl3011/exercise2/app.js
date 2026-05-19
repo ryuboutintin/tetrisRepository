@@ -1,8 +1,9 @@
 const API = 'http://localhost:8000';
+const TOKEN_KEY = 'memo-token';
 
 // ── 상태 ────────────────────────────────────────────────────────────────────
-let allMemos    = [];   // 전체 메모 (삭제 제외)
-let trashMemos  = [];   // 휴지통
+let allMemos    = [];
+let trashMemos  = [];
 let currentId   = null;
 let isNew       = false;
 let isTrashView = false;
@@ -32,6 +33,107 @@ const delCancel    = document.getElementById('delCancel');
 const delConfirmBtn= document.getElementById('delConfirmBtn');
 const sidebarTitle = document.getElementById('sidebarTitle');
 const newMemoBtn   = document.getElementById('newMemoBtn');
+const authOverlay  = document.getElementById('authOverlay');
+const authForm     = document.getElementById('authForm');
+const authUsername = document.getElementById('authUsername');
+const authPassword = document.getElementById('authPassword');
+const authSubmit   = document.getElementById('authSubmit');
+const authError    = document.getElementById('authError');
+const tabLogin     = document.getElementById('tabLogin');
+const tabRegister  = document.getElementById('tabRegister');
+const logoutBtn    = document.getElementById('logoutBtn');
+const userLabel    = document.getElementById('userLabel');
+
+// ── 토큰 유틸 ────────────────────────────────────────────────────────────────
+function getToken()    { return localStorage.getItem(TOKEN_KEY); }
+function setToken(t)   { localStorage.setItem(TOKEN_KEY, t); }
+function clearToken()  { localStorage.removeItem(TOKEN_KEY); }
+
+function getUsername() {
+  try {
+    const payload = JSON.parse(atob(getToken().split('.')[1]));
+    return payload.sub || null;
+  } catch { return null; }
+}
+
+// ── 인증 화면 ────────────────────────────────────────────────────────────────
+let authMode = 'login';
+
+function showAuthOverlay() {
+  authOverlay.classList.remove('hidden');
+  authUsername.value = '';
+  authPassword.value = '';
+  authError.classList.add('hidden');
+  authUsername.focus();
+}
+
+function hideAuthOverlay() {
+  authOverlay.classList.add('hidden');
+}
+
+tabLogin.addEventListener('click', () => {
+  authMode = 'login';
+  tabLogin.classList.add('active');
+  tabRegister.classList.remove('active');
+  authSubmit.textContent = '로그인';
+  authError.classList.add('hidden');
+});
+
+tabRegister.addEventListener('click', () => {
+  authMode = 'register';
+  tabRegister.classList.add('active');
+  tabLogin.classList.remove('active');
+  authSubmit.textContent = '회원가입';
+  authError.classList.add('hidden');
+});
+
+authForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const username = authUsername.value.trim();
+  const password = authPassword.value;
+  const endpoint = authMode === 'login' ? '/auth/login' : '/auth/register';
+
+  try {
+    const res = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      let msg;
+      if (Array.isArray(data.detail)) {
+        msg = data.detail.map(e => (typeof e === 'string' ? e : e.msg || '유효성 검사 오류')).join(', ');
+      } else if (typeof data.detail === 'string') {
+        msg = data.detail;
+      } else {
+        msg = '오류가 발생했습니다.';
+      }
+      throw new Error(msg);
+    }
+    setToken(data.access_token);
+    userLabel.textContent = username;
+    if (authMode === 'register') {
+      alert(`${username}님, 회원가입이 완료되었습니다! 환영합니다.`);
+    }
+    hideAuthOverlay();
+    loadMemos();
+  } catch (err) {
+    authError.textContent = err.message;
+    authError.classList.remove('hidden');
+  }
+});
+
+logoutBtn.addEventListener('click', () => {
+  clearToken();
+  allMemos = [];
+  trashMemos = [];
+  currentId = null;
+  closeEditor();
+  renderList();
+  renderTagFilter();
+  showAuthOverlay();
+});
 
 // ── 테마 ────────────────────────────────────────────────────────────────────
 const THEME_KEY = 'memo-theme';
@@ -57,10 +159,15 @@ function showToast(msg) {
 
 // ── API 헬퍼 ────────────────────────────────────────────────────────────────
 async function apiFetch(path, options = {}) {
-  const res = await fetch(API + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...options,
-  });
+  const token = getToken();
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(API + path, { headers, ...options });
+  if (res.status === 401) {
+    clearToken();
+    showAuthOverlay();
+    throw new Error('인증이 필요합니다.');
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     throw new Error(err.detail || `HTTP ${res.status}`);
@@ -384,7 +491,12 @@ importFile.addEventListener('change', async () => {
   const form = new FormData();
   form.append('file', file);
   try {
-    const res  = await fetch(`${API}/memos/import`, { method: 'POST', body: form });
+    const token = getToken();
+    const res  = await fetch(`${API}/memos/import`, {
+      method: 'POST',
+      headers: token ? { 'Authorization': `Bearer ${token}` } : {},
+      body: form,
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || 'import 실패');
     showToast(`${data.imported}개 메모를 가져왔습니다.`);
@@ -438,4 +550,9 @@ async function loadTrash() {
   }
 }
 
-loadMemos();
+if (getToken()) {
+  userLabel.textContent = getUsername() || '사용자';
+  loadMemos();
+} else {
+  showAuthOverlay();
+}

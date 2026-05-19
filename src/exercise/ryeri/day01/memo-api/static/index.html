@@ -31,6 +31,131 @@
       overflow: hidden;
     }
 
+    .hidden { display: none !important; }
+
+    /* ── Auth Screen ── */
+    #authScreen {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .auth-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 40px;
+      width: 360px;
+    }
+
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent2);
+      margin-bottom: 28px;
+      justify-content: center;
+    }
+
+    .auth-logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+
+    .auth-tab {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 10px 0;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all .15s;
+    }
+    .auth-tab.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent2);
+    }
+
+    .auth-field {
+      margin-bottom: 14px;
+    }
+
+    .auth-label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .auth-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 10px 12px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    .auth-input:focus { border-color: var(--accent); }
+
+    .auth-btn {
+      width: 100%;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 11px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background .12s;
+    }
+    .auth-btn:hover { background: var(--accent2); }
+    .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .auth-error {
+      margin-top: 12px;
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.3);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.8rem;
+      color: var(--red);
+      display: none;
+    }
+    .auth-error.show { display: block; }
+
+    /* ── App Screen ── */
+    #appScreen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
     /* ── Header ── */
     header {
       background: var(--surface);
@@ -69,10 +194,44 @@
       gap: 12px;
     }
 
-    .memo-count {
-      font-size: 0.75rem;
-      color: var(--muted);
+    .memo-count { font-size: 0.75rem; color: var(--muted); }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      color: var(--text);
     }
+
+    .user-avatar {
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .btn-logout {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      padding: 3px 8px;
+      cursor: pointer;
+      transition: all .12s;
+    }
+    .btn-logout:hover { color: var(--red); border-color: var(--red); }
 
     .api-badge {
       display: flex;
@@ -149,6 +308,36 @@
     }
     .btn-new:hover { background: var(--accent2); }
 
+    /* ── Category Filter ── */
+    .category-filter {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      scrollbar-width: none;
+    }
+    .category-filter::-webkit-scrollbar { display: none; }
+
+    .cat-chip {
+      display: inline-block;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      cursor: pointer;
+      margin-right: 5px;
+      transition: all .12s;
+    }
+    .cat-chip:hover { border-color: var(--accent); color: var(--accent2); }
+    .cat-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
     .search-wrap {
       padding: 10px 14px;
       border-bottom: 1px solid var(--border);
@@ -191,7 +380,32 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+
+    .memo-item-meta {
+      display: flex;
+      align-items: center;
+      gap: 5px;
       margin-bottom: 4px;
+      flex-wrap: wrap;
+    }
+
+    .memo-item-cat {
+      font-size: 0.65rem;
+      background: rgba(108,99,255,.2);
+      color: var(--accent2);
+      border-radius: 4px;
+      padding: 1px 6px;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      font-size: 0.63rem;
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: #fff;
+      opacity: 0.85;
     }
 
     .memo-item-preview {
@@ -259,10 +473,7 @@
     }
     .btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-save {
-      background: var(--accent);
-      color: #fff;
-    }
+    .btn-save { background: var(--accent); color: #fff; }
     .btn-save:hover:not(:disabled) { background: var(--accent2); }
 
     .btn-delete {
@@ -284,14 +495,13 @@
       color: var(--muted);
     }
 
-    .char-count { color: var(--muted); }
-
     .editor-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 28px 36px;
       overflow-y: auto;
+      gap: 0;
     }
 
     .title-input {
@@ -304,10 +514,119 @@
       width: 100%;
       padding-bottom: 14px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       font-family: inherit;
     }
     .title-input::placeholder { color: var(--muted); }
+
+    /* ── Meta Row (category + tags) ── */
+    .meta-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .meta-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 160px;
+    }
+
+    .meta-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+    }
+
+    .meta-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.82rem;
+      padding: 4px 10px;
+      outline: none;
+      flex: 1;
+      transition: border-color .15s;
+      font-family: inherit;
+    }
+    .meta-input:focus { border-color: var(--accent); }
+    .meta-input::placeholder { color: var(--muted); }
+
+    /* ── Tag Editor ── */
+    .tags-field {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 2;
+      min-width: 200px;
+    }
+
+    .tags-edit-wrap {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 5px;
+      flex: 1;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      min-height: 32px;
+      cursor: text;
+      transition: border-color .15s;
+    }
+    .tags-edit-wrap:focus-within { border-color: var(--accent); }
+
+    .edit-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      padding: 1px 6px;
+      color: #fff;
+    }
+
+    .edit-tag-remove {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,.7);
+      cursor: pointer;
+      font-size: 0.7rem;
+      padding: 0;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+    .edit-tag-remove:hover { color: #fff; }
+
+    .tag-text-input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 0.82rem;
+      min-width: 80px;
+      flex: 1;
+      font-family: inherit;
+    }
+    .tag-text-input::placeholder { color: var(--muted); }
+
+    .tag-hint {
+      font-size: 0.65rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
 
     .content-input {
       background: transparent;
@@ -319,7 +638,7 @@
       width: 100%;
       flex: 1;
       resize: none;
-      min-height: 300px;
+      min-height: 260px;
       font-family: inherit;
     }
     .content-input::placeholder { color: var(--muted); }
@@ -351,65 +670,244 @@
 </head>
 <body>
 
-<header>
-  <div class="logo">
-    <div class="logo-icon">📝</div>
-    메모장
+<!-- ── 인증 화면 ── -->
+<div id="authScreen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon">📝</div>
+      메모장
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tabLogin" onclick="switchTab('login')">로그인</button>
+      <button class="auth-tab" id="tabRegister" onclick="switchTab('register')">회원가입</button>
+    </div>
+    <div class="auth-field">
+      <label class="auth-label" for="authUsername">사용자 이름</label>
+      <input class="auth-input" id="authUsername" type="text"
+             placeholder="이름을 입력하세요" autocomplete="username"
+             onkeydown="if(event.key==='Enter') authSubmit()" />
+    </div>
+    <div class="auth-field">
+      <label class="auth-label" for="authPassword">비밀번호</label>
+      <input class="auth-input" id="authPassword" type="password"
+             placeholder="비밀번호를 입력하세요" autocomplete="current-password"
+             onkeydown="if(event.key==='Enter') authSubmit()" />
+    </div>
+    <button class="auth-btn" id="authBtn" onclick="authSubmit()">로그인</button>
+    <div class="auth-error" id="authError"></div>
   </div>
-  <div class="header-right">
-    <span class="memo-count" id="memoCount"></span>
-    <div class="api-badge">
-      <span class="status-dot" id="statusDot"></span>
-      FastAPI + SQLite
+</div>
+
+<!-- ── 앱 화면 ── -->
+<div id="appScreen" class="hidden">
+
+  <header>
+    <div class="logo">
+      <div class="logo-icon">📝</div>
+      메모장
     </div>
+    <div class="header-right">
+      <span class="memo-count" id="memoCount"></span>
+      <div class="user-badge">
+        <div class="user-avatar" id="userAvatar"></div>
+        <span id="userNameDisplay"></span>
+      </div>
+      <button class="btn-logout" onclick="logout()">로그아웃</button>
+      <div class="api-badge">
+        <span class="status-dot" id="statusDot"></span>
+        FastAPI + SQLite
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <span class="sidebar-label">메모 목록</span>
+        <button class="btn-new" onclick="newMemo()">+ 새 메모</button>
+      </div>
+      <div class="category-filter" id="categoryFilter"></div>
+      <div class="search-wrap">
+        <input class="search-input" id="searchInput"
+               placeholder="🔍 검색..." oninput="handleSearch()" />
+      </div>
+      <div class="memo-list" id="memoList"></div>
+    </aside>
+
+    <div class="editor-wrap" id="editorWrap">
+      <div class="empty-state">
+        <div class="empty-icon">📄</div>
+        <div class="empty-text">메모를 선택하거나 새 메모를 만드세요</div>
+      </div>
+    </div>
+
   </div>
-</header>
-
-<div class="workspace">
-
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <span class="sidebar-label">메모 목록</span>
-      <button class="btn-new" onclick="newMemo()">+ 새 메모</button>
-    </div>
-    <div class="search-wrap">
-      <input class="search-input" id="searchInput"
-             placeholder="🔍 검색..." oninput="handleSearch()" />
-    </div>
-    <div class="memo-list" id="memoList"></div>
-  </aside>
-
-  <div class="editor-wrap" id="editorWrap">
-    <div class="empty-state">
-      <div class="empty-icon">📄</div>
-      <div class="empty-text">메모를 선택하거나 새 메모를 만드세요</div>
-    </div>
-  </div>
-
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  const API = '/memos';
-  let memos     = [];
-  let currentId = null;
-  let searchTimer = null;
+  // ── 상태 ─────────────────────────────────────────────────────
+  let token           = localStorage.getItem('memo_token') || '';
+  let currentUser     = JSON.parse(localStorage.getItem('memo_user') || 'null');
+  let memos           = [];
+  let currentId       = null;
+  let currentCategory = null;
+  let editTags        = [];
+  let allCategories   = [];
+  let searchTimer     = null;
+  let authMode        = 'login';
+  let _refreshing     = null;  // 진행 중인 토큰 갱신 Promise (동시 401 중복 방지)
 
-  /* ── 상태 표시 ── */
-  function setStatus(state) {
-    const dot = document.getElementById('statusDot');
-    dot.className = 'status-dot' + (state !== 'ok' ? ` ${state}` : '');
+  // ── 인증 UI ──────────────────────────────────────────────────
+  function switchTab(mode) {
+    authMode = mode;
+    document.getElementById('tabLogin').classList.toggle('active', mode === 'login');
+    document.getElementById('tabRegister').classList.toggle('active', mode === 'register');
+    document.getElementById('authBtn').textContent = mode === 'login' ? '로그인' : '회원가입';
+    document.getElementById('authPassword').autocomplete =
+      mode === 'login' ? 'current-password' : 'new-password';
+    setAuthError('');
   }
 
-  /* ── API ── */
+  function setAuthError(msg) {
+    const el = document.getElementById('authError');
+    el.textContent = msg;
+    el.classList.toggle('show', !!msg);
+  }
+
+  async function authSubmit() {
+    const username = document.getElementById('authUsername').value.trim();
+    const password = document.getElementById('authPassword').value;
+    if (!username || !password) { setAuthError('모든 항목을 입력해주세요.'); return; }
+
+    const btn = document.getElementById('authBtn');
+    btn.disabled = true;
+    setAuthError('');
+
+    try {
+      if (authMode === 'register') {
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setAuthError(data.detail || '회원가입 실패'); return; }
+        switchTab('login');
+        toast('회원가입 완료! 로그인해주세요.');
+        return;
+      }
+
+      const res = await fetch('/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({ username, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setAuthError(data.detail || '로그인 실패'); return; }
+
+      token = data.access_token;
+      currentUser = { username: data.username };
+      localStorage.setItem('memo_token', token);
+      localStorage.setItem('memo_refresh_token', data.refresh_token);
+      localStorage.setItem('memo_user', JSON.stringify(currentUser));
+      showApp();
+    } catch {
+      setAuthError('서버에 연결할 수 없습니다.');
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function logout() {
+    _refreshing = null;
+    const rt = localStorage.getItem('memo_refresh_token');
+    if (rt) {
+      fetch('/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: rt }),
+      }).catch(() => {});
+    }
+    token = '';
+    currentUser = null;
+    localStorage.removeItem('memo_token');
+    localStorage.removeItem('memo_refresh_token');
+    localStorage.removeItem('memo_user');
+    memos = [];
+    currentId = null;
+    currentCategory = null;
+    document.getElementById('appScreen').classList.add('hidden');
+    document.getElementById('authScreen').classList.remove('hidden');
+    document.getElementById('authUsername').value = '';
+    document.getElementById('authPassword').value = '';
+    setAuthError('');
+  }
+
+  function showApp() {
+    document.getElementById('authScreen').classList.add('hidden');
+    document.getElementById('appScreen').classList.remove('hidden');
+    if (currentUser) {
+      const name = currentUser.username;
+      document.getElementById('userNameDisplay').textContent = name;
+      document.getElementById('userAvatar').textContent = name[0].toUpperCase();
+    }
+    fetchAll().catch(() => toast('서버에 연결할 수 없습니다.'));
+  }
+
+  // ── API ──────────────────────────────────────────────────────
+  function setStatus(state) {
+    const dot = document.getElementById('statusDot');
+    if (dot) dot.className = 'status-dot' + (state !== 'ok' ? ` ${state}` : '');
+  }
+
   async function apiFetch(path, options = {}) {
     setStatus('loading');
+
+    const makeReq = (t) => fetch(path, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(t ? { Authorization: `Bearer ${t}` } : {}),
+        ...options.headers,
+      },
+    });
+
     try {
-      const res = await fetch(path, {
-        headers: { 'Content-Type': 'application/json' },
-        ...options,
-      });
+      let res = await makeReq(token);
+
+      if (res.status === 401) {
+        // 액세스 토큰 만료 → 리프레시 토큰으로 자동 갱신 시도
+        if (!_refreshing) {
+          const rt = localStorage.getItem('memo_refresh_token');
+          if (!rt) { logout(); throw new Error('세션이 만료됐습니다. 다시 로그인해주세요.'); }
+          _refreshing = fetch('/auth/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: rt }),
+          })
+            .then(async r => { if (!r.ok) throw new Error('refresh_failed'); return r.json(); })
+            .then(data => {
+              token = data.access_token;
+              localStorage.setItem('memo_token', token);
+              localStorage.setItem('memo_refresh_token', data.refresh_token);
+              return token;
+            })
+            .catch(err => { logout(); throw err; })
+            .finally(() => { _refreshing = null; });
+        }
+
+        try {
+          const newToken = await _refreshing;
+          res = await makeReq(newToken);
+        } catch {
+          throw new Error('세션이 만료됐습니다. 다시 로그인해주세요.');
+        }
+      }
+
+      if (res.status === 401) { logout(); throw new Error('세션이 만료됐습니다.'); }
       if (res.status === 204) { setStatus('ok'); return null; }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
@@ -424,12 +922,20 @@
   }
 
   async function fetchAll(search = '') {
-    const url = search ? `${API}?search=${encodeURIComponent(search)}` : API;
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (currentCategory) params.set('category', currentCategory);
+    const url = '/memos' + (params.toString() ? '?' + params : '');
     memos = await apiFetch(url);
     renderList();
   }
 
-  /* ── 검색 (디바운스) ── */
+  async function fetchCategories() {
+    allCategories = await apiFetch('/categories');
+    renderCategoryFilter();
+  }
+
+  // ── 검색 (디바운스) ────────────────────────────────────────────
   function handleSearch() {
     clearTimeout(searchTimer);
     searchTimer = setTimeout(() => {
@@ -438,7 +944,26 @@
     }, 300);
   }
 
-  /* ── 렌더링 ── */
+  // ── 카테고리 필터 렌더링 ──────────────────────────────────────
+  function renderCategoryFilter() {
+    const el = document.getElementById('categoryFilter');
+    const chips = [{ label: '전체', value: null }, ...allCategories.map(c => ({ label: c, value: c }))];
+    el.innerHTML = chips.map(c => `
+      <span class="cat-chip ${c.value === currentCategory ? 'active' : ''}"
+            onclick="selectCategory(${c.value === null ? 'null' : `'${esc(c.value)}'`})">
+        ${esc(c.label)}
+      </span>
+    `).join('');
+  }
+
+  function selectCategory(cat) {
+    currentCategory = cat;
+    renderCategoryFilter();
+    const q = document.getElementById('searchInput').value.trim();
+    fetchAll(q).catch(e => toast(e.message));
+  }
+
+  // ── 리스트 렌더링 ─────────────────────────────────────────────
   function renderList() {
     const el = document.getElementById('memoList');
     document.getElementById('memoCount').textContent =
@@ -446,20 +971,33 @@
 
     if (!memos.length) {
       const q = document.getElementById('searchInput').value.trim();
-      el.innerHTML = `<div class="list-msg">${q ? '검색 결과가 없습니다.' : '메모가 없습니다.\n새 메모를 만들어 보세요.'}</div>`;
+      el.innerHTML = `<div class="list-msg">${
+        q || currentCategory ? '검색 결과가 없습니다.' : '메모가 없습니다.\n새 메모를 만들어 보세요.'
+      }</div>`;
       return;
     }
 
-    el.innerHTML = memos.map(m => `
-      <div class="memo-item ${m.id === currentId ? 'active' : ''}"
-           onclick="selectMemo(${m.id})">
-        <div class="memo-item-title">${esc(m.title)}</div>
-        <div class="memo-item-preview">${esc(m.content) || '내용 없음'}</div>
-        <div class="memo-item-date">${fmtDate(m.updated_at)}</div>
-      </div>
-    `).join('');
+    el.innerHTML = memos.map(m => {
+      const catHtml = m.category
+        ? `<span class="memo-item-cat">${esc(m.category)}</span>` : '';
+      const tagsHtml = (m.tags || []).slice(0, 3).map(t =>
+        `<span class="tag-pill" style="background:${tagColor(t)}">${esc(t)}</span>`
+      ).join('');
+      const metaHtml = (catHtml || tagsHtml)
+        ? `<div class="memo-item-meta">${catHtml}${tagsHtml}</div>` : '';
+      return `
+        <div class="memo-item ${m.id === currentId ? 'active' : ''}"
+             onclick="selectMemo(${m.id})">
+          <div class="memo-item-title">${esc(m.title)}</div>
+          ${metaHtml}
+          <div class="memo-item-preview">${esc(m.content) || '내용 없음'}</div>
+          <div class="memo-item-date">${fmtDate(m.updated_at)}</div>
+        </div>
+      `;
+    }).join('');
   }
 
+  // ── 에디터 ───────────────────────────────────────────────────
   function showEmptyState() {
     document.getElementById('editorWrap').innerHTML = `
       <div class="empty-state">
@@ -468,13 +1006,12 @@
       </div>`;
   }
 
-  function showEditor(title = '', content = '', isNew = false) {
+  function showEditor(title = '', content = '', category = '', tags = [], isNew = false) {
+    editTags = [...tags];
     document.getElementById('editorWrap').innerHTML = `
       <div class="editor-toolbar">
         <button class="btn btn-save" id="btnSave" onclick="handleSave()">💾 저장</button>
-        ${!isNew
-          ? `<button class="btn btn-delete" onclick="handleDelete()">🗑 삭제</button>`
-          : ''}
+        ${!isNew ? `<button class="btn btn-delete" onclick="handleDelete()">🗑 삭제</button>` : ''}
         <div class="toolbar-right">
           <span class="char-count" id="charCount">${content.length}자</span>
           <span>Ctrl + S</span>
@@ -483,10 +1020,84 @@
       <div class="editor-body">
         <input id="titleInput" class="title-input"
                value="${esc(title)}" placeholder="제목을 입력하세요" />
+        <div class="meta-row">
+          <div class="meta-field">
+            <span class="meta-label">카테고리</span>
+            <input id="categoryInput" class="meta-input"
+                   value="${esc(category)}" placeholder="없음"
+                   list="categoryDatalist" autocomplete="off" />
+            <datalist id="categoryDatalist">
+              ${allCategories.map(c => `<option value="${esc(c)}">`).join('')}
+            </datalist>
+          </div>
+          <div class="tags-field">
+            <span class="meta-label">태그</span>
+            <div class="tags-edit-wrap" id="tagsEditWrap" onclick="focusTagInput()">
+              <div id="editTagPills"></div>
+              <input id="tagInput" class="tag-text-input"
+                     placeholder="태그 입력 후 Enter"
+                     onkeydown="handleTagInput(event)"
+                     oninput="handleTagInputChange(event)" />
+            </div>
+            <span class="tag-hint">Enter/,로 추가</span>
+          </div>
+        </div>
         <textarea id="contentInput" class="content-input"
                   placeholder="내용을 입력하세요..." oninput="updateCharCount()">${esc(content)}</textarea>
       </div>`;
+    renderEditTagPills();
     document.getElementById('titleInput').focus();
+  }
+
+  function focusTagInput() {
+    document.getElementById('tagInput')?.focus();
+  }
+
+  function handleTagInput(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      commitTagInput();
+    } else if (e.key === 'Backspace') {
+      const input = document.getElementById('tagInput');
+      if (input.value === '' && editTags.length > 0) {
+        editTags.pop();
+        renderEditTagPills();
+      }
+    }
+  }
+
+  function handleTagInputChange(e) {
+    const val = e.target.value;
+    if (val.endsWith(',')) {
+      e.target.value = val.slice(0, -1);
+      commitTagInput();
+    }
+  }
+
+  function commitTagInput() {
+    const input = document.getElementById('tagInput');
+    const tag = input.value.trim();
+    if (tag && !editTags.includes(tag)) {
+      editTags.push(tag);
+      renderEditTagPills();
+    }
+    input.value = '';
+  }
+
+  function removeTag(i) {
+    editTags.splice(i, 1);
+    renderEditTagPills();
+  }
+
+  function renderEditTagPills() {
+    const el = document.getElementById('editTagPills');
+    if (!el) return;
+    el.innerHTML = editTags.map((t, i) => `
+      <span class="edit-tag-pill" style="background:${tagColor(t)}">
+        ${esc(t)}
+        <button class="edit-tag-remove" onclick="removeTag(${i})" type="button">×</button>
+      </span>
+    `).join('');
   }
 
   function updateCharCount() {
@@ -494,11 +1105,11 @@
     if (el) el.textContent = (document.getElementById('contentInput')?.value.length ?? 0) + '자';
   }
 
-  /* ── 핸들러 ── */
+  // ── 핸들러 ──────────────────────────────────────────────────
   function newMemo() {
     currentId = null;
     renderList();
-    showEditor('', '', true);
+    showEditor('', '', '', [], true);
   }
 
   function selectMemo(id) {
@@ -506,34 +1117,34 @@
     if (!memo) return;
     currentId = id;
     renderList();
-    showEditor(memo.title, memo.content, false);
+    showEditor(memo.title, memo.content, memo.category || '', memo.tags || [], false);
   }
 
   async function handleSave() {
-    const title   = document.getElementById('titleInput')?.value?.trim() ?? '';
-    const content = document.getElementById('contentInput')?.value ?? '';
+    commitTagInput();
+    const title    = document.getElementById('titleInput')?.value?.trim() ?? '';
+    const content  = document.getElementById('contentInput')?.value ?? '';
+    const category = document.getElementById('categoryInput')?.value?.trim() ?? '';
+    const tags     = [...editTags];
+
     if (!title) { toast('제목을 입력해주세요.'); return; }
 
     const btn = document.getElementById('btnSave');
     if (btn) btn.disabled = true;
 
     try {
+      const body = { title, content, category, tags };
       let saved;
       if (currentId === null) {
-        saved = await apiFetch(API, {
-          method: 'POST',
-          body: JSON.stringify({ title, content }),
-        });
+        saved = await apiFetch('/memos', { method: 'POST', body: JSON.stringify(body) });
         currentId = saved.id;
       } else {
-        saved = await apiFetch(`${API}/${currentId}`, {
-          method: 'PUT',
-          body: JSON.stringify({ title, content }),
-        });
+        saved = await apiFetch(`/memos/${currentId}`, { method: 'PUT', body: JSON.stringify(body) });
       }
       const q = document.getElementById('searchInput').value.trim();
-      await fetchAll(q);
-      showEditor(saved.title, saved.content, false);
+      await Promise.all([fetchAll(q), fetchCategories()]);
+      showEditor(saved.title, saved.content, saved.category || '', saved.tags || [], false);
+      renderList();
       toast('저장됐습니다. ✓');
     } catch (e) {
       toast(e.message);
@@ -546,9 +1157,10 @@
   async function handleDelete() {
     if (!confirm('이 메모를 삭제할까요?')) return;
     try {
-      await apiFetch(`${API}/${currentId}`, { method: 'DELETE' });
+      await apiFetch(`/memos/${currentId}`, { method: 'DELETE' });
       currentId = null;
-      await fetchAll();
+      const q = document.getElementById('searchInput').value.trim();
+      await Promise.all([fetchAll(q), fetchCategories()]);
       showEmptyState();
       toast('삭제됐습니다.');
     } catch (e) {
@@ -556,7 +1168,7 @@
     }
   }
 
-  /* ── 키보드 단축키 ── */
+  // ── 키보드 단축키 ─────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 's') {
       e.preventDefault();
@@ -564,7 +1176,7 @@
     }
   });
 
-  /* ── 유틸 ── */
+  // ── 유틸 ────────────────────────────────────────────────────
   function toast(msg) {
     const el = document.getElementById('toast');
     el.textContent = msg;
@@ -584,8 +1196,16 @@
     return `${d.getFullYear()}.${p(d.getMonth()+1)}.${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
   }
 
-  /* ── 초기화 ── */
-  fetchAll().catch(() => toast('서버에 연결할 수 없습니다.'));
+  function tagColor(tag) {
+    let h = 0;
+    for (const c of String(tag)) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return `hsl(${h}, 60%, 45%)`;
+  }
+
+  // ── 초기화 ──────────────────────────────────────────────────
+  if (token && currentUser) {
+    showApp();
+  }
 </script>
 </body>
 </html>
