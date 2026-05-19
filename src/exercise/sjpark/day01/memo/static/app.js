@@ -1,19 +1,50 @@
 // ── 인증 ────────────────────────────────────────────────────────────
 let currentTab = 'login';
 
-function getToken() { return localStorage.getItem('memo_token'); }
-function setToken(t) { localStorage.setItem('memo_token', t); }
-function clearToken() { localStorage.removeItem('memo_token'); }
+function getToken()          { return localStorage.getItem('memo_token'); }
+function setToken(t)         { localStorage.setItem('memo_token', t); }
+function clearToken()        { localStorage.removeItem('memo_token'); }
+function getRefreshToken()   { return localStorage.getItem('memo_refresh_token'); }
+function setRefreshToken(t)  { localStorage.setItem('memo_refresh_token', t); }
+function clearRefreshToken() { localStorage.removeItem('memo_refresh_token'); }
 
-function authHeaders(isForm = false) {
-  const h = { Authorization: `Bearer ${getToken()}` };
-  if (!isForm) h['Content-Type'] = 'application/json';
-  return h;
+function authHeaders() {
+  return { 'Authorization': `Bearer ${getToken()}`, 'Content-Type': 'application/json' };
+}
+
+async function refreshAccessToken() {
+  const rt = getRefreshToken();
+  if (!rt) return false;
+  try {
+    const res = await fetch('/auth/refresh', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: rt }),
+    });
+    if (!res.ok) return false;
+    const data = await res.json();
+    setToken(data.access_token);
+    setRefreshToken(data.refresh_token);
+    return true;
+  } catch { return false; }
 }
 
 async function apiFetch(url, options = {}) {
-  const res = await fetch(url, { ...options, headers: { ...authHeaders(), ...(options.headers || {}) } });
-  if (res.status === 401) { logout(); return null; }
+  const makeReq = () => fetch(url, {
+    ...options,
+    headers: { ...authHeaders(), ...(options.headers || {}) },
+  });
+  let res = await makeReq();
+  if (res.status === 401) {
+    const ok = await refreshAccessToken();
+    if (ok) {
+      res = await makeReq();
+      if (res.status === 401) { logout(); return null; }
+    } else {
+      logout();
+      return null;
+    }
+  }
   return res;
 }
 
@@ -33,7 +64,6 @@ async function submitAuth(e) {
   const password = document.getElementById('auth-password').value;
   const errEl = document.getElementById('auth-error');
   errEl.style.display = 'none';
-
   try {
     if (currentTab === 'register') {
       const res = await fetch('/auth/register', {
@@ -46,8 +76,6 @@ async function submitAuth(e) {
       showToast('회원가입 완료! 로그인해주세요.');
       return;
     }
-
-    // 로그인
     const res = await fetch('/auth/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -56,6 +84,7 @@ async function submitAuth(e) {
     if (!res.ok) { const d = await res.json(); throw new Error(d.detail); }
     const data = await res.json();
     setToken(data.access_token);
+    setRefreshToken(data.refresh_token);
     showApp(username);
   } catch (err) {
     errEl.textContent = err.message;
@@ -70,149 +99,353 @@ function showApp(username) {
 }
 
 function logout() {
+  const rt = getRefreshToken();
+  if (rt) {
+    fetch('/auth/logout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ refresh_token: rt }),
+    }).catch(() => {});
+  }
   clearToken();
-  currentId = null;
+  clearRefreshToken();
   memos = [];
+  currentTag = null;
   document.getElementById('auth-overlay').style.display = 'flex';
-  document.getElementById('view-pane').style.display = 'none';
-  document.getElementById('edit-pane').style.display = 'none';
-  document.getElementById('placeholder').style.display = 'flex';
-  document.getElementById('memo-list').innerHTML = '';
+  document.getElementById('notes-board').innerHTML = '';
+  document.getElementById('tag-filter-bar').className = 'tag-filter-bar';
   document.getElementById('header-username').textContent = '';
   switchTab('login');
 }
 
 // ── 초기화 ───────────────────────────────────────────────────────────
-(function init() {
+(async function init() {
   const token = getToken();
-  if (!token) return; // 오버레이 표시 유지
-
-  // 토큰이 있으면 사용자 정보 확인 후 앱 표시
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    if (payload.exp * 1000 < Date.now()) { clearToken(); return; }
-    showApp(payload.sub);
-  } catch {
-    clearToken();
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.exp * 1000 > Date.now()) { showApp(payload.sub); return; }
+    } catch {}
+  }
+  const ok = await refreshAccessToken();
+  if (ok) {
+    try {
+      const payload = JSON.parse(atob(getToken().split('.')[1]));
+      showApp(payload.sub);
+    } catch { clearToken(); clearRefreshToken(); }
   }
 })();
 
-// ── 메모 ─────────────────────────────────────────────────────────────
+// ── 메모 데이터 ──────────────────────────────────────────────────────
 let memos = [];
-let currentId = null;
+let currentTag = null;
+
+const NOTE_COLORS = ['yellow', 'green', 'blue', 'pink', 'purple', 'teal'];
 
 async function fetchMemos() {
   const res = await apiFetch('/memos');
   if (!res) return;
   memos = await res.json();
-  renderList();
+  renderNotes();
 }
 
-function renderList() {
-  const list = document.getElementById('memo-list');
-  if (memos.length === 0) {
-    list.innerHTML = '<p class="empty-list">메모가 없습니다.</p>';
+// ── 렌더링 ───────────────────────────────────────────────────────────
+function renderNotes() {
+  updateTagFilterBar();
+  renderFilteredNotes();
+}
+
+function renderFilteredNotes() {
+  const board = document.getElementById('notes-board');
+  const filtered = currentTag ? memos.filter(m => m.tags.includes(currentTag)) : memos;
+
+  if (filtered.length === 0 && memos.length === 0) {
+    board.innerHTML = `
+      <div class="empty-board">
+        <div class="empty-icon">📌</div>
+        <p>새 메모 버튼을 눌러 첫 메모를 추가하세요.</p>
+      </div>`;
     return;
   }
-  list.innerHTML = memos.map(m => `
-    <div class="memo-item ${m.id === currentId ? 'active' : ''}" onclick="selectMemo(${m.id})">
-      <div class="item-title">${escHtml(m.title) || '(제목 없음)'}</div>
-      ${m.content ? `<div class="item-preview">${escHtml(m.content)}</div>` : ''}
-      <div class="item-date">${formatDate(m.updated_at)}</div>
-    </div>
+
+  if (filtered.length === 0) {
+    board.innerHTML = `
+      <div class="empty-board">
+        <div class="empty-icon">🔍</div>
+        <p>#${escHtml(currentTag)} 태그가 달린 메모가 없습니다.</p>
+      </div>`;
+    return;
+  }
+
+  board.innerHTML = filtered.map(createNoteCard).join('');
+  board.querySelectorAll('.note-body').forEach(autoResize);
+}
+
+function createNoteCard(memo) {
+  const color = memo.color || 'yellow';
+  const dots = NOTE_COLORS.map(c => `
+    <button class="color-dot ${c === color ? 'active' : ''}"
+            data-color="${c}"
+            onclick="setColor(${memo.id}, '${c}')"
+            title="${c}"></button>
+  `).join('');
+
+  return `
+    <div class="note" data-id="${memo.id}" data-color="${color}">
+      <div class="note-header">
+        <div class="note-colors">${dots}</div>
+        <button class="note-close" onclick="deleteMemoCard(${memo.id})" title="삭제">✕</button>
+      </div>
+      <input  class="note-title"
+              id="note-title-${memo.id}"
+              placeholder="제목 없음"
+              value="${escAttr(memo.title)}"
+              oninput="scheduleSave(${memo.id})" />
+      <textarea class="note-body"
+                id="note-body-${memo.id}"
+                placeholder="내용을 입력하세요..."
+                oninput="scheduleSave(${memo.id}); autoResize(this)">${escHtml(memo.content)}</textarea>
+      <div class="note-tags" id="note-tags-${memo.id}">
+        ${renderTagChips(memo.id, memo.tags)}
+        <button class="tag-add-btn" onclick="startTagInput(${memo.id})">+ 태그</button>
+      </div>
+      <div class="note-footer">
+        <span class="note-date" id="note-date-${memo.id}">${formatDate(memo.updated_at)}</span>
+        <span class="note-saving">저장 중...</span>
+      </div>
+    </div>`;
+}
+
+function renderTagChips(id, tags) {
+  return (tags || []).map(tag => `
+    <span class="tag-chip">
+      #${escHtml(tag)}<button class="tag-chip-remove"
+        onclick="removeTag(${id}, '${escAttr(tag)}')" title="삭제">✕</button>
+    </span>
   `).join('');
 }
 
-function selectMemo(id) {
+// ── 태그 필터 바 ─────────────────────────────────────────────────────
+function updateTagFilterBar() {
+  const allTags = [...new Set(memos.flatMap(m => m.tags || []))].sort();
+  const bar = document.getElementById('tag-filter-bar');
+
+  if (allTags.length === 0) {
+    bar.className = 'tag-filter-bar';
+    return;
+  }
+
+  bar.className = 'tag-filter-bar visible';
+  bar.innerHTML = `
+    <button class="tag-filter-btn ${currentTag === null ? 'active' : ''}" onclick="filterByTag(null)">전체</button>
+    ${allTags.map(tag => `
+      <button class="tag-filter-btn ${currentTag === tag ? 'active' : ''}"
+              onclick="filterByTag('${escAttr(tag)}')">#${escHtml(tag)}</button>
+    `).join('')}
+  `;
+}
+
+function filterByTag(tag) {
+  currentTag = tag;
+  updateTagFilterBar();
+  renderFilteredNotes();
+}
+
+// ── 태그 추가 / 삭제 ─────────────────────────────────────────────────
+function startTagInput(id) {
+  const tagsEl = document.getElementById(`note-tags-${id}`);
+  if (!tagsEl) return;
+
+  const existing = tagsEl.querySelector('.tag-input');
+  if (existing) { existing.focus(); return; }
+
+  const addBtn = tagsEl.querySelector('.tag-add-btn');
+
+  const input = document.createElement('input');
+  input.className = 'tag-input';
+  input.placeholder = '태그 입력...';
+  input.maxLength = 20;
+
+  input.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const name = input.value.trim().replace(/^#/, '');
+      if (name) { await addTag(id, name); input.value = ''; }
+    } else if (e.key === 'Escape') {
+      finishTagInput(id);
+    }
+  });
+
+  input.addEventListener('blur', async () => {
+    const name = input.value.trim().replace(/^#/, '');
+    if (name) await addTag(id, name);
+    else finishTagInput(id);
+  });
+
+  tagsEl.insertBefore(input, addBtn);
+  input.focus();
+}
+
+function finishTagInput(id) {
+  const tagsEl = document.getElementById(`note-tags-${id}`);
+  if (!tagsEl) return;
+  tagsEl.querySelector('.tag-input')?.remove();
+}
+
+async function addTag(id, tagName) {
+  const memo = memos.find(m => m.id === id);
+  if (!memo || memo.tags.includes(tagName)) { finishTagInput(id); return; }
+
+  const newTags = [...memo.tags, tagName];
+  const res = await apiFetch(`/memos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ tags: newTags }),
+  });
+  if (!res) return;
+
+  const updated = await res.json();
+  memo.tags = updated.tags;
+  _refreshTagChips(id, memo.tags);
+  updateTagFilterBar();
+}
+
+async function removeTag(id, tagName) {
   const memo = memos.find(m => m.id === id);
   if (!memo) return;
-  currentId = id;
-  showViewPane(memo);
-  renderList();
+
+  const newTags = memo.tags.filter(t => t !== tagName);
+  const res = await apiFetch(`/memos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ tags: newTags }),
+  });
+  if (!res) return;
+
+  const updated = await res.json();
+  memo.tags = updated.tags;
+  _refreshTagChips(id, memo.tags);
+  updateTagFilterBar();
 }
 
-function showViewPane(memo) {
-  document.getElementById('placeholder').style.display = 'none';
-  document.getElementById('edit-pane').style.display = 'none';
-  const vp = document.getElementById('view-pane');
-  vp.style.display = 'flex';
-  document.getElementById('view-title').textContent = memo.title || '(제목 없음)';
-  document.getElementById('view-content').textContent = memo.content;
+function _refreshTagChips(id, tags) {
+  const tagsEl = document.getElementById(`note-tags-${id}`);
+  if (!tagsEl) return;
+  tagsEl.querySelectorAll('.tag-chip').forEach(el => el.remove());
+  const addBtn = tagsEl.querySelector('.tag-add-btn');
+  addBtn.insertAdjacentHTML('beforebegin', renderTagChips(id, tags));
 }
 
-function startEdit() {
-  const memo = memos.find(m => m.id === currentId);
-  if (!memo) return;
-  document.getElementById('view-pane').style.display = 'none';
-  const ep = document.getElementById('edit-pane');
-  ep.style.display = 'flex';
-  document.getElementById('title-input').value = memo.title;
-  document.getElementById('content-input').value = memo.content;
-  document.getElementById('title-input').focus();
+// ── 새 메모 ──────────────────────────────────────────────────────────
+async function newMemo() {
+  const res = await apiFetch('/memos', {
+    method: 'POST',
+    body: JSON.stringify({ title: '', content: '', color: 'yellow', tags: [] }),
+  });
+  if (!res) return;
+  const memo = await res.json();
+  memos.unshift(memo);
+  currentTag = null;
+
+  updateTagFilterBar();
+
+  const board = document.getElementById('notes-board');
+  board.querySelector('.empty-board')?.remove();
+  board.insertAdjacentHTML('afterbegin', createNoteCard(memo));
+  autoResize(document.getElementById(`note-body-${memo.id}`));
+  document.getElementById(`note-title-${memo.id}`)?.focus();
 }
 
-function newMemo() {
-  currentId = null;
-  document.getElementById('placeholder').style.display = 'none';
-  document.getElementById('view-pane').style.display = 'none';
-  const ep = document.getElementById('edit-pane');
-  ep.style.display = 'flex';
-  document.getElementById('title-input').value = '';
-  document.getElementById('content-input').value = '';
-  document.getElementById('title-input').focus();
-  renderList();
-}
+// ── 색상 변경 ────────────────────────────────────────────────────────
+async function setColor(id, color) {
+  const noteEl = document.querySelector(`.note[data-id="${id}"]`);
+  if (!noteEl) return;
 
-function cancelEdit() {
-  if (currentId !== null) {
-    const memo = memos.find(m => m.id === currentId);
-    if (memo) { showViewPane(memo); return; }
+  const prevColor = noteEl.getAttribute('data-color');
+  noteEl.setAttribute('data-color', color);
+  noteEl.querySelectorAll('.color-dot').forEach(dot =>
+    dot.classList.toggle('active', dot.getAttribute('data-color') === color)
+  );
+
+  const res = await apiFetch(`/memos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ color }),
+  });
+  if (!res) {
+    noteEl.setAttribute('data-color', prevColor);
+    noteEl.querySelectorAll('.color-dot').forEach(dot =>
+      dot.classList.toggle('active', dot.getAttribute('data-color') === prevColor)
+    );
+    return;
   }
-  document.getElementById('edit-pane').style.display = 'none';
-  document.getElementById('placeholder').style.display = 'flex';
+  const memo = memos.find(m => m.id === id);
+  if (memo) memo.color = color;
 }
 
-async function saveMemo() {
-  const title = document.getElementById('title-input').value.trim();
-  const content = document.getElementById('content-input').value;
-  if (!title) { showToast('제목을 입력하세요.'); return; }
+// ── 자동 저장 ─────────────────────────────────────────────────────────
+const saveTimers = {};
 
-  let saved;
-  if (currentId === null) {
-    const res = await apiFetch('/memos', {
-      method: 'POST',
-      body: JSON.stringify({ title, content }),
-    });
-    if (!res) return;
-    saved = await res.json();
-    currentId = saved.id;
-  } else {
-    const res = await apiFetch(`/memos/${currentId}`, {
-      method: 'PUT',
-      body: JSON.stringify({ title, content }),
-    });
-    if (!res) return;
-    saved = await res.json();
-  }
-
-  await fetchMemos();
-  showViewPane(saved);
-  showToast('저장했습니다.');
+function scheduleSave(id) {
+  clearTimeout(saveTimers[id]);
+  document.querySelector(`.note[data-id="${id}"]`)?.setAttribute('data-saving', '');
+  saveTimers[id] = setTimeout(() => saveNote(id), 700);
 }
 
-async function deleteMemo() {
-  if (!currentId) return;
+async function saveNote(id) {
+  const titleEl = document.getElementById(`note-title-${id}`);
+  const bodyEl  = document.getElementById(`note-body-${id}`);
+  if (!titleEl || !bodyEl) return;
+
+  const res = await apiFetch(`/memos/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify({ title: titleEl.value, content: bodyEl.value }),
+  });
+  if (!res) return;
+
+  const updated = await res.json();
+  const memo = memos.find(m => m.id === id);
+  if (memo) Object.assign(memo, updated);
+
+  const dateEl = document.getElementById(`note-date-${id}`);
+  if (dateEl) dateEl.textContent = formatDate(updated.updated_at);
+  document.querySelector(`.note[data-id="${id}"]`)?.removeAttribute('data-saving');
+}
+
+// ── 삭제 ─────────────────────────────────────────────────────────────
+async function deleteMemoCard(id) {
   if (!confirm('이 메모를 삭제하시겠습니까?')) return;
-  await apiFetch(`/memos/${currentId}`, { method: 'DELETE' });
-  currentId = null;
-  document.getElementById('view-pane').style.display = 'none';
-  document.getElementById('edit-pane').style.display = 'none';
-  document.getElementById('placeholder').style.display = 'flex';
-  await fetchMemos();
-  showToast('삭제했습니다.');
+
+  const res = await apiFetch(`/memos/${id}`, { method: 'DELETE' });
+  if (res === null) return;
+
+  const noteEl = document.querySelector(`.note[data-id="${id}"]`);
+  if (noteEl) {
+    noteEl.style.cssText += ';opacity:0;transform:scale(0.88) translateY(-4px);transition:all 0.18s ease';
+    setTimeout(() => noteEl.remove(), 180);
+  }
+  memos = memos.filter(m => m.id !== id);
+
+  setTimeout(() => {
+    updateTagFilterBar();
+    if (memos.length === 0) {
+      document.getElementById('notes-board').innerHTML = `
+        <div class="empty-board">
+          <div class="empty-icon">📌</div>
+          <p>새 메모 버튼을 눌러 첫 메모를 추가하세요.</p>
+        </div>`;
+    } else if (currentTag && !memos.some(m => m.tags.includes(currentTag))) {
+      currentTag = null;
+      updateTagFilterBar();
+      renderFilteredNotes();
+    }
+  }, 200);
 }
 
 // ── 유틸 ─────────────────────────────────────────────────────────────
+function autoResize(el) {
+  if (!el) return;
+  el.style.height = 'auto';
+  el.style.height = Math.max(110, el.scrollHeight) + 'px';
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
@@ -221,10 +454,17 @@ function showToast(msg) {
 }
 
 function formatDate(iso) {
-  const d = new Date(iso);
-  return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleString('ko-KR', {
+    month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+  });
 }
 
-function escHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function escHtml(s = '') {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function escAttr(s = '') {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/'/g, '&#39;');
 }
