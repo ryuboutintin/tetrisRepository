@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — 시작하기</title>
+  <link rel="stylesheet" href="landing.css">
+</head>
+<body>
+
+  <header>
+    <h1>TETRIS</h1>
+    <p>Classic Block Puzzle</p>
+  </header>
+
+  <canvas id="blocks-canvas" width="490" height="36"></canvas>
+
+  <div class="info-grid">
+    <div class="panel">
+      <h2>조작 방법</h2>
+      <div class="key-row"><kbd>← →</kbd><span>좌우 이동</span></div>
+      <div class="key-row"><kbd>↑</kbd><span>블록 회전</span></div>
+      <div class="key-row"><kbd>↓</kbd><span>빠르게 내리기</span></div>
+      <div class="key-row"><kbd>Space</kbd><span>즉시 낙하</span></div>
+      <div class="key-row"><kbd>P</kbd><span>일시 정지</span></div>
+      <div class="key-row"><kbd>M</kbd><span>음악 on/off</span></div>
+    </div>
+
+    <div class="panel">
+      <h2>점수 계산</h2>
+      <div class="score-row"><span>1줄 제거</span><span class="score-val">100 × 레벨</span></div>
+      <div class="score-row"><span>2줄 제거</span><span class="score-val">300 × 레벨</span></div>
+      <div class="score-row"><span>3줄 제거</span><span class="score-val">500 × 레벨</span></div>
+      <div class="score-row"><span>4줄 (테트리스)</span><span class="score-val">800 × 레벨</span></div>
+      <div class="score-row"><span>레벨업 기준</span><span class="score-val">10줄마다</span></div>
+    </div>
+  </div>
+
+  <a href="index.html" class="play-btn">PLAY</a>
+  <p class="hint">BGM: Korobeiniki (Tetris Theme A)</p>
+
+  <script src="landing.js"></script>
+</body>
+</html>
