@@ -758,6 +758,7 @@
   let allCategories   = [];
   let searchTimer     = null;
   let authMode        = 'login';
+  let _refreshing     = null;  // 진행 중인 토큰 갱신 Promise (동시 401 중복 방지)
 
   // ── 인증 UI ──────────────────────────────────────────────────
   function switchTab(mode) {
@@ -810,6 +811,7 @@
       token = data.access_token;
       currentUser = { username: data.username };
       localStorage.setItem('memo_token', token);
+      localStorage.setItem('memo_refresh_token', data.refresh_token);
       localStorage.setItem('memo_user', JSON.stringify(currentUser));
       showApp();
     } catch {
@@ -820,9 +822,19 @@
   }
 
   function logout() {
+    _refreshing = null;
+    const rt = localStorage.getItem('memo_refresh_token');
+    if (rt) {
+      fetch('/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh_token: rt }),
+      }).catch(() => {});
+    }
     token = '';
     currentUser = null;
     localStorage.removeItem('memo_token');
+    localStorage.removeItem('memo_refresh_token');
     localStorage.removeItem('memo_user');
     memos = [];
     currentId = null;
@@ -853,19 +865,49 @@
 
   async function apiFetch(path, options = {}) {
     setStatus('loading');
+
+    const makeReq = (t) => fetch(path, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(t ? { Authorization: `Bearer ${t}` } : {}),
+        ...options.headers,
+      },
+    });
+
     try {
-      const res = await fetch(path, {
-        ...options,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          ...options.headers,
-        },
-      });
+      let res = await makeReq(token);
+
       if (res.status === 401) {
-        logout();
-        throw new Error('세션이 만료됐습니다. 다시 로그인해주세요.');
+        // 액세스 토큰 만료 → 리프레시 토큰으로 자동 갱신 시도
+        if (!_refreshing) {
+          const rt = localStorage.getItem('memo_refresh_token');
+          if (!rt) { logout(); throw new Error('세션이 만료됐습니다. 다시 로그인해주세요.'); }
+          _refreshing = fetch('/auth/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: rt }),
+          })
+            .then(async r => { if (!r.ok) throw new Error('refresh_failed'); return r.json(); })
+            .then(data => {
+              token = data.access_token;
+              localStorage.setItem('memo_token', token);
+              localStorage.setItem('memo_refresh_token', data.refresh_token);
+              return token;
+            })
+            .catch(err => { logout(); throw err; })
+            .finally(() => { _refreshing = null; });
+        }
+
+        try {
+          const newToken = await _refreshing;
+          res = await makeReq(newToken);
+        } catch {
+          throw new Error('세션이 만료됐습니다. 다시 로그인해주세요.');
+        }
       }
+
+      if (res.status === 401) { logout(); throw new Error('세션이 만료됐습니다.'); }
       if (res.status === 204) { setStatus('ok'); return null; }
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
