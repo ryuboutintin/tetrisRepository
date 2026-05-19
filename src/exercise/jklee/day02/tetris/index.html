@@ -841,16 +841,18 @@
     }
 
     document.addEventListener('keydown', (e) => {
-      const blockKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','Space'];
-      if (blockKeys.includes(e.key) || e.code === 'Space') e.preventDefault();
+      // Use e.code so Korean (or any) IME doesn't break letter keys
+      const code = e.code;
+      const blockCodes = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'];
+      if (blockCodes.includes(code)) e.preventDefault();
 
       bootstrapAudioOnce();
 
-      if (e.key === 'r' || e.key === 'R') { reset(); return; }
-      if (e.key === 'm' || e.key === 'M') { setMusic(!musicOn); return; }
+      if (code === 'KeyR') { reset(); return; }
+      if (code === 'KeyM') { setMusic(!musicOn); return; }
       if (gameOver) return;
 
-      if (e.key === 'p' || e.key === 'P') {
+      if (code === 'KeyP') {
         paused = !paused;
         if (paused) { showPause(); stopBGM(); }
         else { hidePause(); if (musicOn) startBGM(); }
@@ -858,12 +860,12 @@
       }
       if (paused) return;
 
-      switch (e.key) {
+      switch (code) {
         case 'ArrowLeft':  if (tryMove(-1, 0)) sfxMove(); break;
         case 'ArrowRight': if (tryMove(1, 0))  sfxMove(); break;
         case 'ArrowUp':    tryRotate(); sfxRotate(); break;
         case 'ArrowDown':  softDrop(); break;
-        case ' ':          hardDrop(); break;
+        case 'Space':      hardDrop(); break;
       }
     });
     // also allow a click anywhere to unlock audio
