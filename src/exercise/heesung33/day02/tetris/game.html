@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테트리스 - 플레이</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="game-page">
+    <div class="game-bg"></div>
+    <div class="game-container">
+        <div class="board-wrapper">
+            <canvas id="board" width="300" height="600"></canvas>
+        </div>
+        <div class="side-panel">
+            <div class="panel-box">
+                <h3>점수</h3>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="panel-box">
+                <h3>레벨</h3>
+                <div class="score-value" id="level">1</div>
+            </div>
+            <div class="panel-box">
+                <h3>다음 블록</h3>
+                <canvas class="next-canvas" id="next" width="120" height="120"></canvas>
+            </div>
+            <div class="panel-box">
+                <h3>음악</h3>
+                <button class="btn btn-music" id="musicToggle">🔊 ON</button>
+            </div>
+            <div class="panel-box controls">
+                <h3>조작법</h3>
+                <kbd>←</kbd> <kbd>→</kbd> 이동<br>
+                <kbd>↑</kbd> 회전<br>
+                <kbd>↓</kbd> 빠른 낙하<br>
+                <kbd>Space</kbd> 즉시 낙하<br>
+                <kbd>P</kbd> 일시정지
+            </div>
+            <a href="index.html" class="btn btn-back">← 메인으로</a>
+        </div>
+    </div>
+
+    <div class="game-over-overlay" id="gameOver">
+        <h1>GAME OVER</h1>
+        <p>점수: <span id="finalScore">0</span></p>
+        <button class="btn" id="restartBtn">다시 시작</button>
+        <a href="index.html" class="btn btn-back-overlay">메인으로</a>
+    </div>
+
+    <script src="music.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>

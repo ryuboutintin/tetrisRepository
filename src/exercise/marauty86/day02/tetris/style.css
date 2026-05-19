@@ -1,0 +1,89 @@
+:root {
+    --bg-color: #0d0d0d;
+    --panel-color: #1a1a1a;
+    --text-color: #e0e0e0;
+    --neon-blue: #00f2ff;
+    --neon-pink: #ff007f;
+    --border-color: #333;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'Orbitron', sans-serif; /* Futuristic font */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.game-wrapper {
+    position: relative;
+    background: var(--panel-color);
+    padding: 20px;
+    border-radius: 10px;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 0 20px rgba(0, 242, 255, 0.2);
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    font-size: 1.2rem;
+    color: var(--neon-blue);
+}
+
+#canvas-container {
+    position: relative;
+    width: 300px;
+    height: 500px;
+}
+
+canvas {
+    background-color: #050505;
+    border: 1px solid var(--border-color);
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* UI Overlays */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.hidden { display: none; }
+
+button {
+    background: transparent;
+    color: var(--neon-blue);
+    border: 2px solid var(--neon-blue);
+    padding: 10px 20px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: var(--neon-blue);
+    color: #000;
+}
+
+.controls {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #666;
+}
