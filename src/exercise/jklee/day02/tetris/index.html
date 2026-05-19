@@ -333,26 +333,31 @@
     const ROWS = 20;
     const CELL = 24; // 240x480 canvas
 
-    // Dark mono palette (kept names for code stability)
-    // bg = darkest (LCD bg) ... ink = brightest (pixel highlight / border)
+    // Dark stage + classic arcade block colors
     const PAL = {
       bg:   '#0e0e14',  // LCD background
       grid: '#1c1c26',  // faint grid lines
-      dk:   '#5a5a6a',  // block dark tone (mid gray)
-      lt:   '#a8a8b8',  // block light tone (light gray)
-      ink:  '#e2e2ec',  // border / pixel highlight (near white)
+      ink:  '#e2e2ec',  // pixel highlight (near white)
+      // 7 piece colors — classic Tetris palette, slightly muted for CRT feel
+      cyan:   '#00cfff',
+      yellow: '#ffd000',
+      purple: '#b048d8',
+      green:  '#4dd14d',
+      red:    '#e84545',
+      blue:   '#4a6cf7',
+      orange: '#ff8a3d',
     };
 
     // Each tetromino fills with one of the 4 GB shades.
     // Use shape-distinct fill + ink border so they remain readable.
     const PIECE_TONE = {
-      I: 'dk',
-      O: 'lt',
-      T: 'dk',
-      S: 'lt',
-      Z: 'dk',
-      J: 'lt',
-      L: 'dk',
+      I: 'cyan',
+      O: 'yellow',
+      T: 'purple',
+      S: 'green',
+      Z: 'red',
+      J: 'blue',
+      L: 'orange',
     };
 
     const SHAPES = {
@@ -521,7 +526,7 @@
             life: 0.6 + Math.random() * 0.5,
             age: 0,
             size: 3 + Math.floor(Math.random() * 3),
-            tone: ['ink','dk','lt','ink'][Math.floor(Math.random()*4)],
+            tone: ['cyan','yellow','red','green','orange','purple','blue','ink'][Math.floor(Math.random()*8)],
           });
         }
       });
