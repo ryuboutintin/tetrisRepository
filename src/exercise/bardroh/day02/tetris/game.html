@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tetris – Play</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <h1><a href="index.html" class="back-link">TETRIS</a></h1>
+    <div id="game-area">
+      <canvas id="board" width="300" height="600"></canvas>
+      <div id="side-panel">
+        <div class="info-box">
+          <div class="info-label">SCORE</div>
+          <div class="info-value" id="score">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LEVEL</div>
+          <div class="info-value" id="level">1</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">LINES</div>
+          <div class="info-value" id="lines">0</div>
+        </div>
+        <div class="info-box">
+          <div class="info-label">NEXT</div>
+          <canvas id="next-canvas" width="120" height="120"></canvas>
+        </div>
+        <div class="btn-row">
+          <button id="start-btn">START</button>
+          <button id="mute-btn" title="BGM 뮤트">🔊</button>
+        </div>
+        <div id="controls">
+          <div class="control-row"><span class="key">← →</span> 이동</div>
+          <div class="control-row"><span class="key">↑</span> 회전</div>
+          <div class="control-row"><span class="key">↓</span> 빠르게</div>
+          <div class="control-row"><span class="key">Space</span> 하드드롭</div>
+        </div>
+      </div>
+    </div>
+    <div id="overlay">
+      <div id="overlay-text">TETRIS</div>
+      <div id="overlay-sub">START를 눌러 시작</div>
+    </div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>

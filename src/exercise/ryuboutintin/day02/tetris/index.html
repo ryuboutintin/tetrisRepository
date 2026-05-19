@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris MVP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page-shell">
+    <section id="landing-view" class="screen screen-active landing-screen">
+      <div class="landing-hero panel">
+        <p class="eyebrow">Browser Arcade</p>
+        <h1>TETRIS</h1>
+        <p class="subtitle">랜딩에서 규칙을 확인하고, 버튼 한 번으로 게임과 BGM을 바로 시작하세요.</p>
+        <button id="play-button" class="primary-button" type="button">플레이 시작</button>
+      </div>
+
+      <div class="landing-grid">
+        <article class="panel info-card">
+          <h2>플레이 방법</h2>
+          <ul>
+            <li>← → : 블록 좌우 이동</li>
+            <li>↓ : 블록 빠르게 내리기</li>
+            <li>↑ / Space : 블록 회전</li>
+            <li>Enter : 게임 재시작</li>
+          </ul>
+        </article>
+
+        <article class="panel info-card">
+          <h2>점수 계산</h2>
+          <ul>
+            <li>1줄 제거: 100점</li>
+            <li>2줄 제거: 300점</li>
+            <li>3줄 제거: 500점</li>
+            <li>4줄 제거: 800점</li>
+          </ul>
+        </article>
+
+        <article class="panel info-card">
+          <h2>게임 목표</h2>
+          <p>블록을 빈틈 없이 쌓아 줄을 완성하면 해당 줄이 사라지고 점수를 얻습니다. 보드 꼭대기까지 쌓이면 게임 오버입니다.</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="game-view" class="screen game-screen hidden">
+      <div class="app-shell">
+        <section class="hero-panel panel">
+          <p class="eyebrow">Now Playing</p>
+          <h1>TETRIS</h1>
+          <p class="subtitle">Web Audio API로 만든 테트리스풍 루프 BGM이 함께 재생됩니다.</p>
+
+          <div class="score-card">
+            <span class="label">SCORE</span>
+            <strong id="score">0</strong>
+          </div>
+
+          <div class="controls-card">
+            <p>조작법</p>
+            <ul>
+              <li>← → : 좌우 이동</li>
+              <li>↓ : 빠르게 내리기</li>
+              <li>↑ / Space : 회전</li>
+              <li>Enter : 재시작</li>
+            </ul>
+          </div>
+
+          <div class="button-row">
+            <button id="restart-button" class="primary-button" type="button">다시 시작</button>
+            <button id="mute-button" class="secondary-button" type="button" aria-pressed="false">BGM 음소거</button>
+          </div>
+        </section>
+
+        <section class="game-panel panel">
+          <div class="board-frame">
+            <canvas id="tetris" width="300" height="600" aria-label="테트리스 게임 보드"></canvas>
+            <div id="overlay" class="overlay hidden">
+              <div class="overlay-card">
+                <h2 id="overlay-title">Game Over</h2>
+                <p id="overlay-message">Enter 키 또는 버튼으로 다시 시작하세요.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

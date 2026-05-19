@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Tetris</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">Browser MVP</p>
+          <h1>Mini Tetris</h1>
+          <p class="lede">
+            설치 없이 바로 실행되는 간단한 테트리스. 이동, 회전, 점수, 라인 클리어만 담은
+            MVP 버전입니다.
+          </p>
+        </div>
+        <div class="stats-card">
+          <div>
+            <span class="stat-label">Score</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span class="stat-label">Lines</span>
+            <strong id="lines">0</strong>
+          </div>
+          <div>
+            <span class="stat-label">Level</span>
+            <strong id="level">1</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="playground">
+        <div class="board-frame">
+          <canvas id="game" width="300" height="600" aria-label="Tetris board"></canvas>
+          <div class="overlay hidden" id="overlay">
+            <p>Game Over</p>
+            <button id="restart">Restart</button>
+          </div>
+        </div>
+
+        <aside class="controls-card">
+          <h2>Controls</h2>
+          <ul>
+            <li><kbd>←</kbd><kbd>→</kbd> 이동</li>
+            <li><kbd>↓</kbd> 빠르게 내리기</li>
+            <li><kbd>↑</kbd> 회전</li>
+            <li><kbd>Space</kbd> 즉시 하드 드롭</li>
+            <li><kbd>R</kbd> 다시 시작</li>
+          </ul>
+          <p class="hint">간단하게 즐길 수 있도록 불필요한 기능은 제외했습니다.</p>
+        </aside>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
