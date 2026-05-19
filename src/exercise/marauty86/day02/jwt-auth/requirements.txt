@@ -1,0 +1,4 @@
+# No python packages required for the core Node.js application.
+# This file is provided as requested by the user.
+# If using python for helper scripts or testing, list them below:
+# requests==2.31.0

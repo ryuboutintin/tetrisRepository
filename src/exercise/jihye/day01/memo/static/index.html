@@ -19,15 +19,40 @@
       <header class="header">
         <div>
           <h1>Memo</h1>
-          <p class="sub">FastAPI + SQLite 메모장 CRUD</p>
+          <p class="sub">JWT Auth + SQLite 메모, 태그, 카테고리, Todo</p>
         </div>
         <div class="header-actions">
           <button class="btn" id="themeToggleBtn" type="button" aria-pressed="false">다크모드</button>
-          <button class="btn primary" id="newMemoBtn" type="button">새 메모</button>
+          <button class="btn" id="logoutBtn" type="button" hidden>로그아웃</button>
+          <button class="btn primary" id="newMemoBtn" type="button" hidden>새 메모</button>
         </div>
       </header>
 
-      <section class="layout">
+      <section class="card auth-card" id="authCard">
+        <div class="auth-copy">
+          <p class="eyebrow">Authentication</p>
+          <h2>로그인 후 메모를 관리하세요</h2>
+          <p>회원가입 또는 로그인으로 JWT 토큰을 발급받고, 사용자별 메모와 Todo를 관리합니다.</p>
+        </div>
+
+        <form class="auth-form" id="authForm">
+          <div class="field">
+            <label for="usernameInput">아이디</label>
+            <input id="usernameInput" name="username" type="text" autocomplete="username" placeholder="예: jihye" />
+          </div>
+          <div class="field">
+            <label for="passwordInput">비밀번호</label>
+            <input id="passwordInput" name="password" type="password" autocomplete="current-password" placeholder="비밀번호" />
+          </div>
+          <div class="button-row">
+            <button class="btn primary" type="submit" data-action="login">로그인</button>
+            <button class="btn" type="button" id="registerBtn">회원가입</button>
+          </div>
+          <p class="status" id="authStatus">로그인 정보를 입력하세요.</p>
+        </form>
+      </section>
+
+      <section class="layout hidden" id="appShell">
         <aside class="memo-list" aria-label="메모 목록">
           <div class="toolbar">
             <strong>메모 목록</strong>
@@ -39,7 +64,7 @@
         <section class="editor" aria-label="메모 편집">
           <div class="toolbar">
             <strong id="editorTitle">새 메모</strong>
-            <div class="button-group">
+            <div class="button-row">
               <button class="btn" id="deleteBtn" type="button">삭제</button>
               <button class="btn primary" id="saveBtn" type="button">저장</button>
             </div>
@@ -50,6 +75,30 @@
               <label for="titleInput">제목</label>
               <input id="titleInput" type="text" placeholder="제목을 입력하세요" />
             </div>
+
+            <div class="two-cols">
+              <div class="field">
+                <label for="categoryInput">카테고리</label>
+                <input id="categoryInput" type="text" placeholder="예: 업무, 개인" />
+              </div>
+              <div class="field">
+                <label for="kindInput">유형</label>
+                <select id="kindInput">
+                  <option value="memo">메모</option>
+                  <option value="todo">Todo</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="tagsInput">태그</label>
+              <input id="tagsInput" type="text" placeholder="예: fastapi, sqlite, 공부" />
+            </div>
+
+            <label class="todo-field hidden" id="todoField">
+              <input id="doneInput" type="checkbox" />
+              <span>Todo 완료</span>
+            </label>
 
             <div class="field">
               <label for="contentInput">내용</label>
