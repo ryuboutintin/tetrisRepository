@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>메모장</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- 인증 화면 -->
+  <div id="auth-view" class="auth-view hidden">
+    <div class="auth-card">
+      <h1 class="auth-title">메모장</h1>
+
+      <div class="auth-tabs">
+        <button id="tab-login" class="auth-tab active" onclick="switchTab('login')">로그인</button>
+        <button id="tab-register" class="auth-tab" onclick="switchTab('register')">회원가입</button>
+      </div>
+
+      <div id="auth-error" class="auth-error hidden"></div>
+
+      <form id="auth-form">
+        <input id="auth-username" type="text" placeholder="아이디" autocomplete="username" required />
+        <input id="auth-password" type="password" placeholder="비밀번호" autocomplete="current-password" required />
+        <button type="submit" id="auth-submit" class="btn btn-primary auth-btn">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 메모 화면 -->
+  <div id="memo-view" class="hidden">
+    <div class="container">
+      <header>
+        <h1>메모장</h1>
+        <div class="header-user">
+          <span id="header-username" class="username-badge"></span>
+          <button id="btn-logout" class="btn btn-secondary btn-sm">로그아웃</button>
+        </div>
+      </header>
+
+      <section class="form-section">
+        <input id="input-title" type="text" placeholder="제목" maxlength="100" />
+        <textarea id="input-content" placeholder="내용을 입력하세요..." rows="4"></textarea>
+        <div class="form-meta">
+          <input id="input-category" type="text" placeholder="카테고리 (예: 업무)" maxlength="50" />
+          <input id="input-tags" type="text" placeholder="태그 (쉼표로 구분, 예: 중요, 회의)" />
+        </div>
+        <div class="form-actions">
+          <button id="btn-cancel" class="btn btn-secondary hidden">취소</button>
+          <button id="btn-submit" class="btn btn-primary">추가</button>
+        </div>
+      </section>
+
+      <section class="filter-section">
+        <select id="filter-category">
+          <option value="">전체 카테고리</option>
+        </select>
+        <input id="filter-tag" type="text" placeholder="태그 검색..." />
+        <button id="btn-filter-clear" class="btn btn-secondary btn-sm hidden">필터 초기화</button>
+      </section>
+
+      <section class="list-section">
+        <div id="memo-list"></div>
+        <p id="empty-msg" class="empty-msg hidden">메모가 없습니다.</p>
+      </section>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal">
+      <p>이 메모를 삭제할까요?</p>
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn btn-secondary">취소</button>
+        <button id="modal-confirm" class="btn btn-danger">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

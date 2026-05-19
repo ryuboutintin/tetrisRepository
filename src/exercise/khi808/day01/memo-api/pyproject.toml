@@ -1,0 +1,12 @@
+[project]
+name = "memo-api"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.10"
+dependencies = [
+    "aiofiles>=25.1.0",
+    "bcrypt>=5.0.0",
+    "fastapi>=0.136.1",
+    "python-jose[cryptography]>=3.5.0",
+    "uvicorn[standard]>=0.47.0",
+]

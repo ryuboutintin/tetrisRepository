@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="개인 소개, 주요 스킬, 간단한 소개문단, 연락 수단을 담은 심플한 랜딩 페이지"
+    />
+    <title>지혜 | Personal Landing</title>
+    <style>
+      :root {
+        --bg: #f6f2ea;
+        --surface: rgba(255, 255, 255, 0.78);
+        --surface-strong: #ffffff;
+        --text: #1f2937;
+        --muted: #5b6472;
+        --border: rgba(31, 41, 55, 0.12);
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+        --shadow: 0 20px 50px rgba(15, 23, 42, 0.08);
+      }
+
+      :root[data-theme="dark"] {
+        --bg: #071018;
+        --surface: rgba(15, 23, 42, 0.74);
+        --surface-strong: #0f172a;
+        --text: #e5eef8;
+        --muted: #a2b0c3;
+        --border: rgba(226, 232, 240, 0.12);
+        --accent: #2dd4bf;
+        --accent-strong: #5eead4;
+        --shadow: 0 22px 54px rgba(2, 6, 23, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font: 16px/1.6 "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 32%),
+          radial-gradient(circle at top right, rgba(251, 191, 36, 0.14), transparent 28%),
+          linear-gradient(180deg, #fcfaf7 0%, var(--bg) 100%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .page {
+        width: min(960px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 48px;
+      }
+
+      .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 28px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .topbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      .brand-mark {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, var(--accent), #14b8a6);
+        color: white;
+        box-shadow: var(--shadow);
+      }
+
+      .theme-toggle {
+        appearance: none;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 10px 14px;
+        font: inherit;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: var(--shadow);
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      .theme-toggle:hover {
+        transform: translateY(-1px);
+        border-color: rgba(15, 118, 110, 0.28);
+      }
+
+      .theme-toggle:focus-visible {
+        outline: 3px solid rgba(45, 212, 191, 0.35);
+        outline-offset: 2px;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 1.4fr 0.9fr;
+        gap: 24px;
+        align-items: stretch;
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        backdrop-filter: blur(14px);
+        border-radius: 28px;
+        box-shadow: var(--shadow);
+      }
+
+      .intro {
+        padding: 36px;
+      }
+
+      .eyebrow {
+        margin: 0 0 12px;
+        color: var(--accent-strong);
+        font-weight: 700;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        font-size: 13px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.4rem, 6vw, 4.3rem);
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+      }
+
+      .subtitle {
+        margin: 18px 0 0;
+        max-width: 28ch;
+        font-size: clamp(1.02rem, 2vw, 1.2rem);
+        color: var(--muted);
+      }
+
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 28px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.72);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-size: 14px;
+      }
+
+      :root[data-theme="dark"] .pill {
+        background: rgba(15, 23, 42, 0.7);
+      }
+
+      .side {
+        display: grid;
+        gap: 18px;
+        padding: 22px;
+      }
+
+      .panel {
+        padding: 22px;
+        border-radius: 22px;
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+      }
+
+      .panel h2 {
+        margin: 0 0 12px;
+        font-size: 1.02rem;
+      }
+
+      .skills {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .skill {
+        padding: 10px 12px;
+        border-radius: 999px;
+        background: #eefaf8;
+        color: var(--accent-strong);
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      :root[data-theme="dark"] .skill {
+        background: rgba(45, 212, 191, 0.12);
+      }
+
+      .about {
+        margin-top: 24px;
+        padding: 30px 36px;
+      }
+
+      .about p {
+        margin: 0;
+        color: var(--text);
+        font-size: 1.03rem;
+      }
+
+      .contact-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .contact-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 16px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      }
+
+      :root[data-theme="dark"] .contact-link {
+        background: rgba(15, 23, 42, 0.72);
+      }
+
+      .contact-link:hover {
+        transform: translateY(-1px);
+        border-color: rgba(15, 118, 110, 0.28);
+        background: #ffffff;
+      }
+
+      :root[data-theme="dark"] .contact-link:hover {
+        background: rgba(15, 23, 42, 0.9);
+      }
+
+      .contact-value {
+        color: var(--accent-strong);
+        font-weight: 600;
+        word-break: break-word;
+        text-align: right;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 18px;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 0 4px;
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          width: min(100% - 20px, 960px);
+          padding-top: 16px;
+        }
+
+        .topbar,
+        .footer {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .hero {
+          grid-template-columns: 1fr;
+        }
+
+        .intro,
+        .about {
+          padding: 24px;
+        }
+
+        .side {
+          padding: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true">J</span>
+          <span>Personal Landing</span>
+        </div>
+        <div class="topbar-actions">
+          <div id="today" aria-label="현재 날짜"></div>
+          <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+            다크모드
+          </button>
+        </div>
+      </header>
+
+      <section class="hero">
+        <article class="card intro">
+          <p class="eyebrow">Hello, I’m</p>
+          <h1>지혜</h1>
+          <p class="subtitle">심플한 UI와 명확한 구조를 좋아하는 프론트엔드 개발자입니다.</p>
+
+          <div class="meta" aria-label="핵심 정보">
+            <span class="pill">한줄 소개: 깔끔한 웹 경험을 만듭니다</span>
+            <span class="pill">지역: Seoul, KR</span>
+          </div>
+        </article>
+
+        <aside class="card side" aria-label="주요 스킬과 연락 수단">
+          <section class="panel">
+            <h2>주요 스킬</h2>
+            <div class="skills">
+              <span class="skill">HTML</span>
+              <span class="skill">CSS</span>
+              <span class="skill">JavaScript</span>
+              <span class="skill">Responsive UI</span>
+              <span class="skill">Accessibility</span>
+            </div>
+          </section>
+
+          <section class="panel">
+            <h2>연락 수단</h2>
+            <ul class="contact-list">
+              <li>
+                <a class="contact-link" href="mailto:hello@example.com">
+                  <span>Email</span>
+                  <span class="contact-value">hello@example.com</span>
+                </a>
+              </li>
+              <li>
+                <a class="contact-link" href="https://github.com/" target="_blank" rel="noreferrer">
+                  <span>GitHub</span>
+                  <span class="contact-value">github.com/your-id</span>
+                </a>
+              </li>
+              <li>
+                <a class="contact-link" href="https://www.linkedin.com/" target="_blank" rel="noreferrer">
+                  <span>LinkedIn</span>
+                  <span class="contact-value">linkedin.com/in/your-id</span>
+                </a>
+              </li>
+            </ul>
+          </section>
+        </aside>
+      </section>
+
+      <section class="card about" aria-label="소개 문단">
+        <p>
+          저는 사용자가 바로 이해할 수 있는 구조와 읽기 쉬운 인터페이스를 우선으로
+          작업합니다. 복잡한 장식보다 핵심 정보가 잘 보이는 페이지를 선호하며,
+          필요할 때 빠르게 수정하고 확장할 수 있는 단순한 구성을 지향합니다.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <span>Single-file landing page</span>
+        <span id="year"></span>
+      </footer>
+    </main>
+
+    <script>
+      const root = document.documentElement;
+      const themeToggle = document.getElementById("themeToggle");
+      const now = new Date();
+      const savedTheme = localStorage.getItem("theme");
+
+      const getSystemTheme = () =>
+        window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches
+          ? "dark"
+          : "light";
+
+      const applyTheme = (theme) => {
+        const nextTheme = theme === "dark" ? "dark" : "light";
+        root.dataset.theme = nextTheme;
+        themeToggle.setAttribute("aria-pressed", String(nextTheme === "dark"));
+        themeToggle.textContent = nextTheme === "dark" ? "라이트모드" : "다크모드";
+      };
+
+      applyTheme(savedTheme || getSystemTheme());
+
+      document.getElementById("today").textContent = now.toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "short",
+      });
+
+      document.getElementById("year").textContent = `© ${now.getFullYear()} Jihye`;
+
+      themeToggle.addEventListener("click", () => {
+        const nextTheme = root.dataset.theme === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", nextTheme);
+        applyTheme(nextTheme);
+      });
+    </script>
+  </body>
+</html>

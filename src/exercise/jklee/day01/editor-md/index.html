@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko" data-color-mode="dark" data-light-theme="light" data-dark-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/lib/common.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5/github-markdown.css" />
+  <link id="hljs-dark"  rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css" />
+  <link id="hljs-light" rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github.min.css" disabled />
+  <style>
+    :root {
+      --bg: #1e1e1e;
+      --bg-elev: #252526;
+      --bg-deep: #181818;
+      --border: #333;
+      --text: #d4d4d4;
+      --text-muted: #8a8a8a;
+      --accent: #4ec9b0;
+      --accent-2: #569cd6;
+      --code-bg: #2d2d2d;
+      --selection: #264f78;
+    }
+
+    :root[data-theme="light"] {
+      --bg: #ffffff;
+      --bg-elev: #f6f8fa;
+      --bg-deep: #eaeef2;
+      --border: #d0d7de;
+      --text: #1f2328;
+      --text-muted: #59636e;
+      --accent: #1f883d;
+      --accent-2: #0969da;
+      --code-bg: #f6f8fa;
+      --selection: #b6d6fb;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Pretendard",
+        "Apple SD Gothic Neo", sans-serif;
+    }
+
+    ::selection { background: var(--selection); }
+
+    .app {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 18px;
+      background: var(--bg-deep);
+      border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .brand .dot {
+      width: 10px;
+      height: 10px;
+      background: var(--accent);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent);
+    }
+
+    .brand .name { color: var(--text); }
+    .brand .ext { color: var(--accent-2); }
+
+    .meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 6px 12px;
+      background: var(--bg-elev);
+      border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
+      flex-wrap: wrap;
+    }
+
+    .toolbar .group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .toolbar .sep {
+      width: 1px;
+      height: 18px;
+      background: var(--border);
+      margin: 0 4px;
+    }
+
+    .toolbar button {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 32px;
+      height: 30px;
+      padding: 0 10px;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      font-size: 13px;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .toolbar button:hover {
+      background: var(--bg-deep);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .toolbar button:active { transform: translateY(1px); }
+
+    .toolbar button.bold   { font-weight: 700; }
+    .toolbar button.italic { font-style: italic; }
+
+    .toolbar button.danger:hover {
+      border-color: #e06c75;
+      color: #e06c75;
+    }
+
+    .panes {
+      flex: 1 1 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 0;
+    }
+
+    .pane {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      min-width: 0;
+    }
+
+    .pane + .pane { border-left: 1px solid var(--border); }
+
+    .pane-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      background: var(--bg-elev);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pane-header .badge {
+      padding: 2px 7px;
+      background: var(--bg-deep);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    textarea#editor {
+      flex: 1 1 auto;
+      width: 100%;
+      resize: none;
+      border: 0;
+      outline: 0;
+      padding: 18px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      tab-size: 2;
+    }
+
+    #preview {
+      flex: 1 1 auto;
+      overflow: auto;
+      padding: 28px 32px;
+    }
+
+    /* GitHub markdown body — let it own its typography & background */
+    .markdown-body { box-sizing: border-box; min-width: 0; }
+    .markdown-body pre { position: relative; }
+
+    /* Scrollbar */
+    #preview::-webkit-scrollbar,
+    textarea#editor::-webkit-scrollbar { width: 10px; height: 10px; }
+    #preview::-webkit-scrollbar-thumb,
+    textarea#editor::-webkit-scrollbar-thumb {
+      background: #3a3a3a;
+      border-radius: 5px;
+    }
+    #preview::-webkit-scrollbar-thumb:hover,
+    textarea#editor::-webkit-scrollbar-thumb:hover { background: #4a4a4a; }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .panes { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+      .pane + .pane { border-left: 0; border-top: 1px solid var(--border); }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <span class="dot"></span>
+        <span class="name">markdown</span><span class="ext">.editor</span>
+      </div>
+      <div class="meta" id="meta">0 chars · 0 words</div>
+    </header>
+
+    <div class="toolbar" role="toolbar" aria-label="Editor toolbar">
+      <div class="group">
+        <button type="button" class="bold"   data-action="bold"    title="굵게 (Ctrl/Cmd+B)">B</button>
+        <button type="button" class="italic" data-action="italic"  title="기울임 (Ctrl/Cmd+I)">I</button>
+        <button type="button"                data-action="heading" title="제목">H</button>
+        <button type="button"                data-action="list"    title="리스트">• 리스트</button>
+        <button type="button"                data-action="link"    title="링크">🔗 링크</button>
+        <button type="button"                data-action="code"    title="코드">&lt;/&gt; 코드</button>
+      </div>
+      <div class="group">
+        <button type="button" id="themeBtn" data-action="theme" title="테마 전환 (다크/라이트)">🌙 다크</button>
+        <span class="sep" aria-hidden="true"></span>
+        <button type="button" data-action="download" title="현재 내용을 .md로 저장 (Ctrl/Cmd+S)">⬇ 다운로드 (.md)</button>
+        <button type="button" class="danger" data-action="reset" title="내용 비우기">🗑 초기화</button>
+      </div>
+    </div>
+
+    <main class="panes">
+      <section class="pane">
+        <div class="pane-header">
+          <span>EDITOR</span>
+          <span class="badge">md</span>
+        </div>
+        <textarea id="editor" spellcheck="false" autofocus></textarea>
+      </section>
+      <section class="pane">
+        <div class="pane-header">
+          <span>PREVIEW</span>
+          <span class="badge">html</span>
+        </div>
+        <article id="preview" class="markdown-body"></article>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const sample = `# Markdown Editor
+
+> 왼쪽에 입력하고, 오른쪽에서 결과를 확인하세요.
+
+## 기본 문법
+
+**굵게**, *기울임*, 그리고 [링크](https://marked.js.org)도 됩니다.
+
+### 리스트
+- 사과
+- 바나나
+  - 노란 바나나
+  - 초록 바나나
+- 체리
+
+### 순서 있는 리스트
+1. 첫번째
+2. 두번째
+3. 세번째
+
+### 인라인 코드
+\`const greeting = "Hello, world!";\`
+
+### 코드 블록
+\`\`\`js
+function fib(n) {
+  if (n < 2) return n;
+  return fib(n - 1) + fib(n - 2);
+}
+
+console.log(fib(10));
+\`\`\`
+
+### 인용문
+> "Talk is cheap. Show me the code." — Linus Torvalds
+
+---
+
+Happy hacking. 🚀
+`;
+
+    const STORAGE_KEY = "jklee:editor-md:content";
+    const THEME_KEY   = "jklee:editor-md:theme";
+
+    const editor = document.getElementById("editor");
+    const preview = document.getElementById("preview");
+    const meta = document.getElementById("meta");
+    const toolbar = document.querySelector(".toolbar");
+    const themeBtn = document.getElementById("themeBtn");
+
+    marked.setOptions({ gfm: true, breaks: true });
+
+    function render() {
+      const src = editor.value;
+      preview.innerHTML = marked.parse(src);
+      if (window.hljs) {
+        preview.querySelectorAll("pre code").forEach((el) => hljs.highlightElement(el));
+      }
+      const chars = src.length;
+      const words = src.trim() ? src.trim().split(/\s+/).length : 0;
+      meta.textContent = `${chars} chars · ${words} words`;
+      try { localStorage.setItem(STORAGE_KEY, src); } catch (_) {}
+    }
+
+    // --- Cursor helpers ---
+    function wrapSelection(before, after, placeholder = "") {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || placeholder;
+      const text = before + selected + after;
+      editor.setRangeText(text, start, end, "select");
+      // Position selection to highlight the inserted text region
+      editor.selectionStart = start + before.length;
+      editor.selectionEnd = start + before.length + selected.length;
+      editor.focus();
+      render();
+    }
+
+    function prependLines(prefix) {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const v = editor.value;
+      const lineStart = v.lastIndexOf("\n", start - 1) + 1;
+      const block = v.slice(lineStart, end) || "";
+      const replaced = block
+        .split("\n")
+        .map((l) => prefix + l)
+        .join("\n");
+      editor.setRangeText(replaced, lineStart, end, "end");
+      editor.focus();
+      render();
+    }
+
+    function insertLink() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end) || "텍스트";
+      const text = `[${selected}](https://)`;
+      editor.setRangeText(text, start, end, "end");
+      // Place cursor inside the URL parens
+      const cursor = start + text.length - 1;
+      editor.selectionStart = editor.selectionEnd = cursor;
+      editor.focus();
+      render();
+    }
+
+    function insertCode() {
+      const start = editor.selectionStart;
+      const end = editor.selectionEnd;
+      const selected = editor.value.slice(start, end);
+      if (selected.includes("\n")) {
+        const text = "```\n" + selected + "\n```";
+        editor.setRangeText(text, start, end, "end");
+      } else {
+        wrapSelection("`", "`", "code");
+        return;
+      }
+      editor.focus();
+      render();
+    }
+
+    const actions = {
+      bold:    () => wrapSelection("**", "**", "굵게"),
+      italic:  () => wrapSelection("*",  "*",  "기울임"),
+      heading: () => prependLines("## "),
+      list:    () => prependLines("- "),
+      link:    () => insertLink(),
+      code:    () => insertCode(),
+      download: () => downloadMd(),
+      reset:    () => resetEditor(),
+      theme:    () => toggleTheme(),
+    };
+
+    toolbar.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-action]");
+      if (!btn) return;
+      const fn = actions[btn.dataset.action];
+      if (fn) fn();
+    });
+
+    // --- Download .md ---
+    function downloadMd() {
+      const blob = new Blob([editor.value], { type: "text/markdown;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      const ts = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
+      a.href = url;
+      a.download = `note-${ts}.md`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // --- Reset ---
+    function resetEditor() {
+      if (!confirm("작성한 내용을 모두 지울까요? 이 동작은 되돌릴 수 없습니다.")) return;
+      editor.value = "";
+      try { localStorage.removeItem(STORAGE_KEY); } catch (_) {}
+      editor.focus();
+      render();
+    }
+
+    // --- Theme ---
+    function applyTheme(theme) {
+      const t = theme === "light" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", t);
+      document.documentElement.setAttribute("data-color-mode", t);
+      const lightLink = document.getElementById("hljs-light");
+      const darkLink  = document.getElementById("hljs-dark");
+      if (lightLink) lightLink.disabled = t !== "light";
+      if (darkLink)  darkLink.disabled  = t !== "dark";
+      if (themeBtn)  themeBtn.textContent = t === "dark" ? "🌙 다크" : "☀️ 라이트";
+    }
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute("data-theme") || "dark";
+      const next = current === "dark" ? "light" : "dark";
+      try { localStorage.setItem(THEME_KEY, next); } catch (_) {}
+      applyTheme(next);
+    }
+
+    // --- Init: theme first, then content ---
+    let savedTheme = "dark";
+    try { savedTheme = localStorage.getItem(THEME_KEY) || "dark"; } catch (_) {}
+    applyTheme(savedTheme);
+
+    let initial;
+    try { initial = localStorage.getItem(STORAGE_KEY); } catch (_) { initial = null; }
+    editor.value = initial != null ? initial : sample;
+    render();
+
+    editor.addEventListener("input", render);
+
+    // Tab inserts two spaces; Cmd/Ctrl+B / +I shortcuts
+    editor.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const s = editor.selectionStart;
+        const eEnd = editor.selectionEnd;
+        editor.setRangeText("  ", s, eEnd, "end");
+        render();
+        return;
+      }
+      if ((e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) {
+        const k = e.key.toLowerCase();
+        if (k === "b") { e.preventDefault(); actions.bold(); }
+        else if (k === "i") { e.preventDefault(); actions.italic(); }
+        else if (k === "s") { e.preventDefault(); downloadMd(); }
+      }
+    });
+  </script>
+</body>
+</html>

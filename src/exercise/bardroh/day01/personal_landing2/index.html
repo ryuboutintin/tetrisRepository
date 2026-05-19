@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bard K. Roh - Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Dark Mode Toggle -->
+    <button id="darkModeToggle" class="dark-mode-toggle" aria-label="다크모드 토글">
+        <span class="toggle-icon">🌙</span>
+    </button>
+
+    <!-- Hero Section -->
+    <section id="hero" class="hero">
+        <div class="hero-content">
+            <h1 class="hero-name">Bard K. Roh</h1>
+            <p class="hero-tagline">소프트웨어 엔지니어 | 문제 해결에 열정을 가진 개발자</p>
+            <div class="hero-buttons">
+                <a href="#contact" class="btn btn-primary">Contact</a>
+                <a href="#about" class="btn btn-secondary">About Me</a>
+            </div>
+        </div>
+        <div class="scroll-indicator">↓</div>
+    </section>
+
+    <!-- About Me Section -->
+    <section id="about" class="about">
+        <div class="section-content">
+            <h2 class="section-title">About Me</h2>
+            <p class="about-text">
+                안녕하세요, 소프트웨어 엔지니어 Bard K. Roh입니다.
+                사용자 중심의 웹 애플리케이션을 개발하는 것에 관심이 많으며,
+                깔끔한 코드와 효율적인 솔루션을 추구합니다.
+                새로운 기술을 배우고 실제 프로젝트에 적용하는 것을 즐기며,
+                협업과 지속적인 학습을 통해 더 나은 개발자로 성장하고자 합니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="skills">
+        <div class="section-content">
+            <h2 class="section-title">Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon">💻</div>
+                    <h3 class="skill-name">Frontend</h3>
+                    <p class="skill-desc">HTML, CSS, JavaScript, React</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">⚙️</div>
+                    <h3 class="skill-name">Backend</h3>
+                    <p class="skill-desc">Node.js, Python, REST API</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🛠️</div>
+                    <h3 class="skill-name">Tools</h3>
+                    <p class="skill-desc">Git, GitHub, VS Code</p>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon">🎨</div>
+                    <h3 class="skill-name">Design</h3>
+                    <p class="skill-desc">UI/UX, Responsive Design</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="section-content">
+            <h2 class="section-title">Projects</h2>
+            <div class="projects-grid">
+                <div class="project-card">
+                    <div class="project-image">🌐</div>
+                    <h3 class="project-title">E-commerce Platform</h3>
+                    <p class="project-desc">
+                        React와 Node.js를 활용한 풀스택 쇼핑몰 애플리케이션.
+                        결제 시스템과 실시간 재고 관리 기능 구현.
+                    </p>
+                    <div class="project-tags">
+                        <span class="tag">React</span>
+                        <span class="tag">Node.js</span>
+                        <span class="tag">MongoDB</span>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">📱</div>
+                    <h3 class="project-title">Task Manager App</h3>
+                    <p class="project-desc">
+                        직관적인 UI와 드래그앤드롭 기능을 갖춘 할 일 관리 애플리케이션.
+                        로컬 스토리지를 활용한 데이터 영속성 구현.
+                    </p>
+                    <div class="project-tags">
+                        <span class="tag">JavaScript</span>
+                        <span class="tag">HTML/CSS</span>
+                        <span class="tag">LocalStorage</span>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">🔍</div>
+                    <h3 class="project-title">Weather Dashboard</h3>
+                    <p class="project-desc">
+                        공공 API를 활용한 실시간 날씨 정보 대시보드.
+                        지역별 날씨 검색 및 5일 예보 기능 제공.
+                    </p>
+                    <div class="project-tags">
+                        <span class="tag">API</span>
+                        <span class="tag">React</span>
+                        <span class="tag">Chart.js</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="section-content">
+            <h2 class="section-title">Contact</h2>
+            <p class="contact-intro">프로젝트 협업이나 문의 사항이 있으시면 언제든 연락주세요.</p>
+            <div class="contact-links">
+                <a href="mailto:your.email@example.com" class="contact-link">
+                    <span class="contact-icon">✉️</span>
+                    <div class="contact-info">
+                        <span class="contact-label">Email</span>
+                        <span class="contact-value">your.email@example.com</span>
+                    </div>
+                </a>
+                <a href="https://github.com/bardroh" class="contact-link" target="_blank" rel="noopener">
+                    <span class="contact-icon">🔗</span>
+                    <div class="contact-info">
+                        <span class="contact-label">GitHub</span>
+                        <span class="contact-value">github.com/bardroh</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Bard K. Roh. All rights reserved.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #0f0f1a;
+  color: #e0e0e0;
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+}
+
+/* ───────────── Game page ───────────── */
+
+#app {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+h1 {
+  font-size: 2.4rem;
+  letter-spacing: 0.4em;
+  color: #a78bfa;
+  text-shadow: 0 0 20px #7c3aed88;
+}
+
+.back-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: #c4b5fd;
+}
+
+#game-area {
+  display: flex;
+  gap: 20px;
+  position: relative;
+}
+
+#board {
+  border: 2px solid #3b3b5c;
+  background: #12122a;
+  display: block;
+}
+
+#side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 140px;
+}
+
+.info-box {
+  background: #1c1c35;
+  border: 1px solid #3b3b5c;
+  border-radius: 6px;
+  padding: 10px 14px;
+}
+
+.info-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  color: #7b7b9e;
+  margin-bottom: 4px;
+}
+
+.info-value {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #c4b5fd;
+}
+
+#next-canvas {
+  display: block;
+  margin-top: 6px;
+  background: #12122a;
+  border-radius: 4px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 8px;
+}
+
+#start-btn {
+  flex: 1;
+  background: #6d28d9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#start-btn:hover {
+  background: #7c3aed;
+}
+
+#mute-btn {
+  background: #1c1c35;
+  color: #c4b5fd;
+  border: 1px solid #3b3b5c;
+  border-radius: 6px;
+  padding: 0 10px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+#mute-btn:hover {
+  background: #2d2d4e;
+}
+
+#controls {
+  background: #1c1c35;
+  border: 1px solid #3b3b5c;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 0.75rem;
+  color: #7b7b9e;
+}
+
+.control-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.control-row:last-child {
+  margin-bottom: 0;
+}
+
+.key {
+  background: #2d2d4e;
+  border-radius: 3px;
+  padding: 1px 5px;
+  font-size: 0.7rem;
+  color: #c4b5fd;
+}
+
+/* Overlay */
+#overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 600px;
+  background: rgba(10, 10, 26, 0.88);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border: 2px solid #3b3b5c;
+}
+
+#overlay.hidden {
+  display: none;
+}
+
+#overlay-text {
+  font-size: 2rem;
+  font-weight: bold;
+  letter-spacing: 0.3em;
+  color: #a78bfa;
+  text-shadow: 0 0 16px #7c3aed;
+}
+
+#overlay-sub {
+  font-size: 0.85rem;
+  color: #7b7b9e;
+}
+
+/* ───────────── Landing page ───────────── */
+
+.landing-page {
+  align-items: flex-start;
+}
+
+.landing-container {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 48px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+
+/* Header */
+.landing-header {
+  text-align: center;
+}
+
+.landing-blocks {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.lb {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+}
+.lb-i { background: #22d3ee; }
+.lb-o { background: #facc15; }
+.lb-t { background: #a855f7; }
+.lb-s { background: #22c55e; }
+.lb-z { background: #ef4444; }
+.lb-j { background: #3b82f6; }
+.lb-l { background: #f97316; }
+
+.landing-logo {
+  font-size: 4rem;
+  letter-spacing: 0.5em;
+  color: #a78bfa;
+  text-shadow: 0 0 30px #7c3aed, 0 0 60px #7c3aed44;
+  margin-bottom: 10px;
+}
+
+.landing-tagline {
+  font-size: 0.95rem;
+  color: #7b7b9e;
+  letter-spacing: 0.05em;
+}
+
+/* Play button */
+.landing-play-btn {
+  display: inline-block;
+  background: #6d28d9;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.25rem;
+  font-weight: bold;
+  letter-spacing: 0.15em;
+  padding: 16px 52px;
+  border-radius: 8px;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 0 20px #7c3aed55;
+}
+
+.landing-play-btn:hover {
+  background: #7c3aed;
+  transform: translateY(-2px);
+  box-shadow: 0 0 32px #7c3aed88;
+}
+
+/* Info grid */
+.landing-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+}
+
+.landing-card {
+  background: #1c1c35;
+  border: 1px solid #3b3b5c;
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+
+.landing-card h2 {
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  color: #7b7b9e;
+  margin-bottom: 16px;
+  text-transform: uppercase;
+}
+
+/* Key list */
+.key-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.key-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: #c4b5fd;
+}
+
+.key-badge {
+  display: inline-block;
+  background: #2d2d4e;
+  border: 1px solid #4b4b6e;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 0.78rem;
+  color: #e0e0e0;
+  min-width: 52px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+/* Score list */
+.score-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.score-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2d2d4e;
+}
+
+.score-list li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.line-label {
+  color: #c4b5fd;
+}
+
+.line-label em {
+  font-style: normal;
+  color: #facc15;
+  margin-left: 4px;
+}
+
+.line-score {
+  color: #7b7b9e;
+  font-size: 0.8rem;
+}
+
+.line-score.hl {
+  color: #facc15;
+  font-weight: bold;
+}
+
+.level-hint {
+  font-size: 0.75rem;
+  color: #5b5b7e;
+}
+
+/* Footer */
+.landing-footer {
+  font-size: 0.72rem;
+  color: #3b3b5c;
+  letter-spacing: 0.05em;
+}

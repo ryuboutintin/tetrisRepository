@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jeonghana — Personal Landing</title>
+  <script>
+    // Apply theme before render to prevent flash of wrong theme
+    (function () {
+      var saved = localStorage.getItem("theme");
+      var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      var theme = saved || (prefersDark ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ---------- Material-inspired tokens (Light) ---------- */
+    :root {
+      --md-primary: #1976d2;
+      --md-primary-hover: #1565c0;
+      --md-on-primary: #ffffff;
+
+      --md-surface: #ffffff;
+      --md-background: #fafafa;
+      --md-on-surface: #212121;
+      --md-on-surface-muted: #5f6368;
+      --md-divider: #e0e0e0;
+      --md-tag-bg: rgba(0, 0, 0, 0.04);
+      --md-hover-overlay: rgba(25, 118, 210, 0.08);
+
+      /* Material elevation shadows */
+      --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.06),
+        0 1px 3px rgba(0, 0, 0, 0.08);
+      --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.06),
+        0 4px 8px rgba(0, 0, 0, 0.08);
+      --elevation-3: 0 4px 8px rgba(0, 0, 0, 0.08),
+        0 8px 16px rgba(0, 0, 0, 0.1);
+
+      --radius-sm: 4px;
+      --radius-md: 8px;
+    }
+
+    /* ---------- Material Dark theme ---------- */
+    :root[data-theme="dark"] {
+      --md-primary: #90caf9;
+      --md-primary-hover: #64b5f6;
+      --md-on-primary: #0d1b2a;
+
+      --md-surface: #1e1e1e;
+      --md-background: #121212;
+      --md-on-surface: #e0e0e0;
+      --md-on-surface-muted: #9e9e9e;
+      --md-divider: #2c2c2c;
+      --md-tag-bg: rgba(255, 255, 255, 0.08);
+      --md-hover-overlay: rgba(144, 202, 249, 0.12);
+
+      --elevation-1: 0 1px 2px rgba(0, 0, 0, 0.4),
+        0 1px 3px rgba(0, 0, 0, 0.5);
+      --elevation-2: 0 2px 4px rgba(0, 0, 0, 0.4),
+        0 4px 8px rgba(0, 0, 0, 0.5);
+      --elevation-3: 0 4px 8px rgba(0, 0, 0, 0.5),
+        0 8px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    body {
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: "Roboto", -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Apple SD Gothic Neo", sans-serif;
+      color: var(--md-on-surface);
+      background: var(--md-background);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ---------- App Bar ---------- */
+    .appbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: var(--md-surface);
+      box-shadow: var(--elevation-1);
+    }
+    .appbar .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 56px;
+    }
+    .appbar .logo {
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: 0.15px;
+    }
+    .appbar nav ul {
+      display: flex;
+      gap: 8px;
+      list-style: none;
+    }
+    .appbar nav a {
+      display: inline-block;
+      padding: 8px 12px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--md-on-surface-muted);
+      border-radius: var(--radius-sm);
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .appbar nav a:hover {
+      background-color: var(--md-hover-overlay);
+      color: var(--md-primary);
+    }
+
+    /* ---------- Theme toggle button ---------- */
+    .appbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      border: none;
+      background: transparent;
+      color: var(--md-on-surface-muted);
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 18px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    .theme-toggle:hover {
+      background-color: var(--md-hover-overlay);
+      color: var(--md-primary);
+    }
+    .theme-toggle .icon-sun { display: none; }
+    .theme-toggle .icon-moon { display: inline; }
+    :root[data-theme="dark"] .theme-toggle .icon-sun { display: inline; }
+    :root[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+
+    /* ---------- Sections ---------- */
+    section {
+      padding: 80px 0;
+    }
+    .section-label {
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      color: var(--md-primary);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .section-title {
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: 0;
+      margin-bottom: 40px;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      padding: 96px 0 80px;
+      background: var(--md-surface);
+      border-bottom: 1px solid var(--md-divider);
+    }
+    .hero-inner {
+      max-width: 680px;
+    }
+    .hero h1 {
+      font-size: 48px;
+      font-weight: 500;
+      line-height: 1.2;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .hero h1 .accent {
+      color: var(--md-primary);
+    }
+    .hero .tagline {
+      font-size: 18px;
+      color: var(--md-on-surface-muted);
+      margin-bottom: 24px;
+    }
+    .hero .intro {
+      font-size: 15px;
+      color: var(--md-on-surface-muted);
+      margin-bottom: 32px;
+      max-width: 600px;
+    }
+
+    /* ---------- Buttons (Material style) ---------- */
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 40px;
+      padding: 0 20px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .btn-contained {
+      background-color: var(--md-primary);
+      color: var(--md-on-primary);
+      box-shadow: var(--elevation-1);
+    }
+    .btn-contained:hover {
+      background-color: var(--md-primary-hover);
+      box-shadow: var(--elevation-2);
+    }
+    .btn-outlined {
+      background-color: transparent;
+      color: var(--md-primary);
+      border: 1px solid var(--md-divider);
+    }
+    .btn-outlined:hover {
+      background-color: var(--md-hover-overlay);
+      border-color: var(--md-primary);
+    }
+
+    /* ---------- Skills (cards) ---------- */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+    }
+    .skill-card {
+      background: var(--md-surface);
+      border-radius: var(--radius-md);
+      padding: 24px 16px;
+      text-align: center;
+      box-shadow: var(--elevation-1);
+      transition: box-shadow 0.2s;
+    }
+    .skill-card:hover {
+      box-shadow: var(--elevation-2);
+    }
+    .skill-icon {
+      display: block;
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .skill-name {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 4px;
+    }
+    .skill-level {
+      font-size: 12px;
+      color: var(--md-on-surface-muted);
+    }
+
+    /* ---------- Projects ---------- */
+    .projects-section {
+      background: var(--md-surface);
+      border-top: 1px solid var(--md-divider);
+      border-bottom: 1px solid var(--md-divider);
+    }
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 20px;
+    }
+    .project-card {
+      background: var(--md-surface);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--elevation-1);
+      transition: box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+    }
+    .project-card:hover {
+      box-shadow: var(--elevation-3);
+    }
+    .project-thumb {
+      height: 140px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      color: var(--md-on-primary);
+      background: var(--md-primary);
+    }
+    .project-thumb.tone-1 {
+      background: #4caf50;
+    }
+    .project-thumb.tone-2 {
+      background: #ff9800;
+    }
+    .project-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .project-title {
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+    .project-desc {
+      font-size: 14px;
+      color: var(--md-on-surface-muted);
+      margin-bottom: 16px;
+      flex: 1;
+    }
+    .project-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .tag {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--md-on-surface-muted);
+      background-color: var(--md-tag-bg);
+      border-radius: 999px;
+    }
+
+    /* ---------- Contact ---------- */
+    .contact-inner {
+      background: var(--md-surface);
+      border-radius: var(--radius-md);
+      padding: 48px 32px;
+      text-align: center;
+      box-shadow: var(--elevation-1);
+    }
+    .contact-inner h2 {
+      font-size: 24px;
+      font-weight: 500;
+      margin-bottom: 12px;
+    }
+    .contact-inner p {
+      color: var(--md-on-surface-muted);
+      font-size: 15px;
+      margin-bottom: 28px;
+    }
+    .contact-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      padding: 24px 0 40px;
+      text-align: center;
+      font-size: 13px;
+      color: var(--md-on-surface-muted);
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      .appbar nav ul {
+        display: none;
+      }
+      .hero {
+        padding: 64px 0 56px;
+      }
+      .hero h1 {
+        font-size: 36px;
+      }
+      section {
+        padding: 56px 0;
+      }
+      .contact-inner {
+        padding: 36px 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- App Bar -->
+  <header class="appbar">
+    <div class="container">
+      <div class="logo">jeonghana.dev</div>
+      <div class="appbar-actions">
+        <nav>
+          <ul>
+            <li><a href="#hero">Home</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#projects">Projects</a></li>
+            <li><a href="#contact">Contact</a></li>
+          </ul>
+        </nav>
+        <button
+          id="themeToggle"
+          class="theme-toggle"
+          type="button"
+          aria-label="테마 전환"
+          title="테마 전환"
+        >
+          <span class="icon-moon" aria-hidden="true">🌙</span>
+          <span class="icon-sun" aria-hidden="true">☀️</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section id="hero" class="hero">
+    <div class="container">
+      <div class="hero-inner">
+        <h1>
+          안녕하세요,<br />
+          개발자 <span class="accent">정하나</span>입니다.
+        </h1>
+        <p class="tagline">사용자 경험을 고민하는 풀스택 웹 개발자</p>
+        <p class="intro">
+          깔끔한 UI와 견고한 백엔드를 함께 만들어가는 것을 좋아합니다.
+          문제 정의부터 배포까지, 사용자에게 가치를 전달하는 제품을 만드는 데
+          집중합니다.
+        </p>
+        <div class="btn-group">
+          <a href="#projects" class="btn btn-contained">View Projects</a>
+          <a href="#contact" class="btn btn-outlined">Contact Me</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section id="skills">
+    <div class="container">
+      <p class="section-label">Skills</p>
+      <h2 class="section-title">기술 스택</h2>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <span class="skill-icon">⚛️</span>
+          <div class="skill-name">React</div>
+          <div class="skill-level">Intermediate</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🟦</span>
+          <div class="skill-name">TypeScript</div>
+          <div class="skill-level">Intermediate</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🟢</span>
+          <div class="skill-name">Node.js</div>
+          <div class="skill-level">Intermediate</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🐍</span>
+          <div class="skill-name">Python</div>
+          <div class="skill-level">Intermediate</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🎨</span>
+          <div class="skill-name">CSS</div>
+          <div class="skill-level">Advanced</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🐘</span>
+          <div class="skill-name">PostgreSQL</div>
+          <div class="skill-level">Intermediate</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">🐳</span>
+          <div class="skill-name">Docker</div>
+          <div class="skill-level">Beginner</div>
+        </div>
+        <div class="skill-card">
+          <span class="skill-icon">☁️</span>
+          <div class="skill-name">AWS</div>
+          <div class="skill-level">Beginner</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Projects -->
+  <section id="projects" class="projects-section">
+    <div class="container">
+      <p class="section-label">Projects</p>
+      <h2 class="section-title">최근 작업</h2>
+      <div class="projects-grid">
+        <article class="project-card">
+          <div class="project-thumb">🛒</div>
+          <div class="project-body">
+            <h3 class="project-title">커머스 대시보드</h3>
+            <p class="project-desc">
+              실시간 매출/재고 데이터를 시각화한 운영자용 어드민 대시보드.
+              SSE 기반 실시간 업데이트를 적용했습니다.
+            </p>
+            <div class="project-tags">
+              <span class="tag">React</span>
+              <span class="tag">TypeScript</span>
+              <span class="tag">Recharts</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-thumb tone-1">📝</div>
+          <div class="project-body">
+            <h3 class="project-title">팀 메모 협업 툴</h3>
+            <p class="project-desc">
+              마크다운 기반 실시간 협업 노트 서비스. WebSocket으로 동시 편집과
+              커서 공유 기능을 구현했습니다.
+            </p>
+            <div class="project-tags">
+              <span class="tag">Next.js</span>
+              <span class="tag">Node.js</span>
+              <span class="tag">PostgreSQL</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-thumb tone-2">🤖</div>
+          <div class="project-body">
+            <h3 class="project-title">AI 챗봇 플랫폼</h3>
+            <p class="project-desc">
+              사내 문서 기반 RAG 챗봇. 임베딩 검색과 LLM을 조합해 빠른 사내
+              지식 검색 경험을 제공합니다.
+            </p>
+            <div class="project-tags">
+              <span class="tag">Python</span>
+              <span class="tag">FastAPI</span>
+              <span class="tag">LangChain</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact">
+    <div class="container">
+      <div class="contact-inner">
+        <h2>함께 일해요</h2>
+        <p>
+          새로운 프로젝트 제안이나 가벼운 질문 모두 환영합니다.
+          편하게 연락주세요.
+        </p>
+        <div class="contact-links">
+          <a class="btn btn-contained" href="mailto:jeonghana0104@gmail.com">
+            Email
+          </a>
+          <a
+            class="btn btn-outlined"
+            href="https://github.com/jeonghana0104"
+            target="_blank"
+            rel="noopener"
+          >
+            GitHub
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer>© 2026 Jeonghana</footer>
+
+  <script>
+    document.getElementById("themeToggle").addEventListener("click", function () {
+      var root = document.documentElement;
+      var next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      root.setAttribute("data-theme", next);
+      localStorage.setItem("theme", next);
+    });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Memo App</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── 인증 화면 ── -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-logo">✦ Memo</div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">로그인</button>
+        <button class="auth-tab" data-tab="register">회원가입</button>
+      </div>
+
+      <form id="auth-form">
+        <div class="field">
+          <label>사용자명</label>
+          <input id="auth-username" type="text" placeholder="username" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label>비밀번호</label>
+          <input id="auth-password" type="password" placeholder="password" autocomplete="current-password" required />
+        </div>
+        <p class="auth-error" id="auth-error"></p>
+        <button type="submit" class="btn btn-primary btn-full" id="auth-submit">로그인</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── 메인 앱 ── -->
+  <div id="app" style="display:none">
+    <aside class="sidebar">
+
+      <div class="sidebar-header">
+        <span class="logo">✦ Memo</span>
+        <div class="sidebar-header-right">
+          <span class="username-badge" id="username-badge"></span>
+          <button class="btn-icon" id="btn-new" title="새 메모">+</button>
+          <button class="btn-icon btn-icon-ghost" id="btn-logout" title="로그아웃">↩</button>
+        </div>
+      </div>
+
+      <div class="search-wrap">
+        <input type="text" id="search" class="search" placeholder="메모 검색..." />
+      </div>
+
+      <!-- 태그 필터 -->
+      <div class="tag-section">
+        <div class="tag-section-header">
+          <span class="section-label">TAGS</span>
+          <button class="btn-tag-add" id="btn-show-add-tag" title="태그 추가">+</button>
+        </div>
+        <div class="add-tag-form" id="add-tag-form" style="display:none">
+          <input id="new-tag-input" class="tag-input" placeholder="태그 이름" maxlength="30" />
+          <button class="btn-tag-submit" id="btn-tag-submit">추가</button>
+        </div>
+        <div class="tag-filter-list" id="tag-filter-list"></div>
+      </div>
+
+      <ul class="memo-list" id="memo-list"></ul>
+    </aside>
+
+    <main class="editor-area">
+      <div class="empty-state" id="empty-state">
+        <p class="empty-icon">📝</p>
+        <p>메모를 선택하거나 <strong>+</strong> 버튼으로 새 메모를 만드세요.</p>
+      </div>
+
+      <div class="editor" id="editor" style="display:none">
+        <div class="editor-header">
+          <input type="text" id="memo-title" class="title-input" placeholder="제목" />
+          <div class="editor-actions">
+            <button class="btn btn-ghost" id="btn-cancel">취소</button>
+            <button class="btn btn-primary" id="btn-save">저장</button>
+            <button class="btn btn-danger" id="btn-delete">삭제</button>
+          </div>
+        </div>
+
+        <!-- 태그 바 -->
+        <div class="tag-bar">
+          <div class="assigned-tags" id="assigned-tags"></div>
+          <div class="tag-dropdown-wrap">
+            <button class="btn-add-tag-inline" id="btn-tag-dropdown">+ 태그</button>
+            <div class="tag-dropdown" id="tag-dropdown" style="display:none"></div>
+          </div>
+        </div>
+
+        <textarea id="memo-content" class="content-input" placeholder="내용을 입력하세요..."></textarea>
+        <div class="editor-footer"><span id="memo-meta"></span></div>
+      </div>
+    </main>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/static/app.js"></script>
+</body>
+</html>

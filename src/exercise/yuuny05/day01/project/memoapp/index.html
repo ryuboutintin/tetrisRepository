@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ﾟ✧ 찻집 메모장 ✧ﾟ</title>
+  <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'M PLUS Rounded 1c', sans-serif;
+      background: #fff8f0;
+      min-height: 100vh;
+      padding: 36px 16px 60px;
+      background-image:
+        radial-gradient(circle at 10% 20%, #ffe4c4 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, #fce4d6 0%, transparent 40%),
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext y='20' font-size='14' opacity='0.06'%3E🍵%3C/text%3E%3Ctext x='30' y='50' font-size='10' opacity='0.06'%3E✦%3C/text%3E%3C/svg%3E");
+    }
+
+    .container { max-width: 720px; margin: 0 auto; }
+
+    /* ── 헤더 ── */
+    .header { text-align: center; margin-bottom: 28px; }
+    .header .deco-top { font-size: 20px; letter-spacing: 6px; color: #a0522d; margin-bottom: 6px; }
+    h1 { font-size: 36px; font-weight: 800; color: #6b3a2a; text-shadow: 3px 3px 0 #deb887, 5px 5px 0 #f5deb3; letter-spacing: 2px; margin-bottom: 6px; }
+    .header .sub { font-size: 13px; color: #a0522d; letter-spacing: 3px; }
+    .header .deco-bottom { font-size: 16px; letter-spacing: 4px; color: #c8a882; margin-top: 6px; }
+
+    /* ── 유저바 ── */
+    .user-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      background: #fff; border: 2px solid #deb887; border-radius: 99px;
+      padding: 8px 18px; margin-bottom: 22px;
+      box-shadow: 3px 3px 0 #deb887;
+    }
+    .user-bar .username { font-size: 13px; font-weight: 800; color: #6b3a2a; }
+    .user-bar .username::before { content: '🍵 '; }
+
+    /* ── 카드 공통 ── */
+    .card {
+      background: #fff; border-radius: 20px;
+      border: 2px solid #deb887;
+      box-shadow: 4px 4px 0 #deb887, 6px 6px 0 #f5deb3;
+      position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, #a0522d, #cd853f, #deb887, #a0522d);
+      background-size: 200% 100%; animation: shimmer 3s linear infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 0% 0%; } 100% { background-position: 200% 0%; } }
+
+    /* ── 버튼 ── */
+    button {
+      padding: 9px 22px; border: none; border-radius: 99px;
+      font-size: 13px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+      font-family: inherit; letter-spacing: 0.5px;
+    }
+    button:hover { transform: translateY(-2px); }
+    button:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, #cd853f, #a0522d); color: #fff;
+      border: 2px solid #8b4513;
+      box-shadow: 0 4px 0 #5c2e0e, 0 6px 12px rgba(139,69,19,0.25);
+    }
+    .btn-primary:hover { box-shadow: 0 6px 0 #5c2e0e, 0 8px 18px rgba(139,69,19,0.35); }
+    .btn-cancel {
+      background: #fff; color: #a0522d; border: 2px solid #deb887;
+      box-shadow: 0 4px 0 #deb887;
+    }
+    .btn-sm {
+      padding: 6px 14px; font-size: 12px;
+      background: #fff8f0; color: #a0522d;
+      border: 2px solid #deb887; box-shadow: 0 3px 0 #deb887;
+    }
+    .btn-sm.danger { color: #c0392b; border-color: #e8b4a0; box-shadow: 0 3px 0 #e8b4a0; }
+    .btn-logout {
+      background: #fff8f0; color: #a0522d; border: 2px solid #deb887;
+      padding: 6px 16px; font-size: 12px; box-shadow: 0 3px 0 #deb887;
+    }
+
+    /* ── 인풋 ── */
+    input[type="text"], input[type="password"], textarea, select {
+      width: 100%; background: #fffaf5; border: 2px solid #deb887;
+      border-radius: 12px; padding: 11px 16px; font-size: 14px;
+      color: #4a2c0a; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      font-family: inherit; caret-color: #a0522d;
+    }
+    input::placeholder, textarea::placeholder { color: #c8a882; }
+    input:focus, textarea:focus, select:focus {
+      border-color: #a0522d; box-shadow: 0 0 0 3px rgba(160,82,45,0.12); background: #fff;
+    }
+    textarea { height: 100px; resize: vertical; }
+    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='%23a0522d'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    /* ── 메시지 ── */
+    .msg-box { border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 700; margin-bottom: 12px; }
+    .msg-error { background: #fff5f0; color: #c0392b; border: 2px solid #e8b4a0; }
+
+    /* ── AUTH ── */
+    .auth-wrap { display: flex; align-items: center; justify-content: center; min-height: 70vh; }
+    .auth-card { width: 100%; max-width: 380px; padding: 32px 28px; }
+    .auth-title { font-size: 22px; font-weight: 800; color: #6b3a2a; text-align: center; margin-bottom: 6px; }
+    .auth-sub { font-size: 12px; color: #a0522d; text-align: center; letter-spacing: 2px; margin-bottom: 22px; }
+    .auth-card input { margin-bottom: 12px; display: block; }
+    .auth-card .btn-primary { width: 100%; margin-top: 4px; }
+    .auth-toggle { text-align: center; margin-top: 16px; font-size: 12px; color: #c8a882; }
+    .auth-toggle span { color: #a0522d; cursor: pointer; font-weight: 800; text-decoration: underline; }
+
+    /* ── 필터 바 ── */
+    .filter-bar {
+      display: flex; gap: 10px; margin-bottom: 18px; align-items: center; flex-wrap: wrap;
+      background: #fff; border: 2px solid #deb887; border-radius: 14px;
+      padding: 12px 16px; box-shadow: 2px 2px 0 #deb887;
+    }
+    .filter-group { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 160px; }
+    .filter-label { font-size: 12px; color: #a0522d; font-weight: 800; white-space: nowrap; }
+    .filter-bar select { flex: 1; padding: 6px 32px 6px 10px; font-size: 12px; height: 34px; }
+    .filter-tag-chip {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 700;
+      background: #6b3a2a; color: #fff; border: none; cursor: pointer;
+    }
+    .filter-tag-chip .x { opacity: 0.7; font-size: 11px; cursor: pointer; }
+    .filter-tag-chip .x:hover { opacity: 1; }
+
+    /* ── 폼 카드 ── */
+    .form-card { padding: 24px 22px; margin-bottom: 22px; }
+    .form-label { font-size: 13px; font-weight: 800; color: #6b3a2a; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 14px; }
+    .form-row { margin-bottom: 10px; }
+    .form-sublabel { font-size: 11px; font-weight: 800; color: #a0522d; letter-spacing: 1px; margin-bottom: 6px; }
+    .btn-row { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+
+    /* ── 태그 자유 입력 ── */
+    .tag-input-wrap {
+      border: 2px solid #deb887; border-radius: 12px;
+      background: #fffaf5; padding: 8px 10px;
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      cursor: text; transition: border-color 0.2s;
+    }
+    .tag-input-wrap:focus-within { border-color: #a0522d; box-shadow: 0 0 0 3px rgba(160,82,45,0.12); background: #fff; }
+    .tag-input-wrap input {
+      border: none; background: transparent; padding: 4px 6px;
+      font-size: 13px; outline: none; min-width: 120px; flex: 1;
+      color: #4a2c0a; width: auto;
+    }
+    .tag-input-wrap input::placeholder { color: #c8a882; font-size: 12px; }
+    .tag-pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #f5e6d3; color: #6b3a2a;
+      border: 1.5px solid #deb887; border-radius: 99px;
+      padding: 3px 10px; font-size: 12px; font-weight: 700;
+    }
+    .tag-pill .del { background: none; border: none; padding: 0; font-size: 12px; line-height: 1; cursor: pointer; opacity: 0.5; transform: none; box-shadow: none; color: #6b3a2a; }
+    .tag-pill .del:hover { opacity: 1; transform: none; }
+
+    /* ── 카테고리 뱃지 ── */
+    .cat-badge {
+      display: inline-block; padding: 3px 12px; border-radius: 99px;
+      font-size: 11px; font-weight: 800; letter-spacing: 0.5px;
+      background: #6b3a2a; color: #fff; margin-bottom: 8px;
+    }
+
+    /* ── 메모 카드 ── */
+    .count-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 0 4px; }
+    .count-text { font-size: 12px; color: #a0522d; font-weight: 700; }
+    .memo-list { display: flex; flex-direction: column; gap: 16px; }
+    .memo-card { padding: 20px 22px; transition: transform 0.2s, box-shadow 0.2s; }
+    .memo-card:hover { transform: translateY(-3px); box-shadow: 6px 8px 0 #deb887, 8px 10px 0 #f5deb3; }
+    .memo-card.editing { border-color: #a0522d; box-shadow: 4px 4px 0 #a0522d; }
+    .memo-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+    .memo-title { font-size: 16px; font-weight: 800; color: #4a2c0a; }
+    .memo-title::before { content: '🍵 '; }
+    .memo-date { font-size: 11px; color: #c8a882; white-space: nowrap; margin-left: 10px; background: #fff8f0; padding: 3px 10px; border-radius: 99px; border: 1px solid #deb887; flex-shrink: 0; }
+    .memo-tags-row { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+    .memo-tag-chip {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 700;
+      background: #f5e6d3; color: #6b3a2a; border: 1.5px solid #deb887;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .memo-tag-chip:hover { background: #deb887; }
+    .memo-tag-chip::before { content: '#'; opacity: 0.6; margin-right: 2px; }
+    .memo-content { font-size: 13px; color: #7a5c3a; line-height: 1.8; margin-bottom: 14px; }
+    .memo-content h1,.memo-content h2,.memo-content h3 { color: #4a2c0a; font-weight: 800; margin: 8px 0 4px; }
+    .memo-content h1 { font-size: 18px; } .memo-content h2 { font-size: 15px; } .memo-content h3 { font-size: 13px; }
+    .memo-content p { margin-bottom: 6px; }
+    .memo-content ul,.memo-content ol { padding-left: 20px; margin-bottom: 6px; }
+    .memo-content strong { color: #a0522d; font-weight: 800; }
+    .memo-content em { color: #cd853f; }
+    .memo-content code { background: #fff8f0; border: 1px solid #deb887; border-radius: 6px; padding: 1px 6px; font-size: 12px; color: #4a2c0a; }
+    .memo-content pre { background: #fff8f0; border: 2px solid #deb887; border-radius: 12px; padding: 12px; overflow-x: auto; margin-bottom: 8px; }
+    .memo-content pre code { background: none; border: none; padding: 0; }
+    .memo-content blockquote { border-left: 3px solid #cd853f; padding-left: 12px; color: #a0522d; margin: 6px 0; }
+    .memo-content a { color: #a0522d; }
+    .memo-content hr { border: none; border-top: 2px dashed #deb887; margin: 10px 0; }
+    .memo-content table { width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 12px; }
+    .memo-content th { background: #fff8f0; color: #4a2c0a; border: 1px solid #deb887; padding: 6px 10px; }
+    .memo-content td { border: 1px solid #deb887; padding: 5px 10px; }
+    .memo-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .edit-form .form-row { margin-bottom: 10px; }
+
+    /* ── 빈 상태 ── */
+    .empty { text-align: center; padding: 56px 0; }
+    .empty-icon { font-size: 52px; display: block; margin-bottom: 14px; animation: bounce 2s ease-in-out infinite; }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+    .empty p { color: #c8a882; font-size: 14px; font-weight: 700; line-height: 2; }
+
+    .divider { text-align: center; color: #deb887; font-size: 18px; letter-spacing: 6px; margin-bottom: 20px; }
+  </style>
+</head>
+<body>
+<div id="app" class="container">
+
+  <!-- 헤더 -->
+  <div class="header">
+    <div class="deco-top">✦ 🍵 ✦ 🍵 ✦</div>
+    <h1>찻집 메모장</h1>
+    <div class="sub">～ 차 한 잔의 여유 ～</div>
+    <div class="deco-bottom">☆ ★ ☆ ★ ☆</div>
+  </div>
+
+  <!-- ══ 인증 화면 ══ -->
+  <div v-if="!token" class="auth-wrap">
+    <div class="auth-card card">
+      <div class="auth-title">{{ authMode === 'login' ? '🍵 로그인' : '🌿 회원가입' }}</div>
+      <div class="auth-sub">{{ authMode === 'login' ? '어서오세요 ♡' : '새로운 시작 ♡' }}</div>
+      <div v-if="authError" class="msg-box msg-error">⚠️ {{ authError }}</div>
+      <input type="text" v-model="authForm.username" placeholder="아이디" @keyup.enter="authMode==='login'?login():register()" />
+      <input type="password" v-model="authForm.password" placeholder="비밀번호" @keyup.enter="authMode==='login'?login():register()" />
+      <button class="btn-primary" @click="authMode==='login'?login():register()">
+        {{ authMode === 'login' ? '🍵 로그인' : '🌿 가입하기' }}
+      </button>
+      <div class="auth-toggle" v-if="authMode==='login'">
+        계정이 없어요! <span @click="switchAuth('register')">회원가입</span>
+      </div>
+      <div class="auth-toggle" v-else>
+        이미 계정이 있어요! <span @click="switchAuth('login')">로그인</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 앱 화면 ══ -->
+  <template v-else>
+
+    <!-- 유저바 -->
+    <div class="user-bar">
+      <span class="username">{{ currentUser }}</span>
+      <button class="btn-logout" @click="logout">로그아웃</button>
+    </div>
+
+    <!-- 필터 바 -->
+    <div class="filter-bar">
+      <!-- 카테고리 드롭다운 필터 -->
+      <div class="filter-group">
+        <span class="filter-label">카테고리</span>
+        <select v-model="filterCategory" @change="fetchMemos">
+          <option value="">전체</option>
+          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+        </select>
+      </div>
+      <!-- 태그 필터 (메모 카드 태그 클릭 시 활성화) -->
+      <div class="filter-group" v-if="filterTag">
+        <span class="filter-label">태그</span>
+        <span class="filter-tag-chip">
+          #{{ filterTag }}
+          <span class="x" @click="clearTagFilter">✕</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- 새 메모 작성 폼 -->
+    <div class="form-card card">
+      <div class="form-label">✏️ 새 메모 작성</div>
+      <div v-if="errorMsg" class="msg-box msg-error">⚠️ {{ errorMsg }}</div>
+
+      <div class="form-row">
+        <input type="text" v-model="newMemo.title" placeholder="제목을 입력해줘 ✦" @keyup.enter="$refs.newContent.focus()" />
+      </div>
+      <div class="form-row">
+        <textarea v-model="newMemo.content" placeholder="내용을 적어줘... ♡ (마크다운 지원)" ref="newContent"></textarea>
+      </div>
+
+      <!-- 카테고리 드롭다운 (1개 선택) -->
+      <div class="form-row">
+        <div class="form-sublabel">📂 카테고리 (선택)</div>
+        <select v-model="newMemo.category">
+          <option value="">카테고리 없음</option>
+          <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+        </select>
+      </div>
+
+      <!-- 태그 자유 입력 -->
+      <div class="form-row">
+        <div class="form-sublabel">🏷️ 태그 — Enter 또는 , 로 추가</div>
+        <div class="tag-input-wrap" @click="$refs.newTagInput.focus()">
+          <span v-for="(t, i) in newMemo.tags" :key="i" class="tag-pill">
+            {{ t }}<button class="del" @click.stop="removeTag(newMemo.tags, i)">✕</button>
+          </span>
+          <input
+            ref="newTagInput"
+            v-model="tagInputNew"
+            placeholder="예) 보이차, 추천메뉴"
+            @keydown="onTagKey($event, newMemo.tags, 'tagInputNew')"
+            @blur="commitTag(newMemo.tags, 'tagInputNew')"
+          />
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" @click="createMemo">🍵 저장하기</button>
+      </div>
+    </div>
+
+    <div class="divider" v-if="memos.length > 0">✦ ✦ ✦</div>
+
+    <!-- 카운트 -->
+    <div class="count-bar" v-if="memos.length > 0">
+      <span class="count-text">📝 메모 {{ memos.length }}개</span>
+      <span class="count-text" v-if="filterCategory">· {{ filterCategory }}</span>
+      <span class="count-text" v-if="filterTag">· #{{ filterTag }}</span>
+    </div>
+
+    <!-- 메모 목록 -->
+    <div class="memo-list">
+      <div v-if="memos.length === 0" class="empty card">
+        <span class="empty-icon">🫖</span>
+        <p>{{ filterCategory || filterTag ? '해당 조건의 메모가 없어요~' : '아직 메모가 없어요~' }}<br>첫 번째 메모를 써봐요 ♡</p>
+      </div>
+
+      <div
+        v-for="memo in memos" :key="memo.id"
+        class="memo-card card"
+        :class="{ editing: editingId === memo.id }"
+      >
+        <!-- 수정 모드 -->
+        <div v-if="editingId === memo.id" class="edit-form">
+          <div class="form-row">
+            <input type="text" v-model="editForm.title" placeholder="제목" />
+          </div>
+          <div class="form-row">
+            <textarea v-model="editForm.content" placeholder="내용"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-sublabel">📂 카테고리</div>
+            <select v-model="editForm.category">
+              <option value="">카테고리 없음</option>
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+          </div>
+          <div class="form-row">
+            <div class="form-sublabel">🏷️ 태그</div>
+            <div class="tag-input-wrap" @click="$refs.editTagInput.focus()">
+              <span v-for="(t, i) in editForm.tags" :key="i" class="tag-pill">
+                {{ t }}<button class="del" @click.stop="removeTag(editForm.tags, i)">✕</button>
+              </span>
+              <input
+                ref="editTagInput"
+                v-model="tagInputEdit"
+                placeholder="태그 입력 후 Enter"
+                @keydown="onTagKey($event, editForm.tags, 'tagInputEdit')"
+                @blur="commitTag(editForm.tags, 'tagInputEdit')"
+              />
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-cancel" @click="cancelEdit">취소</button>
+            <button class="btn-primary" @click="updateMemo(memo.id)">🍵 저장</button>
+          </div>
+        </div>
+
+        <!-- 보기 모드 -->
+        <template v-else>
+          <div class="memo-header">
+            <span class="memo-title">{{ memo.title }}</span>
+            <span class="memo-date">{{ formatDate(memo.updated_at || memo.created_at) }}</span>
+          </div>
+          <!-- 카테고리 뱃지 -->
+          <div v-if="memo.category">
+            <span
+              class="cat-badge"
+              style="cursor:pointer"
+              @click="setCategoryFilter(memo.category)"
+            >{{ memo.category }}</span>
+          </div>
+          <!-- 태그 칩 (클릭 → 태그 필터) -->
+          <div class="memo-tags-row" v-if="memo.tags && memo.tags.length">
+            <span
+              v-for="tag in memo.tags" :key="tag"
+              class="memo-tag-chip"
+              @click="setTagFilter(tag)"
+            >{{ tag }}</span>
+          </div>
+          <div class="memo-content" v-html="renderMd(memo.content)"></div>
+          <div class="memo-actions">
+            <button class="btn-sm" @click="startEdit(memo)">✏️ 수정</button>
+            <button class="btn-sm danger" @click="deleteMemo(memo.id)">🗑️ 삭제</button>
+          </div>
+        </template>
+      </div>
+    </div>
+
+  </template>
+</div>
+
+<script>
+  const { createApp, ref, onMounted } = Vue;
+
+  createApp({
+    setup() {
+      // ── 상태 ──────────────────────────────────────────────────────────
+      const token        = ref(localStorage.getItem('memo_token') || '');
+      const refreshToken = ref(localStorage.getItem('memo_refresh_token') || '');
+      const currentUser  = ref(localStorage.getItem('memo_user') || '');
+      const authMode  = ref('login');
+      const authForm  = ref({ username: '', password: '' });
+      const authError = ref('');
+
+      const memos      = ref([]);
+      const categories = ref([]);
+
+      const filterCategory = ref('');
+      const filterTag      = ref('');
+
+      const newMemo   = ref({ title: '', content: '', category: '', tags: [] });
+      const editingId = ref(null);
+      const editForm  = ref({ title: '', content: '', category: '', tags: [] });
+      const errorMsg  = ref('');
+
+      // 태그 입력 임시값 (폼별로 분리)
+      const tagInputNew  = ref('');
+      const tagInputEdit = ref('');
+
+      // ── Refresh Token 로직 ────────────────────────────────────────────
+
+      async function tryRefresh() {
+        if (!refreshToken.value) return false;
+        try {
+          const res = await fetch('/auth/refresh', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refresh_token: refreshToken.value }),
+          });
+          if (!res.ok) return false;
+          const data = await res.json();
+          token.value        = data.access_token;
+          refreshToken.value = data.refresh_token;
+          localStorage.setItem('memo_token', token.value);
+          localStorage.setItem('memo_refresh_token', refreshToken.value);
+          return true;
+        } catch { return false; }
+      }
+
+      async function apiFetch(url, options = {}) {
+        const buildHeaders = () => ({
+          'Content-Type': 'application/json',
+          ...(options.headers || {}),
+          ...(token.value ? { 'Authorization': `Bearer ${token.value}` } : {}),
+        });
+        let res = await fetch(url, { ...options, headers: buildHeaders() });
+        if (res.status === 401 && refreshToken.value) {
+          const ok = await tryRefresh();
+          if (ok) res = await fetch(url, { ...options, headers: buildHeaders() });
+          else { doLogout(); return res; }
+        }
+        if (res.status === 401) doLogout();
+        return res;
+      }
+
+      // ── 인증 ──────────────────────────────────────────────────────────
+
+      function switchAuth(mode) {
+        authMode.value = mode; authError.value = '';
+        authForm.value = { username: '', password: '' };
+      }
+
+      async function login() {
+        authError.value = '';
+        const form = new URLSearchParams();
+        form.append('username', authForm.value.username.trim());
+        form.append('password', authForm.value.password);
+        const res = await fetch('/auth/token', { method: 'POST', body: form });
+        if (!res.ok) { authError.value = (await res.json()).detail || '로그인 실패'; return; }
+        const data = await res.json();
+        token.value        = data.access_token;
+        refreshToken.value = data.refresh_token;
+        currentUser.value  = authForm.value.username.trim();
+        localStorage.setItem('memo_token', token.value);
+        localStorage.setItem('memo_refresh_token', refreshToken.value);
+        localStorage.setItem('memo_user', currentUser.value);
+        authForm.value = { username: '', password: '' };
+        await fetchCategories();
+        await fetchMemos();
+      }
+
+      async function register() {
+        authError.value = '';
+        const res = await fetch('/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: authForm.value.username.trim(), password: authForm.value.password }),
+        });
+        if (!res.ok) { authError.value = (await res.json()).detail || '회원가입 실패'; return; }
+        const username = authForm.value.username;
+        authMode.value = 'login';
+        authForm.value = { username, password: '' };
+      }
+
+      function doLogout() {
+        token.value = refreshToken.value = currentUser.value = '';
+        localStorage.removeItem('memo_token');
+        localStorage.removeItem('memo_refresh_token');
+        localStorage.removeItem('memo_user');
+        memos.value = []; filterCategory.value = ''; filterTag.value = '';
+      }
+
+      async function logout() {
+        if (refreshToken.value) {
+          try {
+            await fetch('/auth/logout', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ refresh_token: refreshToken.value }),
+            });
+          } catch {}
+        }
+        doLogout();
+      }
+
+      // ── 카테고리 ──────────────────────────────────────────────────────
+
+      async function fetchCategories() {
+        const res = await apiFetch('/categories');
+        if (res && res.ok) categories.value = await res.json();
+      }
+
+      function setCategoryFilter(cat) {
+        filterCategory.value = filterCategory.value === cat ? '' : cat;
+        fetchMemos();
+      }
+
+      // ── 태그 필터 ──────────────────────────────────────────────────────
+
+      function setTagFilter(tag) {
+        filterTag.value = tag;
+        fetchMemos();
+      }
+
+      function clearTagFilter() {
+        filterTag.value = '';
+        fetchMemos();
+      }
+
+      // ── 태그 입력 핸들러 ───────────────────────────────────────────────
+
+      function commitTag(tagList, inputKey) {
+        // inputKey: 'tagInputNew' | 'tagInputEdit'
+        const val = (inputKey === 'tagInputNew' ? tagInputNew : tagInputEdit).value.trim().replace(/,+$/, '');
+        if (val && !tagList.includes(val)) tagList.push(val);
+        if (inputKey === 'tagInputNew') tagInputNew.value = '';
+        else tagInputEdit.value = '';
+      }
+
+      function onTagKey(e, tagList, inputKey) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          commitTag(tagList, inputKey);
+        } else if (e.key === 'Backspace') {
+          const inp = inputKey === 'tagInputNew' ? tagInputNew : tagInputEdit;
+          if (!inp.value && tagList.length) tagList.pop();
+        }
+      }
+
+      function removeTag(tagList, idx) { tagList.splice(idx, 1); }
+
+      // ── 메모 CRUD ─────────────────────────────────────────────────────
+
+      async function fetchMemos() {
+        const params = new URLSearchParams();
+        if (filterCategory.value) params.append('category', filterCategory.value);
+        if (filterTag.value)      params.append('tag', filterTag.value);
+        const url = '/memos' + (params.toString() ? '?' + params.toString() : '');
+        const res = await apiFetch(url);
+        if (res && res.ok) memos.value = await res.json();
+      }
+
+      async function createMemo() {
+        errorMsg.value = '';
+        commitTag(newMemo.value.tags, 'tagInputNew');
+        if (!newMemo.value.title.trim() || !newMemo.value.content.trim()) {
+          errorMsg.value = '제목과 내용을 모두 입력해주세요!'; return;
+        }
+        const res = await apiFetch('/memos', {
+          method: 'POST',
+          body: JSON.stringify({
+            title: newMemo.value.title,
+            content: newMemo.value.content,
+            category: newMemo.value.category || null,
+            tags: newMemo.value.tags,
+          }),
+        });
+        if (res && res.ok) {
+          newMemo.value = { title: '', content: '', category: '', tags: [] };
+          tagInputNew.value = '';
+          await fetchMemos();
+        }
+      }
+
+      function startEdit(memo) {
+        editingId.value = memo.id;
+        editForm.value  = {
+          title: memo.title,
+          content: memo.content,
+          category: memo.category || '',
+          tags: [...(memo.tags || [])],
+        };
+        tagInputEdit.value = '';
+      }
+
+      function cancelEdit() { editingId.value = null; }
+
+      async function updateMemo(id) {
+        commitTag(editForm.value.tags, 'tagInputEdit');
+        if (!editForm.value.title.trim() || !editForm.value.content.trim()) return;
+        const res = await apiFetch(`/memos/${id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+            title: editForm.value.title,
+            content: editForm.value.content,
+            category: editForm.value.category || null,
+            tags: editForm.value.tags,
+          }),
+        });
+        if (res && res.ok) { editingId.value = null; await fetchMemos(); }
+      }
+
+      async function deleteMemo(id) {
+        if (!confirm('이 메모를 삭제할까요? 🍵')) return;
+        await apiFetch(`/memos/${id}`, { method: 'DELETE' });
+        await fetchMemos();
+      }
+
+      // ── 유틸 ──────────────────────────────────────────────────────────
+
+      function renderMd(text) { return marked.parse(text || ''); }
+
+      function formatDate(dateStr) {
+        if (!dateStr) return '';
+        return new Date(dateStr).toLocaleDateString('ko-KR', {
+          month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit',
+        });
+      }
+
+      onMounted(async () => {
+        if (token.value) { await fetchCategories(); await fetchMemos(); }
+      });
+
+      return {
+        token, currentUser, authMode, authForm, authError,
+        memos, categories, filterCategory, filterTag,
+        newMemo, editingId, editForm, errorMsg,
+        tagInputNew, tagInputEdit,
+        switchAuth, login, register, logout,
+        fetchMemos, setCategoryFilter, setTagFilter, clearTagFilter,
+        createMemo, startEdit, cancelEdit, updateMemo, deleteMemo,
+        commitTag, onTagKey, removeTag,
+        renderMd, formatDate,
+      };
+    }
+  }).mount('#app');
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>스티커 메모</title>
+  <link rel="stylesheet" href="/static/style.css?v=3" />
+</head>
+<body>
+
+<!-- 인증 오버레이 -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <h2 class="auth-title">📌 스티커 메모</h2>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">로그인</button>
+      <button class="auth-tab" id="tab-register" onclick="switchTab('register')">회원가입</button>
+    </div>
+    <div id="auth-error" class="auth-error" style="display:none;"></div>
+    <form id="auth-form" onsubmit="submitAuth(event)">
+      <input class="auth-input" id="auth-username" type="text" placeholder="아이디" autocomplete="username" required />
+      <input class="auth-input" id="auth-password" type="password" placeholder="비밀번호" autocomplete="current-password" required />
+      <button class="auth-submit" type="submit" id="auth-submit-btn">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- 메인 앱 -->
+<header>
+  <h1>📌 스티커 메모</h1>
+  <div class="header-actions">
+    <button class="btn-new" onclick="newMemo()">+ 새 메모</button>
+    <span id="header-username"></span>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</header>
+
+<div id="tag-filter-bar" class="tag-filter-bar"></div>
+<div id="notes-board" class="notes-board"></div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/static/app.js?v=3"></script>
+</body>
+</html>

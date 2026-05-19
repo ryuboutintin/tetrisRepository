@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memo App</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="topbar">
+        <h1>📝 Memo</h1>
+        <span class="hint">FastAPI + Vanilla JS</span>
+        <div class="user-area">
+            <span id="userBadge" class="user-badge" hidden></span>
+            <button type="button" id="logoutBtn" class="btn-secondary" hidden>로그아웃</button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="card form-card">
+            <h2 id="formTitle">새 메모</h2>
+            <form id="memoForm">
+                <input type="hidden" id="memoId">
+                <input
+                    type="text"
+                    id="title"
+                    placeholder="제목"
+                    required
+                    maxlength="200"
+                    autocomplete="off"
+                >
+                <textarea
+                    id="content"
+                    placeholder="내용을 입력하세요..."
+                    rows="4"
+                    maxlength="10000"
+                ></textarea>
+                <div class="form-actions">
+                    <button type="button" id="cancelBtn" class="btn-secondary" hidden>취소</button>
+                    <button type="submit" id="submitBtn" class="btn-primary">저장</button>
+                </div>
+            </form>
+        </section>
+
+        <section>
+            <div class="list-header">
+                <h2>메모 목록</h2>
+                <span id="count" class="count">0개</span>
+            </div>
+            <div id="list" class="list"></div>
+            <p id="empty" class="empty" hidden>아직 메모가 없습니다. 첫 메모를 작성해보세요!</p>
+        </section>
+    </main>
+
+    <div id="toast" class="toast" hidden></div>
+
+    <script src="/static/script.js"></script>
+</body>
+</html>

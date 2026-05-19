@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Markdown Editor</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">M</div>
+        <div>
+          <h1>Markdown Editor</h1>
+          <div class="status" id="saveStatus">자동 저장 준비됨</div>
+        </div>
+      </div>
+      <div class="actions">
+        <div class="view-toggle" aria-label="보기 모드">
+          <button class="mode-button active" type="button" data-view="split">분할</button>
+          <button class="mode-button" type="button" data-view="editor">편집</button>
+          <button class="mode-button" type="button" data-view="preview">미리보기</button>
+        </div>
+        <button class="icon-button" type="button" id="copyHtml" title="HTML 복사" aria-label="HTML 복사">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="9" y="9" width="13" height="13" rx="2"></rect>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" id="downloadMd" title="마크다운 다운로드" aria-label="마크다운 다운로드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <path d="M7 10l5 5 5-5"></path>
+            <path d="M12 15V3"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" id="clearDoc" title="문서 비우기" aria-label="문서 비우기">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 6h18"></path>
+            <path d="M8 6V4h8v2"></path>
+            <path d="M19 6l-1 14H6L5 6"></path>
+            <path d="M10 11v5"></path>
+            <path d="M14 11v5"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="formatbar" aria-label="서식 도구">
+      <div class="toolbar">
+        <button class="icon-button" type="button" data-wrap="**|**" title="굵게" aria-label="굵게"><strong>B</strong></button>
+        <button class="icon-button" type="button" data-wrap="*|*" title="기울임" aria-label="기울임"><em>I</em></button>
+        <button class="icon-button" type="button" data-wrap="`|`" title="인라인 코드" aria-label="인라인 코드">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M16 18l6-6-6-6"></path>
+            <path d="M8 6l-6 6 6 6"></path>
+          </svg>
+        </button>
+        <div class="tool-separator"></div>
+        <button class="icon-button" type="button" data-prefix="# " title="제목" aria-label="제목">H1</button>
+        <button class="icon-button" type="button" data-prefix="- " title="목록" aria-label="목록">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M8 6h13"></path>
+            <path d="M8 12h13"></path>
+            <path d="M8 18h13"></path>
+            <path d="M3 6h.01"></path>
+            <path d="M3 12h.01"></path>
+            <path d="M3 18h.01"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-prefix="> " title="인용" aria-label="인용">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M3 21c3 0 7-1 7-8V5H3v8h4c0 4-2 6-4 8z"></path>
+            <path d="M14 21c3 0 7-1 7-8V5h-7v8h4c0 4-2 6-4 8z"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-insert="[링크 텍스트](https://example.com)" title="링크" aria-label="링크">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+          </svg>
+        </button>
+        <button class="icon-button" type="button" data-insert="![이미지 설명](https://placehold.co/800x420)" title="이미지" aria-label="이미지">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+            <circle cx="8.5" cy="8.5" r="1.5"></circle>
+            <path d="M21 15l-5-5L5 21"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="status" id="docStats">0 글자 · 0 단어</div>
+    </section>
+
+    <main class="workspace" id="workspace">
+      <section class="pane editor-pane" aria-label="마크다운 편집 영역">
+        <div class="pane-header">
+          <span>Markdown</span>
+          <span class="counter" id="lineCount">1 줄</span>
+        </div>
+        <textarea id="editor" spellcheck="false"></textarea>
+      </section>
+      <section class="pane preview-pane" aria-label="미리보기 영역">
+        <div class="pane-header">
+          <span>Preview</span>
+          <span class="counter">실시간 렌더링</span>
+        </div>
+        <article class="preview" id="preview"></article>
+      </section>
+    </main>
+  </div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

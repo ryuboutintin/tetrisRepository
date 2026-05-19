@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="landing-page">
+  <div class="landing-container">
+
+    <header class="landing-header">
+      <div class="landing-blocks" aria-hidden="true">
+        <span class="lb lb-i"></span>
+        <span class="lb lb-o"></span>
+        <span class="lb lb-t"></span>
+        <span class="lb lb-s"></span>
+        <span class="lb lb-z"></span>
+        <span class="lb lb-j"></span>
+        <span class="lb lb-l"></span>
+      </div>
+      <h1 class="landing-logo">TETRIS</h1>
+      <p class="landing-tagline">떨어지는 블록, 채워지는 즐거움</p>
+    </header>
+
+    <a href="game.html" class="landing-play-btn">▶ &nbsp;PLAY NOW</a>
+
+    <div class="landing-info-grid">
+
+      <section class="landing-card">
+        <h2>조작법</h2>
+        <ul class="key-list">
+          <li>
+            <span class="key-badge">← →</span>
+            <span>좌우 이동</span>
+          </li>
+          <li>
+            <span class="key-badge">↑</span>
+            <span>블록 회전 (시계 방향)</span>
+          </li>
+          <li>
+            <span class="key-badge">↓</span>
+            <span>빠르게 내리기 (소프트 드롭)</span>
+          </li>
+          <li>
+            <span class="key-badge">Space</span>
+            <span>즉시 내리기 (하드 드롭)</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="landing-card">
+        <h2>점수 계산</h2>
+        <ul class="score-list">
+          <li>
+            <span class="line-label">1줄 클리어</span>
+            <span class="line-score">100 × 레벨</span>
+          </li>
+          <li>
+            <span class="line-label">2줄 클리어</span>
+            <span class="line-score">300 × 레벨</span>
+          </li>
+          <li>
+            <span class="line-label">3줄 클리어</span>
+            <span class="line-score">500 × 레벨</span>
+          </li>
+          <li class="tetris-row">
+            <span class="line-label">4줄 클리어 <em>TETRIS!</em></span>
+            <span class="line-score hl">800 × 레벨</span>
+          </li>
+        </ul>
+        <p class="level-hint">★ 10줄마다 레벨업 — 낙하 속도가 빨라집니다</p>
+      </section>
+
+    </div>
+
+    <footer class="landing-footer">
+      브라우저에서 바로 플레이 · BGM 포함 · 설치 불필요
+    </footer>
+
+  </div>
+</body>
+</html>
