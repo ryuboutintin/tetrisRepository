@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── 랜딩 페이지 ── -->
+<div id="landing">
+  <div class="landing-inner">
+
+    <div class="landing-title">
+      <span class="t t1">T</span><span class="t t2">E</span><span class="t t3">T</span><span class="t t4">R</span><span class="t t5">I</span><span class="t t6">S</span>
+    </div>
+
+    <p class="landing-welcome">어서오세요! 블록을 쌓고 라인을 지워보세요.</p>
+
+    <div class="landing-best">
+      <span class="label">최고 점수</span>
+      <span class="best-val" id="landing-best">0</span>
+    </div>
+
+    <div class="landing-controls">
+      <h3>조작법</h3>
+      <table>
+        <tr><td><kbd>← →</kbd></td><td>좌우 이동</td></tr>
+        <tr><td><kbd>↑</kbd></td><td>블록 회전</td></tr>
+        <tr><td><kbd>↓</kbd></td><td>소프트 드롭 (+1점)</td></tr>
+        <tr><td><kbd>Space</kbd></td><td>하드 드롭 (+2점/칸)</td></tr>
+      </table>
+    </div>
+
+    <button id="start-btn">게임 시작</button>
+
+  </div>
+</div>
+
+<!-- ── 게임 화면 ── -->
+<div id="app" class="hidden">
+
+  <!-- 게임 보드 -->
+  <canvas id="game-canvas" width="300" height="600"></canvas>
+
+  <!-- 사이드 패널 -->
+  <div id="side-panel">
+
+    <div class="panel-box">
+      <h3>Score</h3>
+      <div class="value" id="score-val">0</div>
+    </div>
+
+    <div class="panel-box">
+      <h3>Best</h3>
+      <div class="value" id="best-val">0</div>
+    </div>
+
+    <div class="panel-box">
+      <h3>Lines</h3>
+      <div class="value" id="lines-val">0</div>
+    </div>
+
+    <div class="panel-box">
+      <h3>Level</h3>
+      <div class="value" id="level-val">1</div>
+    </div>
+
+    <div class="panel-box">
+      <h3>Next</h3>
+      <canvas id="next-canvas" width="120" height="120"></canvas>
+    </div>
+
+    <div class="panel-box" id="controls">
+      <span>← →</span> 이동<br>
+      <span>↑</span> 회전<br>
+      <span>↓</span> 소프트 드롭<br>
+      <span>Space</span> 하드 드롭
+    </div>
+
+  </div>
+</div>
+
+<!-- ── 게임 오버 오버레이 ── -->
+<div id="overlay">
+  <h2>GAME OVER</h2>
+  <div class="overlay-scores">
+    <div class="ov-row"><span>이번 점수</span><strong id="ov-score">0</strong></div>
+    <div class="ov-row"><span>최고 점수</span><strong id="ov-best">0</strong></div>
+  </div>
+  <p id="ov-record" class="record-msg hidden">🏆 신기록!</p>
+  <div class="overlay-btns">
+    <button id="restart-btn">다시 시작</button>
+    <button id="home-btn">메인으로</button>
+  </div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/board.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
