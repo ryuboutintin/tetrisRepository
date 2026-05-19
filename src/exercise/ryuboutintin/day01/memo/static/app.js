@@ -22,12 +22,15 @@ const filterCategoryInput = document.getElementById("filter-category");
 const filterTagInput = document.getElementById("filter-tag");
 const clearFiltersButton = document.getElementById("clear-filters-button");
 
-const TOKEN_KEY = "memo_jwt_token";
+const ACCESS_TOKEN_KEY = "memo_access_token";
+const REFRESH_TOKEN_KEY = "memo_refresh_token";
 const USER_KEY = "memo_user";
 
 let editingMemoId = null;
-let authToken = localStorage.getItem(TOKEN_KEY);
+let authToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+let refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
 let currentUser = readStoredUser();
+let refreshPromise = null;
 
 function readStoredUser() {
   try {
@@ -37,7 +40,7 @@ function readStoredUser() {
   }
 }
 
-async function request(url, options = {}) {
+async function request(url, options = {}, retryOnAuthFailure = true) {
   const headers = new Headers(options.headers || {});
   if (!headers.has("Content-Type") && options.body) {
     headers.set("Content-Type", "application/json");
@@ -57,6 +60,12 @@ async function request(url, options = {}) {
 
   const data = await response.json();
   if (!response.ok) {
+    if (response.status === 401 && retryOnAuthFailure && refreshToken && url !== "/api/auth/refresh") {
+      const refreshed = await refreshAccessToken();
+      if (refreshed) {
+        return request(url, options, false);
+      }
+    }
     if (response.status === 401) {
       clearSession();
       syncAuthView();
@@ -64,6 +73,47 @@ async function request(url, options = {}) {
     throw new Error(data.detail || "요청 처리 중 오류가 발생했습니다.");
   }
   return data;
+}
+
+async function refreshAccessToken() {
+  if (!refreshToken) {
+    return false;
+  }
+  if (refreshPromise) {
+    return refreshPromise;
+  }
+
+  refreshPromise = (async () => {
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      });
+      if (!response.ok) {
+        clearSession();
+        syncAuthView();
+        return false;
+      }
+
+      const data = await response.json();
+      authToken = data.access_token;
+      refreshToken = data.refresh_token;
+      localStorage.setItem(ACCESS_TOKEN_KEY, authToken);
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+      return true;
+    } catch {
+      clearSession();
+      syncAuthView();
+      return false;
+    } finally {
+      refreshPromise = null;
+    }
+  })();
+
+  return refreshPromise;
 }
 
 function setStatus(message) {
@@ -76,20 +126,24 @@ function setAuthStatus(message) {
 
 function clearSession() {
   authToken = null;
+  refreshToken = null;
   currentUser = null;
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 }
 
 function saveSession(payload) {
   authToken = payload.access_token;
+  refreshToken = payload.refresh_token;
   currentUser = payload.user;
-  localStorage.setItem(TOKEN_KEY, authToken);
+  localStorage.setItem(ACCESS_TOKEN_KEY, authToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
 }
 
 function syncAuthView() {
-  const authenticated = Boolean(authToken && currentUser);
+  const authenticated = Boolean(authToken && refreshToken && currentUser);
   authSection.hidden = authenticated;
   workspace.hidden = !authenticated;
   currentUsername.textContent = authenticated ? `${currentUser.username} 님` : "-";
@@ -260,10 +314,25 @@ async function handleAuthSubmit(event, endpoint) {
 loginForm.addEventListener("submit", (event) => handleAuthSubmit(event, "/api/auth/login"));
 registerForm.addEventListener("submit", (event) => handleAuthSubmit(event, "/api/auth/register"));
 
-logoutButton.addEventListener("click", () => {
-  clearSession();
-  resetForm();
-  syncAuthView();
+logoutButton.addEventListener("click", async () => {
+  try {
+    if (refreshToken) {
+      await request(
+        "/api/auth/logout",
+        {
+          method: "POST",
+          body: JSON.stringify({ refresh_token: refreshToken }),
+        },
+        false,
+      );
+    }
+  } catch {
+    // Ignore logout failures and clear local session regardless.
+  } finally {
+    clearSession();
+    resetForm();
+    syncAuthView();
+  }
 });
 
 form.addEventListener("submit", async (event) => {
@@ -316,7 +385,7 @@ filterTagInput.addEventListener("change", loadMemos);
 
 async function bootstrap() {
   syncAuthView();
-  if (!authToken) {
+  if (!authToken || !refreshToken) {
     return;
   }
 
