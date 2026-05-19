@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>메모장</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1>메모장</h1>
+    <div id="user-info" class="user-info hidden">
+      <span id="username-display"></span>
+      <button id="logout-btn" class="btn btn-logout">로그아웃</button>
+    </div>
+  </header>
+
+  <!-- 인증 화면 -->
+  <div id="auth-screen">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">로그인</button>
+        <button class="auth-tab" data-tab="register">회원가입</button>
+      </div>
+
+      <form id="login-form" class="auth-form">
+        <input type="text" id="login-username" placeholder="사용자명" autocomplete="username" required>
+        <input type="password" id="login-password" placeholder="비밀번호" autocomplete="current-password" required>
+        <p id="login-error" class="auth-error"></p>
+        <button type="submit" class="btn btn-primary">로그인</button>
+      </form>
+
+      <form id="register-form" class="auth-form hidden">
+        <input type="text" id="reg-username" placeholder="사용자명" autocomplete="username" required>
+        <input type="email" id="reg-email" placeholder="이메일" autocomplete="email" required>
+        <input type="password" id="reg-password" placeholder="비밀번호 (8자 이상)" autocomplete="new-password" required>
+        <p id="register-error" class="auth-error"></p>
+        <button type="submit" class="btn btn-primary">가입하기</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- 메모 화면 -->
+  <div id="memo-screen" class="hidden">
+
+    <!-- 필터 바 -->
+    <div class="filter-bar">
+      <div class="category-tabs">
+        <button class="cat-tab active" data-category="">전체</button>
+        <button class="cat-tab" data-category="업무">업무</button>
+        <button class="cat-tab" data-category="개인">개인</button>
+        <button class="cat-tab" data-category="아이디어">아이디어</button>
+        <button class="cat-tab" data-category="기타">기타</button>
+        <button class="cat-tab cat-tab--uncat" data-category="__uncat__">미분류</button>
+      </div>
+      <div id="active-tags" class="active-tags"></div>
+    </div>
+
+    <main>
+      <aside class="panel-add">
+        <h2>새 메모</h2>
+        <form id="add-form">
+          <input type="text" id="add-title" placeholder="제목" required>
+          <textarea id="add-content" placeholder="내용을 입력하세요" rows="5" required></textarea>
+          <select id="add-category">
+            <option value="">카테고리 없음</option>
+            <option value="업무">업무</option>
+            <option value="개인">개인</option>
+            <option value="아이디어">아이디어</option>
+            <option value="기타">기타</option>
+          </select>
+          <input type="text" id="add-tags" placeholder="태그 (쉼표로 구분)">
+          <button type="submit" class="btn btn-primary">저장</button>
+        </form>
+      </aside>
+
+      <section class="panel-list">
+        <h2>메모 목록 <span id="memo-count" class="count"></span></h2>
+        <div id="memo-list"></div>
+        <p id="empty-msg" class="empty">저장된 메모가 없습니다.</p>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

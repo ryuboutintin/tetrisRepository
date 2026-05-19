@@ -7,15 +7,67 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="app">
 
+  <!-- ── 인증 화면 ── -->
+  <div class="auth-wrap" id="authWrap">
+    <div class="auth-card">
+      <h1 class="auth-logo">✦ 메모장</h1>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabLogin"  onclick="switchAuthTab('login')">로그인</button>
+        <button class="auth-tab"        id="tabRegister" onclick="switchAuthTab('register')">회원가입</button>
+      </div>
+
+      <!-- 로그인 폼 -->
+      <form class="auth-form" id="loginForm" novalidate>
+        <div class="field">
+          <label for="loginUser">아이디</label>
+          <input id="loginUser" type="text" placeholder="아이디 입력" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="loginPass">비밀번호</label>
+          <input id="loginPass" type="password" placeholder="비밀번호 입력" autocomplete="current-password" required />
+        </div>
+        <p class="auth-error hidden" id="loginError"></p>
+        <button type="submit" class="btn-primary">로그인</button>
+      </form>
+
+      <!-- 회원가입 폼 -->
+      <form class="auth-form hidden" id="registerForm" novalidate>
+        <div class="field">
+          <label for="regUser">아이디</label>
+          <input id="regUser" type="text" placeholder="사용할 아이디 입력" autocomplete="username" required />
+        </div>
+        <div class="field">
+          <label for="regPass">비밀번호</label>
+          <input id="regPass" type="password" placeholder="비밀번호 입력" autocomplete="new-password" required />
+        </div>
+        <p class="auth-error hidden" id="registerError"></p>
+        <p class="auth-success hidden" id="registerSuccess"></p>
+        <button type="submit" class="btn-primary">가입하기</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── 메모 앱 화면 ── -->
+  <div class="app hidden" id="app">
     <header class="app-header">
       <span class="logo">✦ 메모장</span>
-      <button class="btn-new" id="btnNew">+ 새 메모</button>
+      <div class="header-right">
+        <span class="username-badge" id="usernameBadge"></span>
+        <button type="button" class="btn-add-category" onclick="openCategoryModal()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13" style="pointer-events:none">
+            <path d="M2 6a2 2 0 012-2h4l2 2h6a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+            <line x1="10" y1="9" x2="10" y2="13"/><line x1="8" y1="11" x2="12" y2="11"/>
+          </svg>
+          카테고리
+        </button>
+        <button class="btn-new"    id="btnNew">+ 새 메모</button>
+        <button class="btn-logout" id="btnLogout">로그아웃</button>
+      </div>
     </header>
 
     <div class="app-body">
-
       <!-- 목록 패널 -->
       <aside class="sidebar" id="sidebar">
         <div class="search-wrap">
@@ -24,9 +76,21 @@
           </svg>
           <input type="search" id="searchInput" placeholder="메모 검색..." autocomplete="off" />
         </div>
-
+        <div class="sidebar-filters">
+          <div class="filter-group">
+            <label class="filter-label" for="categoryFilter">카테고리</label>
+            <select id="categoryFilter" onchange="onCategoryFilterChange(this.value)">
+              <option value="">전체</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <span class="filter-label">태그</span>
+            <div class="tag-filter-chips" id="tagFilterChips">
+              <button type="button" class="tag-filter-chip active" onclick="selectTagFilter(null)">전체</button>
+            </div>
+          </div>
+        </div>
         <ul class="memo-list" id="memoList"></ul>
-
         <div class="empty-list hidden" id="emptyList">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="40" height="40">
             <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
@@ -37,8 +101,6 @@
 
       <!-- 편집 패널 -->
       <main class="editor-panel" id="editorPanel">
-
-        <!-- 빈 상태 -->
         <div class="empty-editor" id="emptyEditor">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="48" height="48">
             <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -46,11 +108,10 @@
           <p>메모를 선택하거나 새로 만드세요</p>
         </div>
 
-        <!-- 편집 폼 -->
         <form class="memo-form hidden" id="memoForm" novalidate>
           <div class="form-header">
             <button type="button" class="btn-back" id="btnBack">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="18" height="18">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
                 <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
               </svg>
               목록
@@ -62,25 +123,45 @@
             <label for="inputTitle">제목</label>
             <input type="text" id="inputTitle" placeholder="메모 제목을 입력하세요" maxlength="200" required />
           </div>
-
+          <div class="field">
+            <label for="inputCategory">카테고리</label>
+            <select id="inputCategory">
+              <option value="">없음</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>태그</label>
+            <div class="tag-input-wrap">
+              <input type="text" id="inputTagText" placeholder="태그 입력 후 Enter 또는 쉼표" autocomplete="off" />
+              <div class="form-tag-chips" id="formTagChips"></div>
+            </div>
+          </div>
           <div class="field field-content">
             <label for="inputContent">내용</label>
             <textarea id="inputContent" placeholder="내용을 입력하세요..." required></textarea>
           </div>
-
           <div class="form-actions">
             <button type="submit" class="btn-save" id="btnSave">저장</button>
             <button type="button" class="btn-delete hidden" id="btnDelete">삭제</button>
           </div>
         </form>
-
       </main>
     </div>
   </div>
 
-  <!-- 토스트 알림 -->
-  <div class="toast hidden" id="toast"></div>
+  <!-- 카테고리 추가 모달 -->
+  <div class="modal-overlay hidden" id="categoryModal">
+    <div class="modal-card">
+      <p class="modal-title">새 카테고리</p>
+      <input type="text" id="categoryNameInput" placeholder="카테고리 이름" maxlength="30" autocomplete="off" />
+      <div class="modal-actions">
+        <button class="btn-modal-confirm" id="btnCategoryConfirm">추가</button>
+        <button class="btn-modal-cancel"  id="btnCategoryCancel">취소</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="app.js"></script>
+  <div class="toast hidden" id="toast"></div>
+  <script src="app.js?v=7"></script>
 </body>
 </html>

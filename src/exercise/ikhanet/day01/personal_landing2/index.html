@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>James Kim</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --border: #2a2d3a;
+      --accent: #6c63ff;
+      --accent2: #ff6584;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --radius: 12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(15, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── hero ── */
+    #hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 1.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 30% 40%, rgba(108,99,255,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 70% 60%, rgba(255,101,132,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-inner { position: relative; max-width: 640px; }
+
+    .avatar {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.4rem;
+      margin: 0 auto 1.5rem;
+      box-shadow: 0 0 0 4px var(--bg), 0 0 0 6px var(--accent);
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-8px); }
+    }
+
+    h1 {
+      font-size: clamp(2rem, 6vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 span { color: var(--accent); }
+
+    .tagline {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    .cta {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+    }
+    .cta:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(108,99,255,0.5); }
+
+    /* ── sections shared ── */
+    section { padding: 5rem 1.5rem; }
+    .container { max-width: 800px; margin: 0 auto; }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── skills ── */
+    #skills { background: var(--surface); }
+
+    .skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .skill-chip {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.55rem 1.1rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: default;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .skill-chip:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+    .skill-chip .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .skill-chip:nth-child(2) .dot { background: #f7df1e; }
+    .skill-chip:nth-child(3) .dot { background: #61dafb; }
+    .skill-chip:nth-child(4) .dot { background: #3178c6; }
+    .skill-chip:nth-child(5) .dot { background: #68a063; }
+
+    /* ── about ── */
+    #about p {
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.8;
+    }
+    #about p + p { margin-top: 1rem; }
+
+    /* ── contact ── */
+    #contact { background: var(--surface); }
+
+    .contact-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      list-style: none;
+    }
+
+    .contact-list li a {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      padding: 1rem 1.2rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.95rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .contact-list li a:hover {
+      border-color: var(--accent);
+      transform: translateX(4px);
+    }
+    .contact-icon {
+      font-size: 1.3rem;
+      width: 2rem;
+      text-align: center;
+    }
+    .contact-label { color: var(--muted); font-size: 0.8rem; display: block; }
+
+    /* ── footer ── */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── fade-in on scroll ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+  <!-- nav -->
+  <nav>
+    <span class="nav-logo">james.kim</span>
+    <ul class="nav-links">
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- hero -->
+  <section id="hero">
+    <div class="hero-inner">
+      <div class="avatar">👨‍💻</div>
+      <h1>Hi, I'm <span>James Kim</span></h1>
+      <p class="tagline">풀스택 개발자 · 코드로 아이디어를 현실로 만듭니다</p>
+      <a href="#contact" class="cta">연락하기</a>
+    </div>
+  </section>
+
+  <!-- skills -->
+  <section id="skills">
+    <div class="container fade-in">
+      <h2 class="section-title">🛠 Skills</h2>
+      <div class="skills-grid">
+        <div class="skill-chip"><span class="dot"></span>JavaScript</div>
+        <div class="skill-chip"><span class="dot"></span>Python</div>
+        <div class="skill-chip"><span class="dot"></span>React</div>
+        <div class="skill-chip"><span class="dot"></span>Node.js</div>
+        <div class="skill-chip"><span class="dot"></span>Git</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- about -->
+  <section id="about">
+    <div class="container fade-in">
+      <h2 class="section-title">👋 About Me</h2>
+      <p>
+        안녕하세요, 저는 <strong>James Kim</strong>입니다. JavaScript와 Python을 중심으로
+        프론트엔드부터 백엔드까지 아우르는 풀스택 개발을 즐기고 있습니다.
+      </p>
+      <p>
+        React와 Node.js로 사용자 경험을 고민하며 제품을 만들고, Git을 활용한 협업과
+        코드 리뷰를 즐깁니다. 좋은 코드는 읽기 쉬운 코드라는 믿음으로, 항상 명확하고
+        유지보수하기 쉬운 코드를 작성하려고 노력합니다.
+      </p>
+      <p>
+        새로운 기술을 배우고 문제를 해결하는 과정을 즐기며, 팀과 함께 성장하는 것을
+        가장 큰 즐거움으로 여깁니다.
+      </p>
+    </div>
+  </section>
+
+  <!-- contact -->
+  <section id="contact">
+    <div class="container fade-in">
+      <h2 class="section-title">📬 Contact</h2>
+      <ul class="contact-list">
+        <li>
+          <a href="mailto:ikhan.kim@gmail.com">
+            <span class="contact-icon">✉️</span>
+            <div>
+              <span class="contact-label">Email</span>
+              ikhan.kim@gmail.com
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ikhanet" target="_blank" rel="noopener">
+            <span class="contact-icon">🐙</span>
+            <div>
+              <span class="contact-label">GitHub</span>
+              github.com/ikhanet
+            </div>
+          </a>
+        </li>
+        <li>
+          <a href="https://linkedin.com/in/james-kim" target="_blank" rel="noopener">
+            <span class="contact-icon">💼</span>
+            <div>
+              <span class="contact-label">LinkedIn</span>
+              linkedin.com/in/james-kim
+            </div>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 James Kim · Built with HTML, CSS & JavaScript</p>
+  </footer>
+
+  <script>
+    // scroll fade-in
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.15 }
+    );
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    // nav active highlight on scroll
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(sec => {
+        if (window.scrollY >= sec.offsetTop - 120) current = sec.id;
+      });
+      navLinks.forEach(a => {
+        a.style.color = a.getAttribute('href') === '#' + current
+          ? 'var(--text)' : '';
+      });
+    }, { passive: true });
+  </script>
+</body>
+</html>
