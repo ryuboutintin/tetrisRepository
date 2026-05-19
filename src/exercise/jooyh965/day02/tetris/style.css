@@ -64,6 +64,10 @@ body {
     border-radius: 10px;
 }
 
+.overlay[hidden] {
+    display: none;
+}
+
 .overlay-card {
     text-align: center;
 }
