@@ -1,24 +1,47 @@
 # Memo App
 
-FastAPI + SQLite로 만든 메모장 CRUD 예제입니다. JWT 인증, 태그, 카테고리, Todo 기능을 포함합니다.
+FastAPI + SQLite로 만든 메모장 CRUD 예제입니다.
 
-UI는 다음처럼 분리되어 있습니다.
-
-- `static/index.html`: 화면 구조
-- `static/styles.css`: 스타일
-- `static/app.js`: CRUD 로직과 다크모드 토글
-
-## Run
+## 실행
 
 ```bash
-cd memo
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-브라우저에서 `http://127.0.0.1:8000` 을 열면 UI가 표시됩니다.
+기본 접속 주소는 `http://127.0.0.1:8000` 입니다.
+
+## 서비스 확인
+
+서비스가 정상적으로 올라왔는지 아래 순서로 확인하면 됩니다.
+
+1. 브라우저에서 `http://127.0.0.1:8000/` 접속
+2. API 문서 페이지 `http://127.0.0.1:8000/docs` 접속
+3. 터미널에서 상태 확인
+
+```bash
+curl http://127.0.0.1:8000/
+```
+
+HTML 화면이 응답되면 서비스가 정상적으로 실행 중입니다.
+
+## 검증 완료
+
+2026-05-19 기준으로 로컬에서 실제 응답을 확인했습니다.
+
+- `GET /` -> `200 OK`
+- `GET /docs` -> `200 OK`
+
+응답 확인 시 `http://127.0.0.1:8000/` 에서 메인 화면 HTML이 내려오고, `http://127.0.0.1:8000/docs` 에서 Swagger UI가 노출됩니다.
+
+## 파일 구조
+
+- `main.py`: FastAPI 서버
+- `static/index.html`: 화면 구조
+- `static/styles.css`: 스타일
+- `static/app.js`: CRUD 로직
 
 ## API
 
@@ -31,17 +54,7 @@ uvicorn main:app --reload
 - `PUT /api/memos/{memo_id}`
 - `DELETE /api/memos/{memo_id}`
 
-메모 payload 예시:
+## 참고
 
-```json
-{
-  "title": "할 일",
-  "content": "FastAPI 정리",
-  "category": "공부",
-  "tags": ["fastapi", "sqlite"],
-  "kind": "todo",
-  "is_done": false
-}
-```
-
-SQLite DB 파일은 `memo/memo.db` 에 생성됩니다. JWT 비밀키를 바꾸려면 `MEMO_JWT_SECRET` 환경 변수를 설정하세요.
+- SQLite DB 파일은 `memo.db` 에 생성됩니다.
+- JWT 비밀키를 바꾸려면 `MEMO_JWT_SECRET` 환경 변수를 설정하세요.
