@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mini Tetris</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section id="landingPage" class="landing-shell" aria-label="테트리스 소개">
+        <div class="landing-hero">
+          <p class="eyebrow">Classic block puzzle</p>
+          <h1>Mini Tetris</h1>
+          <p class="lead">
+            브라우저에서 바로 즐기는 간단한 테트리스 MVP입니다. 줄을 완성해 점수를 얻고,
+            블록이 천장까지 쌓이기 전에 최대한 오래 버티세요.
+          </p>
+          <button id="playButton" type="button" class="play-button">플레이</button>
+        </div>
+
+        <div class="info-grid">
+          <article class="info-panel">
+            <h2>플레이 방법</h2>
+            <ul>
+              <li>← / →: 블록 좌우 이동</li>
+              <li>↓: 블록 한 칸 빠르게 내리기</li>
+              <li>↑: 블록 회전</li>
+              <li>Space: 블록 즉시 드롭</li>
+              <li>P: 일시정지 또는 재개</li>
+            </ul>
+          </article>
+
+          <article class="info-panel">
+            <h2>점수 계산</h2>
+            <ul>
+              <li>1줄 제거: 100점</li>
+              <li>2줄 제거: 300점</li>
+              <li>3줄 제거: 500점</li>
+              <li>4줄 제거: 800점</li>
+              <li>즉시 드롭: 내려간 칸마다 2점</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="gamePage" class="game-shell is-hidden" aria-label="테트리스 게임">
+        <div class="topbar">
+          <div>
+            <p class="eyebrow">MVP Tetris</p>
+            <h1>Mini Tetris</h1>
+          </div>
+          <div class="top-actions">
+            <button id="musicButton" type="button" class="icon-button" aria-label="음악 켜기 또는 끄기" aria-pressed="true">♪</button>
+            <button id="pauseButton" type="button" class="icon-button" aria-label="일시정지">II</button>
+          </div>
+        </div>
+
+        <div class="play-area">
+          <canvas id="board" width="300" height="600" aria-label="테트리스 보드"></canvas>
+
+          <aside class="side-panel">
+            <div class="stat">
+              <span>점수</span>
+              <strong id="score">0</strong>
+            </div>
+            <div class="stat">
+              <span>라인</span>
+              <strong id="lines">0</strong>
+            </div>
+            <div class="next-box">
+              <span>다음 블록</span>
+              <canvas id="next" width="96" height="96" aria-label="다음 블록"></canvas>
+            </div>
+            <button id="restartButton" type="button" class="primary-button">새 게임</button>
+          </aside>
+        </div>
+
+        <div class="controls" aria-label="조작 버튼">
+          <button type="button" data-action="left" aria-label="왼쪽 이동">←</button>
+          <button type="button" data-action="rotate" aria-label="회전">↻</button>
+          <button type="button" data-action="right" aria-label="오른쪽 이동">→</button>
+          <button type="button" data-action="down" aria-label="아래 이동">↓</button>
+          <button type="button" data-action="drop" class="wide">DROP</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — 클래식 퍼즐 게임</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- 내비게이션 -->
+  <nav class="nav">
+    <span class="nav-logo">TETRIS</span>
+    <a href="game.html" class="nav-play">▶ PLAY</a>
+  </nav>
+
+  <!-- 히어로 -->
+  <section class="hero">
+    <div class="hero-blocks" aria-hidden="true">
+      <div class="hero-block" style="width:30px;height:30px;background:#00d4ff;top:15%;left:8%;transform:rotate(12deg)"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#00d4ff;top:15%;left:11%;transform:rotate(12deg)"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#a855f7;top:25%;right:10%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#a855f7;top:28%;right:10%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#a855f7;top:28%;right:13%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#f7d800;bottom:30%;left:6%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#f7d800;bottom:30%;left:9%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#f7d800;bottom:27%;left:6%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#f7d800;bottom:27%;left:9%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#ef4444;bottom:20%;right:7%;transform:rotate(-8deg)"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#ef4444;bottom:20%;right:10%;transform:rotate(-8deg)"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#22c55e;top:60%;left:5%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#22c55e;top:63%;left:8%;"></div>
+      <div class="hero-block" style="width:30px;height:30px;background:#22c55e;top:63%;left:5%;"></div>
+    </div>
+
+    <h1 class="hero-title">TETRIS</h1>
+    <p class="hero-sub">클래식 퍼즐 게임의 정수</p>
+    <a href="game.html" class="hero-cta">▶ &nbsp;게임 시작</a>
+    <div class="hero-scroll">SCROLL</div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 조작 방법 -->
+  <section class="section">
+    <p class="section-title">HOW TO PLAY</p>
+    <h2 class="section-heading">조작 방법</h2>
+
+    <div class="controls-grid">
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">←</span>
+          <span class="key">→</span>
+        </div>
+        <div class="control-desc">
+          <strong>좌우 이동</strong>
+          블록을 왼쪽·오른쪽으로 이동
+        </div>
+      </div>
+
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">↑</span>
+        </div>
+        <div class="control-desc">
+          <strong>회전</strong>
+          블록을 시계 방향으로 회전 (Z키도 가능)
+        </div>
+      </div>
+
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">↓</span>
+        </div>
+        <div class="control-desc">
+          <strong>빠르게 내리기</strong>
+          블록을 한 칸씩 빠르게 내림
+        </div>
+      </div>
+
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">Space</span>
+        </div>
+        <div class="control-desc">
+          <strong>즉시 낙하</strong>
+          블록을 바닥까지 즉시 떨어뜨림
+        </div>
+      </div>
+
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">P</span>
+        </div>
+        <div class="control-desc">
+          <strong>일시정지</strong>
+          게임을 잠시 멈추거나 재개
+        </div>
+      </div>
+
+      <div class="control-item">
+        <div class="key-group">
+          <span class="key">M</span>
+        </div>
+        <div class="control-desc">
+          <strong>음소거</strong>
+          배경음악 켜기 / 끄기
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- 점수 계산 -->
+  <section class="section">
+    <p class="section-title">SCORING</p>
+    <h2 class="section-heading">점수 계산</h2>
+
+    <div class="score-grid">
+      <div class="score-card">
+        <div class="score-lines">1줄</div>
+        <div class="score-label">SINGLE</div>
+        <div class="score-pts">100pt</div>
+      </div>
+      <div class="score-card">
+        <div class="score-lines">2줄</div>
+        <div class="score-label">DOUBLE</div>
+        <div class="score-pts">300pt</div>
+      </div>
+      <div class="score-card">
+        <div class="score-lines">3줄</div>
+        <div class="score-label">TRIPLE</div>
+        <div class="score-pts">500pt</div>
+      </div>
+      <div class="score-card">
+        <div class="score-lines">4줄</div>
+        <div class="score-label">TETRIS!</div>
+        <div class="score-pts">800pt</div>
+      </div>
+    </div>
+
+    <div class="score-note" style="margin-bottom:16px">
+      위 점수에 <span>현재 레벨</span>이 곱해집니다. 예: 레벨 3에서 테트리스 → 800 × 3 = 2,400점
+    </div>
+
+    <div class="level-info">
+      <span class="level-info-icon">⚡</span>
+      <div>
+        <strong>10줄마다 레벨 업!</strong><br>
+        레벨이 오를수록 블록 낙하 속도가 빨라지고 배수 점수로 고득점을 노릴 수 있습니다.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <footer class="footer">
+    TETRIS &nbsp;·&nbsp; Web Audio API BGM &nbsp;·&nbsp; yuuny05
+  </footer>
+
+</body>
+</html>
