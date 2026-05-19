@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>문성수 | Backend Developer</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black: #111111;
+      --gray-dark: #444444;
+      --gray: #888888;
+      --gray-light: #eeeeee;
+      --white: #ffffff;
+      --accent: #2563eb;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: var(--black);
+      background: var(--white);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 2rem;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--gray-light);
+      z-index: 100;
+    }
+    nav .logo {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: var(--black);
+      text-decoration: none;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+    nav ul a {
+      text-decoration: none;
+      color: var(--gray-dark);
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    nav ul a:hover { color: var(--accent); }
+
+    /* SECTIONS */
+    section {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+    section:first-of-type { padding-top: 9rem; }
+
+    .section-label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+    }
+
+    /* HERO */
+    #hero h1 {
+      font-size: clamp(2.4rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 1.25rem;
+    }
+    #hero h1 span { color: var(--accent); }
+    #hero p {
+      font-size: 1.1rem;
+      color: var(--gray-dark);
+      max-width: 520px;
+      margin-bottom: 2rem;
+    }
+    .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .btn {
+      display: inline-block;
+      padding: 0.65rem 1.4rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--black);
+      color: var(--white);
+      border: 2px solid var(--black);
+    }
+    .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+    .btn-outline {
+      background: transparent;
+      color: var(--black);
+      border: 2px solid var(--black);
+    }
+    .btn-outline:hover { background: var(--black); color: var(--white); }
+
+    /* DIVIDER */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--gray-light);
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    /* SKILLS */
+    #skills h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+    }
+    .skill-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .skill-group h3 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--gray);
+      margin-bottom: 0.75rem;
+    }
+    .tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .tag {
+      padding: 0.3rem 0.75rem;
+      background: var(--gray-light);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--black);
+    }
+
+    /* PROJECTS */
+    #projects h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+    }
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+    .project-card {
+      border: 1px solid var(--gray-light);
+      border-radius: 10px;
+      padding: 1.5rem;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .project-card:hover {
+      border-color: var(--accent);
+      box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+    }
+    .project-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .project-card p {
+      font-size: 0.875rem;
+      color: var(--gray-dark);
+      margin-bottom: 1rem;
+      line-height: 1.5;
+    }
+    .project-card a {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+    }
+    .project-card a:hover { text-decoration: underline; }
+
+    /* CONTACT */
+    #contact h2 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+    }
+    #contact .sub {
+      color: var(--gray-dark);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+    .contact-links {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+      color: var(--black);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .contact-link:hover { color: var(--accent); }
+    .contact-link .icon {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-light);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+    }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      color: var(--gray);
+      border-top: 1px solid var(--gray-light);
+    }
+
+    @media (max-width: 600px) {
+      nav ul { gap: 1.2rem; }
+      .skill-groups { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#hero" class="logo">문성수</a>
+    <ul>
+      <li><a href="#skills">기술</a></li>
+      <li><a href="#projects">프로젝트</a></li>
+      <li><a href="#contact">연락처</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <p class="section-label">안녕하세요</p>
+    <h1>저는 <span>문성수</span>입니다</h1>
+    <p>백엔드 개발을 주력으로 하는 개발자입니다. 안정적이고 확장 가능한 서버 시스템을 만드는 것에 관심이 있습니다.</p>
+    <div class="btn-group">
+      <a href="#projects" class="btn btn-primary">프로젝트 보기</a>
+      <a href="#contact" class="btn btn-outline">연락하기</a>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- SKILLS -->
+  <section id="skills">
+    <p class="section-label">기술 스택</p>
+    <h2>사용하는 기술들</h2>
+    <div class="skill-groups">
+      <div class="skill-group">
+        <h3>언어</h3>
+        <div class="tags">
+          <span class="tag">Python</span>
+          <span class="tag">Java</span>
+          <span class="tag">JavaScript</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>백엔드</h3>
+        <div class="tags">
+          <span class="tag">FastAPI</span>
+          <span class="tag">Spring Boot</span>
+          <span class="tag">Node.js</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>데이터베이스</h3>
+        <div class="tags">
+          <span class="tag">PostgreSQL</span>
+          <span class="tag">MySQL</span>
+          <span class="tag">Redis</span>
+        </div>
+      </div>
+      <div class="skill-group">
+        <h3>인프라 / 도구</h3>
+        <div class="tags">
+          <span class="tag">Docker</span>
+          <span class="tag">Git</span>
+          <span class="tag">Linux</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <p class="section-label">프로젝트</p>
+    <h2>만들어온 것들</h2>
+    <div class="project-grid">
+      <div class="project-card">
+        <h3>메모 앱 (Memo App)</h3>
+        <p>JWT 인증, 태그·카테고리 관리, RESTful API를 갖춘 백엔드 메모 서비스</p>
+        <a href="#">GitHub →</a>
+      </div>
+      <div class="project-card">
+        <h3>개인 랜딩 페이지</h3>
+        <p>미니멀한 디자인의 개인 포트폴리오 페이지. 순수 HTML/CSS로 제작</p>
+        <a href="#">GitHub →</a>
+      </div>
+      <div class="project-card">
+        <h3>프로젝트 추가 예정</h3>
+        <p>새로운 프로젝트를 준비 중입니다. 기대해 주세요!</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- CONTACT -->
+  <section id="contact">
+    <p class="section-label">연락처</p>
+    <h2>함께 이야기해요</h2>
+    <p class="sub">프로젝트 협업이나 궁금한 점이 있으면 언제든지 연락주세요.</p>
+    <div class="contact-links">
+      <a href="mailto:canmoon81@gmail.com" class="contact-link">
+        <span class="icon">✉</span>
+        canmoon81@gmail.com
+      </a>
+      <a href="https://github.com/sung00su99" class="contact-link" target="_blank">
+        <span class="icon">⌥</span>
+        github.com/sung00su99
+      </a>
+    </div>
+  </section>
+
+  <footer>
+    © 2026 문성수. All rights reserved.
+  </footer>
+
+</body>
+</html>

@@ -8,43 +8,75 @@
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='52' font-size='52'%3E%F0%9F%A6%80%3C/text%3E%3C/svg%3E" />
 </head>
 <body>
-  <div class="app">
+  <!-- ===== Auth Screen ===== -->
+  <div id="authScreen" class="auth-screen">
+    <div class="auth-card">
+      <svg class="crab crab-big" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <ellipse cx="18" cy="58" rx="14" ry="10" fill="#d97757" />
+        <ellipse cx="14" cy="54" rx="6" ry="4" fill="#b85a3e" />
+        <ellipse cx="102" cy="58" rx="14" ry="10" fill="#d97757" />
+        <ellipse cx="106" cy="54" rx="6" ry="4" fill="#b85a3e" />
+        <path d="M30 75 Q22 86 18 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M40 80 Q36 92 34 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M90 75 Q98 86 102 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+        <path d="M80 80 Q84 92 86 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
+        <ellipse cx="60" cy="56" rx="36" ry="26" fill="#e88c6a" />
+        <ellipse cx="60" cy="52" rx="32" ry="20" fill="#f4a988" />
+        <line x1="48" y1="40" x2="46" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+        <line x1="72" y1="40" x2="74" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
+        <circle cx="46" cy="20" r="6" fill="#fff" />
+        <circle cx="74" cy="20" r="6" fill="#fff" />
+        <circle cx="47" cy="21" r="3" fill="#2d2018" />
+        <circle cx="75" cy="21" r="3" fill="#2d2018" />
+        <path d="M52 64 Q60 58 68 64" stroke="#b85a3e" stroke-width="2.5" stroke-linecap="round" fill="none" />
+        <circle cx="42" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+        <circle cx="78" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
+      </svg>
+      <h1>Claude Memo</h1>
+      <p class="auth-subtitle" id="authSubtitle">집게로 꾹꾹 적어둔 메모들 🦀</p>
+
+      <form id="authForm" class="auth-form">
+        <input id="authUsername" type="text" placeholder="아이디" autocomplete="username" required minlength="2" maxlength="50" />
+        <input id="authPassword" type="password" placeholder="비밀번호" autocomplete="current-password" required minlength="4" maxlength="200" />
+        <button type="submit" class="btn btn-primary auth-submit">로그인</button>
+      </form>
+
+      <button id="authToggle" class="auth-toggle">회원가입은 처음이신가요? <strong>가입하기</strong></button>
+      <button id="authThemeToggle" class="auth-theme">
+        <span class="theme-icon-light">🌙 다크모드</span>
+        <span class="theme-icon-dark">☀️ 라이트모드</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== App ===== -->
+  <div id="app" class="app hidden">
     <aside class="sidebar">
       <div class="brand">
-        <!-- Claude crab character -->
         <svg class="crab" viewBox="0 0 120 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <!-- left claw -->
           <ellipse cx="18" cy="58" rx="14" ry="10" fill="#d97757" />
           <ellipse cx="14" cy="54" rx="6" ry="4" fill="#b85a3e" />
-          <!-- right claw -->
           <ellipse cx="102" cy="58" rx="14" ry="10" fill="#d97757" />
           <ellipse cx="106" cy="54" rx="6" ry="4" fill="#b85a3e" />
-          <!-- legs -->
           <path d="M30 75 Q22 86 18 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
           <path d="M40 80 Q36 92 34 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
           <path d="M90 75 Q98 86 102 92" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
           <path d="M80 80 Q84 92 86 96" stroke="#d97757" stroke-width="4" stroke-linecap="round" fill="none" />
-          <!-- body -->
           <ellipse cx="60" cy="56" rx="36" ry="26" fill="#e88c6a" />
           <ellipse cx="60" cy="52" rx="32" ry="20" fill="#f4a988" />
-          <!-- eyes (stalks) -->
           <line x1="48" y1="40" x2="46" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
           <line x1="72" y1="40" x2="74" y2="22" stroke="#b85a3e" stroke-width="3" stroke-linecap="round" />
           <circle cx="46" cy="20" r="6" fill="#fff" />
           <circle cx="74" cy="20" r="6" fill="#fff" />
           <circle cx="47" cy="21" r="3" fill="#2d2018" />
           <circle cx="75" cy="21" r="3" fill="#2d2018" />
-          <circle cx="48" cy="20" r="1" fill="#fff" />
-          <circle cx="76" cy="20" r="1" fill="#fff" />
-          <!-- mouth -->
           <path d="M54 62 Q60 68 66 62" stroke="#b85a3e" stroke-width="2.5" stroke-linecap="round" fill="none" />
-          <!-- cheek blush -->
           <circle cx="42" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
           <circle cx="78" cy="60" r="3" fill="#ff9a7a" opacity="0.6" />
         </svg>
         <div class="brand-text">
           <h1>Claude Memo</h1>
-          <p class="tagline">집게로 꾹꾹 적어둔 메모들 🦀</p>
+          <p class="tagline" id="usernameLabel">🦀</p>
         </div>
       </div>
 
@@ -56,6 +88,23 @@
         <input id="searchInput" type="search" placeholder="메모 검색..." />
       </div>
 
+      <!-- Categories -->
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span>카테고리</span>
+          <button id="newCategoryBtn" class="icon-btn" title="새 카테고리">＋</button>
+        </div>
+        <ul id="categoryList" class="category-list"></ul>
+      </div>
+
+      <!-- Tags -->
+      <div class="sidebar-section">
+        <div class="section-header">
+          <span>태그</span>
+        </div>
+        <div id="tagCloud" class="tag-cloud"></div>
+      </div>
+
       <ul id="memoList" class="memo-list" aria-label="메모 목록"></ul>
 
       <div class="sidebar-footer">
@@ -63,6 +112,10 @@
           <span class="theme-icon-light">🌙</span>
           <span class="theme-icon-dark">☀️</span>
           <span class="theme-label">테마</span>
+        </button>
+        <button id="logoutBtn" class="btn btn-ghost" title="로그아웃">
+          <span>🚪</span>
+          <span>로그아웃</span>
         </button>
       </div>
     </aside>
@@ -103,12 +156,50 @@
             <button id="saveBtn" class="btn btn-primary">저장</button>
           </div>
         </header>
+
+        <div class="editor-meta-row">
+          <label class="meta-field">
+            <span class="meta-label">카테고리</span>
+            <select id="categorySelect">
+              <option value="">없음</option>
+            </select>
+          </label>
+          <div class="meta-field meta-field-grow">
+            <span class="meta-label">태그</span>
+            <div id="tagEditor" class="tag-editor">
+              <input id="tagInput" type="text" placeholder="태그 입력 후 Enter" maxlength="30" />
+            </div>
+          </div>
+        </div>
+
         <textarea id="contentInput" placeholder="여기에 메모를 적어보세요... 🦀"></textarea>
         <footer class="editor-footer">
           <span id="metaInfo"></span>
         </footer>
       </section>
     </main>
+  </div>
+
+  <!-- ===== Category Modal ===== -->
+  <div id="categoryModal" class="modal hidden">
+    <div class="modal-card">
+      <h3 id="categoryModalTitle">새 카테고리</h3>
+      <form id="categoryForm">
+        <label class="modal-field">
+          <span>이름</span>
+          <input id="categoryName" type="text" required minlength="1" maxlength="50" />
+        </label>
+        <label class="modal-field">
+          <span>색상</span>
+          <input id="categoryColor" type="color" value="#d97757" />
+        </label>
+        <div class="modal-actions">
+          <button type="button" id="categoryDeleteBtn" class="btn btn-danger hidden">삭제</button>
+          <button type="button" id="categoryCancelBtn" class="btn">취소</button>
+          <button type="submit" class="btn btn-primary">저장</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

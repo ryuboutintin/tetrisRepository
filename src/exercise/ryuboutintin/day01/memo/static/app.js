@@ -1,6 +1,16 @@
+const authSection = document.getElementById("auth-section");
+const workspace = document.getElementById("workspace");
+const loginForm = document.getElementById("login-form");
+const registerForm = document.getElementById("register-form");
+const authStatusText = document.getElementById("auth-status-text");
+const currentUsername = document.getElementById("current-username");
+const logoutButton = document.getElementById("logout-button");
+
 const form = document.getElementById("memo-form");
 const formTitle = document.getElementById("form-title");
 const titleInput = document.getElementById("title");
+const categoryInput = document.getElementById("category");
+const tagsInput = document.getElementById("tags");
 const contentInput = document.getElementById("content");
 const submitButton = document.getElementById("submit-button");
 const resetButton = document.getElementById("reset-button");
@@ -8,13 +18,37 @@ const refreshButton = document.getElementById("refresh-button");
 const statusText = document.getElementById("status-text");
 const memoList = document.getElementById("memo-list");
 const emptyState = document.getElementById("empty-state");
+const filterCategoryInput = document.getElementById("filter-category");
+const filterTagInput = document.getElementById("filter-tag");
+const clearFiltersButton = document.getElementById("clear-filters-button");
+
+const TOKEN_KEY = "memo_jwt_token";
+const USER_KEY = "memo_user";
 
 let editingMemoId = null;
+let authToken = localStorage.getItem(TOKEN_KEY);
+let currentUser = readStoredUser();
+
+function readStoredUser() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
 
 async function request(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  if (!headers.has("Content-Type") && options.body) {
+    headers.set("Content-Type", "application/json");
+  }
+  if (authToken) {
+    headers.set("Authorization", `Bearer ${authToken}`);
+  }
+
   const response = await fetch(url, {
-    headers: { "Content-Type": "application/json" },
     ...options,
+    headers,
   });
 
   if (response.status === 204) {
@@ -23,6 +57,10 @@ async function request(url, options = {}) {
 
   const data = await response.json();
   if (!response.ok) {
+    if (response.status === 401) {
+      clearSession();
+      syncAuthView();
+    }
     throw new Error(data.detail || "요청 처리 중 오류가 발생했습니다.");
   }
   return data;
@@ -30,6 +68,44 @@ async function request(url, options = {}) {
 
 function setStatus(message) {
   statusText.textContent = message;
+}
+
+function setAuthStatus(message) {
+  authStatusText.textContent = message;
+}
+
+function clearSession() {
+  authToken = null;
+  currentUser = null;
+  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(USER_KEY);
+}
+
+function saveSession(payload) {
+  authToken = payload.access_token;
+  currentUser = payload.user;
+  localStorage.setItem(TOKEN_KEY, authToken);
+  localStorage.setItem(USER_KEY, JSON.stringify(currentUser));
+}
+
+function syncAuthView() {
+  const authenticated = Boolean(authToken && currentUser);
+  authSection.hidden = authenticated;
+  workspace.hidden = !authenticated;
+  currentUsername.textContent = authenticated ? `${currentUser.username} 님` : "-";
+  if (!authenticated) {
+    memoList.innerHTML = "";
+    emptyState.hidden = false;
+    setStatus("로그인 후 메모를 확인할 수 있습니다.");
+    setAuthStatus("로그인 필요");
+  }
+}
+
+function parseTags(value) {
+  return value
+    .split(",")
+    .map((tag) => tag.trim())
+    .filter(Boolean);
 }
 
 function resetForm() {
@@ -44,6 +120,8 @@ function resetForm() {
 function startEdit(memo) {
   editingMemoId = memo.id;
   titleInput.value = memo.title;
+  categoryInput.value = memo.category || "";
+  tagsInput.value = (memo.tags || []).join(", ");
   contentInput.value = memo.content;
   formTitle.textContent = `메모 수정 #${memo.id}`;
   submitButton.textContent = "수정 저장";
@@ -59,8 +137,27 @@ function renderMemos(memos) {
     const item = document.createElement("li");
     item.className = "memo-item";
 
+    const header = document.createElement("div");
+    header.className = "memo-header";
+
     const title = document.createElement("h3");
     title.textContent = memo.title;
+
+    const category = document.createElement("span");
+    category.className = "category-pill";
+    category.textContent = memo.category || "미분류";
+    header.append(title, category);
+
+    const tagList = document.createElement("div");
+    tagList.className = "tag-list";
+    if (memo.tags?.length) {
+      for (const tag of memo.tags) {
+        const tagItem = document.createElement("span");
+        tagItem.className = "tag-pill";
+        tagItem.textContent = `#${tag}`;
+        tagList.append(tagItem);
+      }
+    }
 
     const content = document.createElement("p");
     content.textContent = memo.content.trim() || "내용 없음";
@@ -76,9 +173,7 @@ function renderMemos(memos) {
     editButton.type = "button";
     editButton.className = "memo-action";
     editButton.textContent = "수정";
-    editButton.addEventListener("click", () => {
-      startEdit(memo);
-    });
+    editButton.addEventListener("click", () => startEdit(memo));
 
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
@@ -103,28 +198,81 @@ function renderMemos(memos) {
     });
 
     controls.append(editButton, deleteButton);
-    item.append(title, content, meta, controls);
+    item.append(header, tagList, content, meta, controls);
     memoList.appendChild(item);
   }
 }
 
 async function loadMemos() {
+  if (!authToken) {
+    return;
+  }
+
   try {
-    const memos = await request("/api/memos");
-    renderMemos(memos);
-    if (!memos.length) {
-      setStatus("메모가 비어 있습니다.");
+    const params = new URLSearchParams();
+    const category = filterCategoryInput.value.trim();
+    const tag = filterTagInput.value.trim();
+    if (category) {
+      params.set("category", category);
     }
+    if (tag) {
+      params.set("tag", tag);
+    }
+
+    const query = params.toString();
+    const memos = await request(`/api/memos${query ? `?${query}` : ""}`);
+    renderMemos(memos);
+    setStatus(memos.length ? "메모를 불러왔습니다." : "조건에 맞는 메모가 없습니다.");
   } catch (error) {
     setStatus(error.message);
   }
 }
+
+async function handleAuthSubmit(event, endpoint) {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const payload = {
+    username: String(formData.get("username") || "").trim(),
+    password: String(formData.get("password") || "").trim(),
+  };
+
+  if (!payload.username || !payload.password) {
+    setAuthStatus("사용자 이름과 비밀번호를 입력하세요.");
+    return;
+  }
+
+  try {
+    const data = await request(endpoint, {
+      method: "POST",
+      body: JSON.stringify(payload),
+    });
+    saveSession(data);
+    syncAuthView();
+    resetForm();
+    setAuthStatus(`${data.user.username} 계정으로 로그인되었습니다.`);
+    setStatus("로그인 완료");
+    await loadMemos();
+  } catch (error) {
+    setAuthStatus(error.message);
+  }
+}
+
+loginForm.addEventListener("submit", (event) => handleAuthSubmit(event, "/api/auth/login"));
+registerForm.addEventListener("submit", (event) => handleAuthSubmit(event, "/api/auth/register"));
+
+logoutButton.addEventListener("click", () => {
+  clearSession();
+  resetForm();
+  syncAuthView();
+});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
 
   const payload = {
     title: titleInput.value.trim(),
+    category: categoryInput.value.trim(),
+    tags: parseTags(tagsInput.value),
     content: contentInput.value.trim(),
   };
 
@@ -158,5 +306,30 @@ form.addEventListener("submit", async (event) => {
 
 resetButton.addEventListener("click", resetForm);
 refreshButton.addEventListener("click", loadMemos);
+clearFiltersButton.addEventListener("click", async () => {
+  filterCategoryInput.value = "";
+  filterTagInput.value = "";
+  await loadMemos();
+});
+filterCategoryInput.addEventListener("change", loadMemos);
+filterTagInput.addEventListener("change", loadMemos);
 
-loadMemos();
+async function bootstrap() {
+  syncAuthView();
+  if (!authToken) {
+    return;
+  }
+
+  try {
+    const user = await request("/api/auth/me");
+    currentUser = user;
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    syncAuthView();
+    await loadMemos();
+  } catch {
+    clearSession();
+    syncAuthView();
+  }
+}
+
+bootstrap();
