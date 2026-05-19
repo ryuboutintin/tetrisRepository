@@ -3,10 +3,6 @@
 브라우저에서 바로 실행할 수 있는 간단한 프론트엔드 테트리스 애플리케이션입니다.  
 별도 설치나 빌드 없이 `index.html`을 열면 실행됩니다.
 
-## 배포 링크
-
-- 플레이하기: https://ryuboutintin.github.io/tetrisRepository/
-
 ## 실행 방법
 
 1. 프로젝트 폴더로 이동합니다.
