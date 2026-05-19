@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 배포 URL
+
+https://ikhanet.github.io/kosa_202605/tetris/
+
 ## 실행 방법
 
 단일 HTML 파일이므로 빌드 과정 없음.
