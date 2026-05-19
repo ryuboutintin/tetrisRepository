@@ -6,430 +6,714 @@
   <title>Tetris</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       background: #0f0f1a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      display: flex; justify-content: center; align-items: center;
       min-height: 100vh;
-      font-family: 'Segoe UI', sans-serif;
-      color: #fff;
+      font-family: 'Segoe UI', sans-serif; color: #fff;
+      user-select: none;
     }
-
-    .wrapper {
-      display: flex;
-      gap: 24px;
-      align-items: flex-start;
-    }
-
-    /* 게임 보드 */
+    .wrapper { display: flex; gap: 20px; align-items: flex-start; }
     #board {
-      border: 2px solid #3a3a5c;
-      border-radius: 4px;
-      background: #12122a;
-      box-shadow: 0 0 40px rgba(100, 80, 255, 0.3);
-      display: block;
+      border: 2px solid #3a3a5c; border-radius: 4px; background: #12122a;
+      box-shadow: 0 0 40px rgba(100,80,255,0.3); display: block;
     }
-
-    /* 사이드 패널 */
-    .panel {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      min-width: 140px;
-    }
-
+    .panel, .panel-left { display: flex; flex-direction: column; gap: 12px; min-width: 130px; }
     .panel-box {
-      background: #1a1a30;
-      border: 1px solid #3a3a5c;
-      border-radius: 8px;
-      padding: 16px;
+      background: #1a1a30; border: 1px solid #3a3a5c;
+      border-radius: 8px; padding: 12px 14px;
     }
-
     .panel-box h3 {
-      font-size: 11px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: #8080aa;
-      margin-bottom: 10px;
+      font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+      color: #8080aa; margin-bottom: 8px;
+    }
+    .val-purple { font-size: 26px; font-weight: 700; color: #a78bfa; }
+    .val-yellow  { font-size: 18px; font-weight: 700; color: #fbbf24; }
+    .val-green   { font-size: 22px; font-weight: 700; color: #60d394; }
+    .val-red     { font-size: 20px; font-weight: 700; color: #f87171; min-height: 28px; }
+    canvas.mini  { display: block; margin: 0 auto; }
+
+    /* Skill gauge */
+    .gauge-wrap { margin-bottom: 6px; }
+    .gauge-bg {
+      width: 100%; height: 14px; background: #2a2a44;
+      border-radius: 7px; overflow: hidden;
+    }
+    .gauge-fill {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #818cf8, #f87171);
+      border-radius: 7px; transition: width 0.25s;
+    }
+    .gauge-fill.ready {
+      background: linear-gradient(90deg, #f87171, #fbbf24);
+      animation: gpulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes gpulse { from { opacity: 0.65; } to { opacity: 1; } }
+    .skill-ready { font-size: 11px; font-weight: 700; color: #f87171; display: none; margin-bottom: 4px; }
+    .skill-hint  { font-size: 10px; color: #8080aa; margin-top: 4px; }
+    .skill-hint span {
+      display: inline-block; background: #2a2a44; border-radius: 4px;
+      padding: 1px 5px; font-size: 10px; color: #ccc; margin-right: 3px;
     }
 
-    .score-value {
-      font-size: 28px;
-      font-weight: 700;
-      color: #a78bfa;
-      letter-spacing: 1px;
-    }
-
-    .level-value, .lines-value {
-      font-size: 22px;
-      font-weight: 700;
-      color: #60d394;
-    }
-
-    #next-canvas {
-      display: block;
-      margin: 0 auto;
-    }
-
-    /* 조작키 안내 */
-    .keys {
-      font-size: 12px;
-      color: #8080aa;
-      line-height: 1.9;
-    }
+    /* Keys */
+    .keys { font-size: 11px; color: #8080aa; line-height: 2; }
     .keys span {
-      display: inline-block;
-      background: #2a2a44;
-      border-radius: 4px;
-      padding: 1px 6px;
-      font-size: 11px;
-      color: #ccc;
-      margin-right: 4px;
+      display: inline-block; background: #2a2a44; border-radius: 4px;
+      padding: 1px 5px; font-size: 10px; color: #ccc; margin-right: 3px;
     }
 
-    /* 오버레이 */
+    /* Bomb tag */
+    .bomb-tag {
+      text-align: center; font-size: 11px; font-weight: 700;
+      color: #ff4444; letter-spacing: 1px; margin-top: 4px;
+      display: none;
+      animation: blink 0.45s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Pause */
+    #pause-banner {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(10,10,25,0.93); border: 1px solid #3a3a5c;
+      border-radius: 12px; padding: 24px 48px;
+      font-size: 22px; font-weight: 700; letter-spacing: 4px; color: #a78bfa;
+      display: none; z-index: 5;
+    }
+
+    /* Overlay */
     #overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 10, 25, 0.88);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 16px;
-      z-index: 10;
+      position: fixed; inset: 0; background: rgba(10,10,25,0.9);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; gap: 14px; z-index: 10;
     }
-
     #overlay h1 {
-      font-size: 48px;
-      font-weight: 900;
-      letter-spacing: 6px;
+      font-size: 48px; font-weight: 900; letter-spacing: 6px;
       background: linear-gradient(135deg, #a78bfa, #60d394);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     }
-
-    #overlay p {
-      color: #9090bb;
-      font-size: 15px;
-    }
-
+    #overlay p { color: #9090bb; font-size: 14px; }
     #overlay button {
-      margin-top: 8px;
-      padding: 12px 40px;
+      margin-top: 8px; padding: 12px 40px;
       background: linear-gradient(135deg, #7c3aed, #4f46e5);
-      border: none;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 1px;
+      border: none; border-radius: 8px; color: #fff;
+      font-size: 16px; font-weight: 600; cursor: pointer; letter-spacing: 1px;
       transition: opacity 0.2s;
     }
     #overlay button:hover { opacity: 0.85; }
 
-    #final-score {
-      font-size: 20px;
-      color: #a78bfa;
-      font-weight: 700;
+    #quit-btn {
+      padding: 10px;
+      background: transparent;
+      border: 1px solid #3a3a5c;
+      border-radius: 8px;
+      color: #8080aa;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 1px;
+      transition: background 0.2s, color 0.2s;
     }
+    #quit-btn:hover { background: #3a1a1a; color: #f87171; border-color: #f87171; }
+    #final-score { font-size: 18px; color: #a78bfa; font-weight: 700; }
+    #final-best  { font-size: 14px; color: #fbbf24; }
   </style>
 </head>
 <body>
 
 <div class="wrapper">
-  <canvas id="board" width="300" height="600"></canvas>
-
-  <div class="panel">
+  <!-- 왼쪽 패널 -->
+  <div class="panel-left">
+    <div class="panel-box">
+      <h3>Hold &nbsp;<span style="font-size:9px;color:#f87171" id="hold-used-label"></span></h3>
+      <canvas class="mini" id="hold-canvas" width="100" height="100"></canvas>
+    </div>
     <div class="panel-box">
       <h3>Score</h3>
-      <div class="score-value" id="score">0</div>
+      <div class="val-purple" id="score">0</div>
     </div>
-
     <div class="panel-box">
-      <h3>Level</h3>
-      <div class="level-value" id="level">1</div>
+      <h3>Best</h3>
+      <div class="val-yellow" id="best">0</div>
     </div>
-
     <div class="panel-box">
-      <h3>Lines</h3>
-      <div class="lines-value" id="lines">0</div>
+      <h3>Skill</h3>
+      <div class="skill-ready" id="skill-ready">★ READY!</div>
+      <div class="gauge-wrap">
+        <div class="gauge-bg"><div class="gauge-fill" id="gauge-fill"></div></div>
+      </div>
+      <div class="skill-hint"><span>Z</span> 라인 폭파</div>
     </div>
+  </div>
 
+  <canvas id="board" width="300" height="600"></canvas>
+
+  <!-- 오른쪽 패널 -->
+  <div class="panel">
     <div class="panel-box">
       <h3>Next</h3>
-      <canvas id="next-canvas" width="100" height="100"></canvas>
+      <canvas class="mini" id="next-canvas" width="100" height="100"></canvas>
+      <div class="bomb-tag" id="bomb-tag">💣 BOMB</div>
     </div>
-
+    <div class="panel-box">
+      <h3>Combo</h3>
+      <div class="val-red" id="combo">—</div>
+    </div>
+    <div class="panel-box">
+      <h3>Level</h3>
+      <div class="val-green" id="level">1</div>
+    </div>
+    <div class="panel-box">
+      <h3>Lines</h3>
+      <div class="val-green" id="lines">0</div>
+    </div>
     <div class="panel-box">
       <h3>Keys</h3>
       <div class="keys">
         <span>←→</span> 이동<br>
         <span>↑</span> 회전<br>
-        <span>↓</span> 빠르게<br>
+        <span>↓</span> 내리기<br>
         <span>Space</span> 즉시낙하<br>
-        <span>P</span> 일시정지
+        <span>C</span> 홀드<br>
+        <span>Z</span> 스킬<br>
+        <span>P</span> 정지
       </div>
     </div>
+    <button id="quit-btn">종료</button>
   </div>
 </div>
 
-<!-- 시작/게임오버 오버레이 -->
+<div id="pause-banner">⏸ PAUSED</div>
+
 <div id="overlay">
   <h1>TETRIS</h1>
   <p>블록을 쌓아 줄을 완성하세요</p>
+  <p style="font-size:12px;color:#666;margin-top:-6px">💣 폭탄 블록 · 콤보 · 스킬 게이지</p>
   <div id="final-score" style="display:none"></div>
+  <div id="final-best"  style="display:none"></div>
   <button id="start-btn">시작하기</button>
 </div>
 
 <script>
   const COLS = 10, ROWS = 20, CELL = 30;
+  const SKILL_MAX = 100;
+  const SKILL_GAIN = [0, 25, 45, 65, 100]; // per lines cleared (1~4)
+  const COMBO_MULT = [1, 1, 1.5, 2, 3];    // combo index 0~4+
 
   const COLORS = [
     null,
-    '#60d394', // I — 초록
-    '#a78bfa', // O — 보라
-    '#f59e0b', // T — 노랑
-    '#38bdf8', // S — 하늘
-    '#f87171', // Z — 빨강
-    '#fb923c', // J — 주황
-    '#818cf8', // L — 인디고
+    '#60d394', // 1 I
+    '#a78bfa', // 2 O
+    '#f59e0b', // 3 T
+    '#38bdf8', // 4 S
+    '#f87171', // 5 Z
+    '#fb923c', // 6 J
+    '#818cf8', // 7 L
+    '#ff3333', // 8 BOMB
   ];
 
   const SHAPES = [
     null,
-    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]], // I
-    [[2,2],[2,2]],                               // O
-    [[0,3,0],[3,3,3],[0,0,0]],                  // T
-    [[0,4,4],[4,4,0],[0,0,0]],                  // S
-    [[5,5,0],[0,5,5],[0,0,0]],                  // Z
-    [[6,0,0],[6,6,6],[0,0,0]],                  // J
-    [[0,0,7],[7,7,7],[0,0,0]],                  // L
+    [[0,0,0,0],[1,1,1,1],[0,0,0,0],[0,0,0,0]],
+    [[2,2],[2,2]],
+    [[0,3,0],[3,3,3],[0,0,0]],
+    [[0,4,4],[4,4,0],[0,0,0]],
+    [[5,5,0],[0,5,5],[0,0,0]],
+    [[6,0,0],[6,6,6],[0,0,0]],
+    [[0,0,7],[7,7,7],[0,0,0]],
   ];
 
-  const board = document.getElementById('board');
-  const ctx = board.getContext('2d');
-  const nextCanvas = document.getElementById('next-canvas');
-  const nCtx = nextCanvas.getContext('2d');
-
-  const scoreEl = document.getElementById('score');
-  const levelEl = document.getElementById('level');
-  const linesEl = document.getElementById('lines');
-  const overlay = document.getElementById('overlay');
-  const startBtn = document.getElementById('start-btn');
+  // ── DOM ──────────────────────────────────────────────────
+  const boardEl    = document.getElementById('board');
+  const ctx        = boardEl.getContext('2d');
+  const nCtx       = document.getElementById('next-canvas').getContext('2d');
+  const hCtx       = document.getElementById('hold-canvas').getContext('2d');
+  const scoreEl    = document.getElementById('score');
+  const bestEl     = document.getElementById('best');
+  const levelEl    = document.getElementById('level');
+  const linesEl    = document.getElementById('lines');
+  const comboEl    = document.getElementById('combo');
+  const gaugeFill  = document.getElementById('gauge-fill');
+  const skillReady = document.getElementById('skill-ready');
+  const bombTag    = document.getElementById('bomb-tag');
+  const holdUsedLabel = document.getElementById('hold-used-label');
+  const pauseBanner= document.getElementById('pause-banner');
+  const overlay    = document.getElementById('overlay');
+  const startBtn   = document.getElementById('start-btn');
   const finalScore = document.getElementById('final-score');
+  const finalBest  = document.getElementById('final-best');
 
-  let grid, piece, nextPiece, score, level, lines, dropInterval, lastTime, animId, paused, running;
+  // ── Audio ─────────────────────────────────────────────────
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  let audioCtx = null;
+  function resumeAudio() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+  }
+  function tone(freq, type, dur, vol = 0.15) {
+    if (!audioCtx) return;
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.connect(g); g.connect(audioCtx.destination);
+    o.type = type;
+    o.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    g.gain.setValueAtTime(vol, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+    o.start(); o.stop(audioCtx.currentTime + dur);
+  }
+  const sfxMove   = () => tone(220, 'square',   0.06, 0.06);
+  const sfxRotate = () => tone(440, 'square',   0.08, 0.08);
+  const sfxDrop   = () => tone(160, 'sine',     0.12, 0.20);
+  const sfxHold   = () => tone(330, 'triangle', 0.10, 0.10);
+  function sfxClear(n) {
+    [523,659,784,1047].slice(0,n).forEach((f,i) =>
+      setTimeout(() => tone(f,'sine',0.18,0.2), i*60));
+  }
+  function sfxCombo(n) {
+    const f = 300 + n * 80;
+    tone(f, 'sine', 0.12, 0.25);
+    setTimeout(() => tone(f * 1.5, 'sine', 0.12, 0.2), 80);
+  }
+  function sfxBomb() {
+    tone(80,  'sawtooth', 0.30, 0.40);
+    tone(220, 'square',   0.15, 0.20);
+    setTimeout(() => tone(50, 'sine', 0.40, 0.50), 100);
+  }
+  function sfxSkill() {
+    [500,700,900,1200].forEach((f,i) =>
+      setTimeout(() => tone(f,'sine',0.15,0.25), i*55));
+  }
+  function sfxGameOver() {
+    [400,300,200,150].forEach((f,i) =>
+      setTimeout(() => tone(f,'sawtooth',0.3,0.25), i*120));
+  }
 
+  // ── State ─────────────────────────────────────────────────
+  let grid, piece, nextPiece, holdPiece, holdUsed;
+  let score, level, lines, dropInterval, dropCounter, lastTime, animId;
+  let paused, running;
+  let combo, skillGauge;
+  let explosion = null;  // { r, c, alpha }
+  let comboAnim = null;  // { text, alpha, y }
+  let skillAnim = false; // brief flash when skill fires
+  let skillFlash = 0;
+
+  let bestScore = parseInt(localStorage.getItem('tetris-best') || '0');
+  bestEl.textContent = bestScore;
+
+  // ── Core helpers ──────────────────────────────────────────
   function createGrid() {
-    return Array.from({ length: ROWS }, () => Array(COLS).fill(0));
+    return Array.from({length: ROWS}, () => Array(COLS).fill(0));
   }
 
   function randomPiece() {
-    const id = Math.floor(Math.random() * 7) + 1;
-    const shape = SHAPES[id].map(r => [...r]);
-    return { id, shape, x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2), y: 0 };
+    const shapeId = Math.floor(Math.random() * 7) + 1;
+    const isBomb  = Math.random() < 0.10;
+    const shape   = SHAPES[shapeId].map(r => [...r]);
+    return {
+      id: isBomb ? 8 : shapeId,
+      shapeId, isBomb, shape,
+      x: Math.floor(COLS / 2) - Math.floor(shape[0].length / 2),
+      y: 0,
+    };
   }
 
   function rotate(shape) {
     const n = shape.length;
-    return shape[0].map((_, c) => shape.map((_, r) => shape[n - 1 - r][c]));
+    return shape[0].map((_, c) => shape.map((_, r) => shape[n-1-r][c]));
   }
 
-  function collides(p, dx = 0, dy = 0, sh = p.shape) {
-    for (let r = 0; r < sh.length; r++) {
-      for (let c = 0; c < sh[r].length; c++) {
+  function collides(p, dx=0, dy=0, sh=p.shape) {
+    for (let r=0; r<sh.length; r++)
+      for (let c=0; c<sh[r].length; c++) {
         if (!sh[r][c]) continue;
-        const nx = p.x + c + dx, ny = p.y + r + dy;
-        if (nx < 0 || nx >= COLS || ny >= ROWS) return true;
-        if (ny >= 0 && grid[ny][nx]) return true;
+        const nx=p.x+c+dx, ny=p.y+r+dy;
+        if (nx<0||nx>=COLS||ny>=ROWS) return true;
+        if (ny>=0&&grid[ny][nx]) return true;
       }
-    }
     return false;
   }
 
+  // ── Lock ─────────────────────────────────────────────────
   function lock() {
-    piece.shape.forEach((row, r) => {
-      row.forEach((val, c) => {
-        if (val && piece.y + r >= 0) grid[piece.y + r][piece.x + c] = val;
-      });
-    });
+    if (piece.isBomb) { lockBomb(); return; }
+    piece.shape.forEach((row,r) => row.forEach((val,c) => {
+      if (val && piece.y+r>=0) grid[piece.y+r][piece.x+c] = val;
+    }));
+    sfxDrop();
     clearLines();
+    advancePiece();
+  }
+
+  function lockBomb() {
+    // Find center of the bomb within grid bounds
+    let minR=99, maxR=-1, minC=99, maxC=-1;
+    piece.shape.forEach((row,r) => row.forEach((val,c) => {
+      if (!val) return;
+      const gr=piece.y+r, gc=piece.x+c;
+      if (gr<0||gr>=ROWS||gc<0||gc>=COLS) return;
+      minR=Math.min(minR,gr); maxR=Math.max(maxR,gr);
+      minC=Math.min(minC,gc); maxC=Math.max(maxC,gc);
+    }));
+    if (maxR===-1) { advancePiece(); return; }
+
+    const cr = Math.round((minR+maxR)/2);
+    const cc = Math.round((minC+maxC)/2);
+
+    // Clear 5×5 area
+    let cleared=0;
+    for (let r=cr-2; r<=cr+2; r++)
+      for (let c=cc-2; c<=cc+2; c++)
+        if (r>=0&&r<ROWS&&c>=0&&c<COLS&&grid[r][c]) { grid[r][c]=0; cleared++; }
+
+    score += cleared * 15;
+    scoreEl.textContent = score;
+    sfxBomb();
+    explosion = { r: cr, c: cc, alpha: 1.0 };
+    advancePiece();
+  }
+
+  function advancePiece() {
+    holdUsed = false;
+    holdUsedLabel.textContent = '';
     piece = nextPiece;
     nextPiece = randomPiece();
     if (collides(piece)) { gameOver(); return; }
-    drawNext();
+    updateNextDisplay();
   }
 
+  // ── Clear lines ───────────────────────────────────────────
   function clearLines() {
-    let cleared = 0;
-    for (let r = ROWS - 1; r >= 0; r--) {
-      if (grid[r].every(v => v)) {
-        grid.splice(r, 1);
+    let cleared=0;
+    for (let r=ROWS-1; r>=0; r--) {
+      if (grid[r].every(v=>v)) {
+        grid.splice(r,1);
         grid.unshift(Array(COLS).fill(0));
-        cleared++;
-        r++;
+        cleared++; r++;
       }
     }
-    if (!cleared) return;
-    const pts = [0, 100, 300, 500, 800][cleared] * level;
-    score += pts;
-    lines += cleared;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    if (cleared) {
+      combo++;
+      const mult = COMBO_MULT[Math.min(combo, COMBO_MULT.length-1)];
+      const base = [0,100,300,500,800][Math.min(cleared,4)];
+      score  += Math.round(base * level * mult);
+      lines  += cleared;
+      level   = Math.floor(lines/10)+1;
+      dropInterval = Math.max(80, 1000-(level-1)*90);
+      sfxClear(Math.min(cleared,4));
+      if (combo>=2) sfxCombo(combo);
+      skillGauge = Math.min(SKILL_MAX, skillGauge + SKILL_GAIN[Math.min(cleared,4)]);
+      updateSkillUI();
+      if (combo>=2) {
+        const labels = ['','','2× COMBO!','3× COMBO!!','4× COMBO!!!'];
+        comboAnim = {
+          text: labels[Math.min(combo, labels.length-1)] || `${combo}× COMBO!`,
+          alpha: 1.0, y: boardEl.height/2
+        };
+        comboEl.textContent = `${combo}콤보 ×${mult}`;
+      } else {
+        comboEl.textContent = '1';
+      }
+    } else {
+      combo = 0;
+      comboEl.textContent = '—';
+    }
     scoreEl.textContent = score;
     levelEl.textContent = level;
     linesEl.textContent = lines;
   }
 
+  // ── Skill: Line Blast ─────────────────────────────────────
+  function skillAction() {
+    if (skillGauge < SKILL_MAX || !running || paused) return;
+    // Remove bottom 2 rows
+    grid.splice(ROWS-2, 2);
+    grid.unshift(Array(COLS).fill(0));
+    grid.unshift(Array(COLS).fill(0));
+    score += 300 * level;
+    scoreEl.textContent = score;
+    skillGauge = 0;
+    sfxSkill();
+    updateSkillUI();
+    skillFlash = 8; // frames of white flash
+  }
+
+  function updateSkillUI() {
+    gaugeFill.style.width = (skillGauge/SKILL_MAX*100)+'%';
+    const ready = skillGauge >= SKILL_MAX;
+    gaugeFill.classList.toggle('ready', ready);
+    skillReady.style.display = ready ? 'block' : 'none';
+  }
+
+  // ── Hold ─────────────────────────────────────────────────
+  function holdAction() {
+    if (holdUsed||!running||paused) return;
+    sfxHold();
+    if (!holdPiece) {
+      holdPiece = clonePiece(piece);
+      piece = nextPiece;
+      nextPiece = randomPiece();
+      updateNextDisplay();
+    } else {
+      const tmp = clonePiece(holdPiece);
+      holdPiece = clonePiece(piece);
+      piece = tmp;
+      piece.x = Math.floor(COLS/2)-Math.floor(piece.shape[0].length/2);
+      piece.y = 0;
+      if (collides(piece)) { gameOver(); return; }
+    }
+    holdUsed = true;
+    holdUsedLabel.textContent = '(used)';
+    drawHold();
+  }
+
+  function clonePiece(p) {
+    return { ...p, shape: SHAPES[p.shapeId].map(r=>[...r]) };
+  }
+
+  // ── Hard drop ─────────────────────────────────────────────
   function hardDrop() {
-    while (!collides(piece, 0, 1)) piece.y++;
+    let d=0;
+    while (!collides(piece,0,1)) { piece.y++; d++; }
+    score += d*2;
+    scoreEl.textContent = score;
     lock();
   }
 
-  function drawCell(c, x, y, size = CELL, context = ctx) {
-    if (!c) return;
-    const color = COLORS[c];
-    context.fillStyle = color;
-    context.fillRect(x + 1, y + 1, size - 2, size - 2);
-    context.fillStyle = 'rgba(255,255,255,0.18)';
-    context.fillRect(x + 1, y + 1, size - 2, 6);
-    context.fillStyle = 'rgba(0,0,0,0.2)';
-    context.fillRect(x + 1, y + size - 7, size - 2, 6);
+  // ── Next / Hold display ───────────────────────────────────
+  function updateNextDisplay() {
+    drawMini(nCtx, nextPiece);
+    bombTag.style.display = nextPiece.isBomb ? 'block' : 'none';
+  }
+  function drawHold() {
+    drawMini(hCtx, holdPiece, holdUsed);
   }
 
-  function drawBoard() {
-    ctx.clearRect(0, 0, board.width, board.height);
+  // ── Draw helpers ──────────────────────────────────────────
+  function drawCell(colorId, x, y, size=CELL, context=ctx) {
+    if (!colorId) return;
+    const col = COLORS[colorId];
+    context.fillStyle = col;
+    context.fillRect(x+1, y+1, size-2, size-2);
+    context.fillStyle = 'rgba(255,255,255,0.18)';
+    context.fillRect(x+1, y+1, size-2, 6<size?6:size);
+    context.fillStyle = 'rgba(0,0,0,0.20)';
+    context.fillRect(x+1, y+size-7, size-2, 6<size?6:size);
+  }
 
-    // 격자 선
-    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
-    ctx.lineWidth = 1;
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        ctx.strokeRect(c * CELL, r * CELL, CELL, CELL);
-      }
+  function drawMini(context, pieceObj, dimmed=false) {
+    context.clearRect(0, 0, 100, 100);
+    if (!pieceObj) return;
+    const s=pieceObj.shape, cs=20;
+    const ox=Math.floor((5-s[0].length)/2)*cs;
+    const oy=Math.floor((5-s.length)/2)*cs;
+    context.globalAlpha = dimmed ? 0.3 : 1.0;
+    if (pieceObj.isBomb) {
+      context.shadowColor='#ff3333'; context.shadowBlur=12;
+    }
+    s.forEach((row,r) => row.forEach((val,c) => {
+      if (val) drawCell(pieceObj.id, ox+c*cs, oy+r*cs, cs, context);
+    }));
+    context.shadowBlur=0; context.globalAlpha=1.0;
+  }
+
+  // ── Main draw ─────────────────────────────────────────────
+  function drawBoard() {
+    ctx.clearRect(0, 0, boardEl.width, boardEl.height);
+
+    // Skill flash overlay
+    if (skillFlash>0) {
+      ctx.fillStyle=`rgba(100,180,255,${skillFlash*0.06})`;
+      ctx.fillRect(0,0,boardEl.width,boardEl.height);
+      skillFlash--;
     }
 
-    // 고정 블록
-    grid.forEach((row, r) => row.forEach((val, c) => {
-      if (val) drawCell(val, c * CELL, r * CELL);
+    // Grid lines
+    ctx.strokeStyle='rgba(255,255,255,0.04)'; ctx.lineWidth=1;
+    for (let r=0;r<ROWS;r++)
+      for (let c=0;c<COLS;c++)
+        ctx.strokeRect(c*CELL, r*CELL, CELL, CELL);
+
+    // Fixed blocks
+    grid.forEach((row,r) => row.forEach((val,c) => {
+      if (val) drawCell(val, c*CELL, r*CELL);
     }));
 
-    // 고스트
     if (piece) {
-      let ghostY = piece.y;
-      while (!collides(piece, 0, ghostY - piece.y + 1)) ghostY++;
-      if (ghostY !== piece.y) {
-        piece.shape.forEach((row, r) => row.forEach((val, c) => {
+      // Ghost piece
+      let gy=piece.y;
+      while (!collides(piece,0,gy-piece.y+1)) gy++;
+      if (gy!==piece.y) {
+        piece.shape.forEach((row,r) => row.forEach((val,c) => {
           if (!val) return;
-          const gx = (piece.x + c) * CELL, gy = (ghostY + r) * CELL;
-          ctx.strokeStyle = COLORS[piece.id];
-          ctx.lineWidth = 1.5;
-          ctx.strokeRect(gx + 2, gy + 2, CELL - 4, CELL - 4);
+          ctx.strokeStyle=COLORS[piece.id]; ctx.lineWidth=1.5;
+          ctx.strokeRect((piece.x+c)*CELL+2, (gy+r)*CELL+2, CELL-4, CELL-4);
         }));
       }
-    }
 
-    // 현재 블록
-    if (piece) {
-      piece.shape.forEach((row, r) => row.forEach((val, c) => {
-        if (val) drawCell(val, (piece.x + c) * CELL, (piece.y + r) * CELL);
+      // Current piece (with bomb glow)
+      if (piece.isBomb) {
+        ctx.shadowColor='#ff3333';
+        ctx.shadowBlur=10+Math.sin(Date.now()/120)*6;
+      }
+      piece.shape.forEach((row,r) => row.forEach((val,c) => {
+        if (val) drawCell(piece.id, (piece.x+c)*CELL, (piece.y+r)*CELL);
       }));
+      ctx.shadowBlur=0;
+
+      // Bomb label
+      if (piece.isBomb) {
+        const px=(piece.x+Math.floor(piece.shape[0].length/2))*CELL+CELL/2;
+        const py=(piece.y+Math.floor(piece.shape.length/2))*CELL+CELL/2+4;
+        ctx.font='bold 14px sans-serif';
+        ctx.textAlign='center';
+        ctx.fillStyle='#fff';
+        ctx.fillText('💣', px, py);
+      }
+    }
+
+    // Explosion animation
+    if (explosion) {
+      const ex=explosion, cx=ex.c*CELL+CELL/2, cy=ex.r*CELL+CELL/2;
+      const rad=CELL*2.8*(1-ex.alpha*0.4);
+      ctx.save();
+      const grad=ctx.createRadialGradient(cx,cy,0,cx,cy,rad);
+      grad.addColorStop(0, `rgba(255,200,0,${ex.alpha*0.9})`);
+      grad.addColorStop(0.4, `rgba(255,80,0,${ex.alpha*0.7})`);
+      grad.addColorStop(1, `rgba(255,0,0,0)`);
+      ctx.fillStyle=grad;
+      ctx.beginPath(); ctx.arc(cx,cy,rad,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+      explosion.alpha-=0.05;
+      if (explosion.alpha<=0) explosion=null;
+    }
+
+    // Combo text animation
+    if (comboAnim) {
+      ctx.save();
+      ctx.globalAlpha=comboAnim.alpha;
+      ctx.font='bold 30px sans-serif';
+      ctx.textAlign='center';
+      ctx.fillStyle='#fbbf24';
+      ctx.strokeStyle='rgba(0,0,0,0.6)';
+      ctx.lineWidth=4;
+      ctx.strokeText(comboAnim.text, boardEl.width/2, comboAnim.y);
+      ctx.fillText(comboAnim.text, boardEl.width/2, comboAnim.y);
+      ctx.restore();
+      comboAnim.alpha-=0.022;
+      comboAnim.y-=0.8;
+      if (comboAnim.alpha<=0) comboAnim=null;
     }
   }
 
-  function drawNext() {
-    nCtx.clearRect(0, 0, 100, 100);
-    const s = nextPiece.shape;
-    const cs = 20;
-    const ox = Math.floor((5 - s[0].length) / 2) * cs;
-    const oy = Math.floor((5 - s.length) / 2) * cs;
-    s.forEach((row, r) => row.forEach((val, c) => {
-      if (val) drawCell(val, ox + c * cs, oy + r * cs, cs, nCtx);
-    }));
-  }
-
-  let dropCounter = 0;
-
-  function gameLoop(ts = 0) {
+  // ── Game loop ─────────────────────────────────────────────
+  function gameLoop(ts=0) {
     if (!running) return;
-    const delta = ts - lastTime;
-    lastTime = ts;
+    const delta=ts-lastTime; lastTime=ts;
     if (!paused) {
-      dropCounter += delta;
-      if (dropCounter >= dropInterval) {
-        if (!collides(piece, 0, 1)) piece.y++;
+      dropCounter+=delta;
+      if (dropCounter>=dropInterval) {
+        if (!collides(piece,0,1)) piece.y++;
         else lock();
-        dropCounter = 0;
+        dropCounter=0;
       }
       drawBoard();
     }
-    animId = requestAnimationFrame(gameLoop);
+    animId=requestAnimationFrame(gameLoop);
   }
 
+  // ── Start / Game over ──────────────────────────────────────
   function startGame() {
-    grid = createGrid();
-    score = 0; level = 1; lines = 0; dropInterval = 1000; dropCounter = 0; paused = false; running = true;
-    scoreEl.textContent = 0; levelEl.textContent = 1; linesEl.textContent = 0;
-    piece = randomPiece();
-    nextPiece = randomPiece();
-    drawNext();
-    overlay.style.display = 'none';
-    finalScore.style.display = 'none';
-    lastTime = 0;
+    resumeAudio();
+    grid=createGrid();
+    score=0; level=1; lines=0; dropInterval=1000; dropCounter=0;
+    combo=0; skillGauge=0; paused=false; running=true;
+    holdPiece=null; holdUsed=false;
+    explosion=null; comboAnim=null; skillFlash=0;
+    scoreEl.textContent=0; levelEl.textContent=1; linesEl.textContent=0;
+    comboEl.textContent='—';
+    piece=randomPiece(); nextPiece=randomPiece();
+    updateNextDisplay(); drawHold(); updateSkillUI();
+    overlay.style.display='none';
+    finalScore.style.display='none'; finalBest.style.display='none';
+    pauseBanner.style.display='none';
+    holdUsedLabel.textContent='';
+    lastTime=0;
     if (animId) cancelAnimationFrame(animId);
-    animId = requestAnimationFrame(gameLoop);
+    animId=requestAnimationFrame(gameLoop);
   }
 
   function gameOver() {
-    running = false;
-    cancelAnimationFrame(animId);
-    overlay.querySelector('h1').textContent = 'GAME OVER';
-    overlay.querySelector('p').textContent = '수고하셨습니다!';
-    finalScore.textContent = `최종 점수: ${score}`;
-    finalScore.style.display = 'block';
-    startBtn.textContent = '다시하기';
-    overlay.style.display = 'flex';
+    running=false; cancelAnimationFrame(animId);
+    sfxGameOver();
+    if (score>bestScore) {
+      bestScore=score;
+      localStorage.setItem('tetris-best', bestScore);
+      bestEl.textContent=bestScore;
+    }
+    overlay.querySelector('h1').textContent='GAME OVER';
+    overlay.querySelector('p').textContent='수고하셨습니다!';
+    finalScore.textContent=`최종 점수: ${score}`;
+    finalBest.textContent =`최고 점수: ${bestScore}`;
+    finalScore.style.display='block'; finalBest.style.display='block';
+    startBtn.textContent='다시하기';
+    overlay.style.display='flex';
   }
 
-  startBtn.addEventListener('click', startGame);
-
+  // ── Keyboard ──────────────────────────────────────────────
   document.addEventListener('keydown', e => {
-    if (!running) return;
-    if (e.key === 'p' || e.key === 'P') { paused = !paused; return; }
-    if (paused) return;
-    switch (e.key) {
+    if (e.key==='p'||e.key==='P') {
+      if (!running) return;
+      paused=!paused;
+      pauseBanner.style.display=paused?'block':'none';
+      if (!paused) lastTime=0;
+      return;
+    }
+    if (!running||paused) return;
+    switch(e.key) {
       case 'ArrowLeft':
-        if (!collides(piece, -1, 0)) { piece.x--; drawBoard(); }
-        break;
+        if (!collides(piece,-1,0)) { piece.x--; sfxMove(); drawBoard(); } break;
       case 'ArrowRight':
-        if (!collides(piece, 1, 0)) { piece.x++; drawBoard(); }
-        break;
+        if (!collides(piece, 1,0)) { piece.x++; sfxMove(); drawBoard(); } break;
       case 'ArrowDown':
-        if (!collides(piece, 0, 1)) { piece.y++; dropCounter = 0; }
+        e.preventDefault();
+        if (!collides(piece,0,1)) { piece.y++; score++; scoreEl.textContent=score; dropCounter=0; }
         else lock();
-        drawBoard();
-        break;
+        drawBoard(); break;
       case 'ArrowUp': {
-        const rotated = rotate(piece.shape);
-        let kick = 0;
-        if (collides(piece, 0, 0, rotated)) {
-          kick = piece.x + rotated[0].length > COLS ? -1 : 1;
-        }
-        if (!collides(piece, kick, 0, rotated)) {
-          piece.shape = rotated; piece.x += kick; drawBoard();
+        e.preventDefault();
+        const rotated=rotate(piece.shape);
+        let kick=0;
+        if (collides(piece,0,0,rotated))
+          kick=piece.x+rotated[0].length>COLS?-1:1;
+        if (!collides(piece,kick,0,rotated)) {
+          piece.shape=rotated; piece.x+=kick; sfxRotate(); drawBoard();
         }
         break;
       }
       case ' ':
-        e.preventDefault();
-        hardDrop();
-        drawBoard();
-        break;
+        e.preventDefault(); hardDrop(); drawBoard(); break;
+      case 'c': case 'C':
+        holdAction(); drawBoard(); break;
+      case 'z': case 'Z':
+        skillAction(); drawBoard(); break;
     }
+  });
+
+  startBtn.addEventListener('click', startGame);
+
+  document.getElementById('quit-btn').addEventListener('click', () => {
+    if (!running) return;
+    if (!confirm('게임을 종료하시겠습니까?')) return;
+    running = false;
+    cancelAnimationFrame(animId);
+    overlay.querySelector('h1').textContent = 'TETRIS';
+    overlay.querySelector('p').textContent = '블록을 쌓아 줄을 완성하세요';
+    finalScore.style.display = 'none';
+    finalBest.style.display  = 'none';
+    startBtn.textContent = '다시하기';
+    overlay.style.display = 'flex';
+    pauseBanner.style.display = 'none';
   });
 </script>
 </body>
