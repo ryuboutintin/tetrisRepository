@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris — Play</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="game-body">
+
+  <!-- 시작 화면 -->
+  <div id="start-screen">
+    <h1>TETRIS</h1>
+    <p>아이디를 입력하고 게임을 시작하세요</p>
+    <input id="id-input" type="text" maxlength="12" placeholder="아이디 입력" autocomplete="off">
+    <button id="start-btn">START</button>
+    <div class="key-hint">
+      <span>←</span> <span>→</span> 이동 &nbsp;
+      <span>↓</span> 빠르게 &nbsp;
+      <span>↑</span> / <span>Z</span> 회전 &nbsp;
+      <span>Space</span> 즉시 낙하 &nbsp;
+      <span>P</span> 정지 &nbsp;
+      <span>M</span> 음소거
+    </div>
+    <a href="index.html" class="back-link">← 랜딩 페이지로</a>
+  </div>
+
+  <!-- 게임 화면 -->
+  <div id="game-screen">
+    <canvas id="board" width="300" height="600"></canvas>
+
+    <div id="panel">
+      <div class="panel-box">
+        <div class="panel-label">Player</div>
+        <div class="panel-value" id="player-name">—</div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-label">Score</div>
+        <div class="panel-value" id="score-value">0</div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-label">Level</div>
+        <div class="panel-value" id="level-value">1</div>
+      </div>
+      <div class="panel-box">
+        <div class="panel-label-sm">NEXT</div>
+        <canvas id="next-canvas" width="120" height="120"></canvas>
+      </div>
+      <button class="panel-btn" id="pause-btn">일시정지 (P)</button>
+      <button class="panel-btn" id="mute-btn">🔊 음소거 (M)</button>
+    </div>
+  </div>
+
+  <!-- 오버레이 -->
+  <div id="overlay">
+    <div class="overlay-box">
+      <h2 id="overlay-title">GAME OVER</h2>
+      <div class="final-score" id="overlay-score"></div>
+      <p id="overlay-sub"></p>
+      <button class="overlay-btn" id="overlay-btn">다시 시작</button>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

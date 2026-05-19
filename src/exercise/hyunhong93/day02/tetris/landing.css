@@ -1,0 +1,135 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #1a1a2e;
+  color: #eee;
+  font-family: 'Segoe UI', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 32px;
+}
+
+header {
+  text-align: center;
+}
+
+header h1 {
+  font-size: 5rem;
+  letter-spacing: 16px;
+  color: #a0a0ff;
+  text-shadow: 0 0 40px rgba(160,160,255,0.5), 0 0 80px rgba(160,160,255,0.2);
+  line-height: 1;
+}
+
+header p {
+  margin-top: 10px;
+  font-size: 0.78rem;
+  letter-spacing: 4px;
+  color: #44447a;
+  text-transform: uppercase;
+}
+
+#blocks-canvas {
+  display: block;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  max-width: 560px;
+}
+
+.panel {
+  background: #16213e;
+  border: 1px solid #2a2a5a;
+  border-radius: 10px;
+  padding: 22px 24px;
+}
+
+.panel h2 {
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  color: #5555aa;
+  text-transform: uppercase;
+  margin-bottom: 16px;
+}
+
+.key-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 11px;
+  font-size: 0.88rem;
+  color: #ccc;
+}
+
+.key-row:last-child { margin-bottom: 0; }
+
+kbd {
+  display: inline-block;
+  background: #1e1e3e;
+  border: 1px solid #4a4a7a;
+  border-bottom: 3px solid #3a3a6a;
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  color: #aaa;
+  min-width: 34px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.score-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #1e1e3e;
+  font-size: 0.88rem;
+  color: #ccc;
+}
+
+.score-row:last-child { border-bottom: none; padding-bottom: 0; }
+.score-row:first-of-type { padding-top: 0; }
+
+.score-val {
+  color: #a0a0ff;
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.play-btn {
+  display: block;
+  width: 220px;
+  padding: 15px;
+  background: #4040aa;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 6px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  transition: background 0.15s, transform 0.1s, box-shadow 0.15s;
+  box-shadow: 0 4px 20px rgba(64, 64, 170, 0.4);
+}
+
+.play-btn:hover {
+  background: #5555cc;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(85, 85, 204, 0.5);
+}
+
+.hint {
+  font-size: 0.72rem;
+  color: #33335a;
+  letter-spacing: 1px;
+}

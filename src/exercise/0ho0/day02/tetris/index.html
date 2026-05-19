@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tetris MVP</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #14151a;
+      --panel: #20232b;
+      --panel-soft: #292d37;
+      --grid: #303542;
+      --text: #f2f4f8;
+      --muted: #aeb6c4;
+      --accent: #4ade80;
+      --danger: #fb7185;
+      --cell-size: min(4.2vw, 28px);
+      --preview-cell-size: 24px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        radial-gradient(circle at top left, rgba(74, 222, 128, 0.12), transparent 32rem),
+        var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .screen {
+      width: 100%;
+    }
+
+    .screen.hidden {
+      display: none;
+    }
+
+    .landing {
+      width: min(94vw, 900px);
+      min-height: min(720px, 92vh);
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 24px;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .hero {
+      display: grid;
+      gap: 22px;
+    }
+
+    .hero-title {
+      margin: 0;
+      font-size: clamp(3rem, 8vw, 6rem);
+      line-height: 0.9;
+      letter-spacing: 0;
+    }
+
+    .hero-copy {
+      max-width: 34rem;
+      margin: 0;
+      color: var(--muted);
+      font-size: 1.08rem;
+      line-height: 1.65;
+    }
+
+    .play-button {
+      width: min(100%, 260px);
+      min-height: 54px;
+      font-size: 1.1rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .player-form {
+      display: grid;
+      gap: 10px;
+      max-width: 360px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 12px;
+      border: 1px solid #4b5363;
+      border-radius: 8px;
+      background: var(--panel-soft);
+      color: var(--text);
+      font: inherit;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(74, 222, 128, 0.55);
+      outline-offset: 2px;
+    }
+
+    .form-message {
+      min-height: 1.3em;
+      margin: 0;
+      color: var(--danger);
+      font-size: 0.9rem;
+    }
+
+    .landing-board {
+      display: grid;
+      grid-template-columns: repeat(8, minmax(20px, 1fr));
+      grid-template-rows: repeat(10, minmax(20px, 1fr));
+      gap: 4px;
+      aspect-ratio: 8 / 10;
+      padding: 14px;
+      background: #0f1117;
+      border: 1px solid #343a47;
+      border-radius: 8px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+    }
+
+    .landing-cell {
+      min-width: 0;
+      border-radius: 4px;
+      background: var(--grid);
+    }
+
+    .landing-cell.cyan {
+      background: #22d3ee;
+    }
+
+    .landing-cell.yellow {
+      background: #facc15;
+    }
+
+    .landing-cell.purple {
+      background: #a78bfa;
+    }
+
+    .landing-cell.green {
+      background: #4ade80;
+    }
+
+    .landing-cell.red {
+      background: #f87171;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .info-list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    .game {
+      width: min(94vw, 760px);
+      display: grid;
+      grid-template-columns: auto minmax(180px, 240px);
+      gap: 20px;
+      align-items: start;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 2rem;
+      line-height: 1.1;
+      letter-spacing: 0;
+    }
+
+    .board-wrap {
+      position: relative;
+      padding: 12px;
+      background: #0f1117;
+      border: 1px solid #343a47;
+      border-radius: 8px;
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.32);
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(10, var(--cell-size));
+      grid-template-rows: repeat(20, var(--cell-size));
+      gap: 1px;
+      background: #171a21;
+      border: 1px solid #3a4050;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      background: var(--grid);
+      border-radius: 3px;
+    }
+
+    .cell.filled {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22);
+    }
+
+    .sidebar {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid #373d4a;
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .score-label {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    #score {
+      margin: 0;
+      font-size: 2.3rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .panel-title {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    #next-preview {
+      display: grid;
+      grid-template-columns: repeat(4, var(--preview-cell-size));
+      grid-template-rows: repeat(4, var(--preview-cell-size));
+      gap: 2px;
+      width: max-content;
+      margin: 0 auto;
+      padding: 8px;
+      background: #171a21;
+      border: 1px solid #3a4050;
+      border-radius: 8px;
+    }
+
+    .preview-cell {
+      width: var(--preview-cell-size);
+      height: var(--preview-cell-size);
+      background: var(--grid);
+      border-radius: 3px;
+    }
+
+    .preview-cell.filled {
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.22);
+    }
+
+    #status {
+      min-height: 1.4em;
+      margin: 10px 0 0;
+      color: var(--accent);
+      font-size: 0.95rem;
+    }
+
+    #status.game-over {
+      color: var(--danger);
+    }
+
+    button {
+      width: 100%;
+      min-height: 44px;
+      border: 0;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #092014;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .secondary-button {
+      background: var(--panel-soft);
+      color: var(--text);
+      border: 1px solid #4b5363;
+    }
+
+    .actions button {
+      width: auto;
+      min-width: 130px;
+      padding: 0 18px;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(8, 10, 14, 0.72);
+    }
+
+    .modal-backdrop.hidden {
+      display: none;
+    }
+
+    .modal {
+      width: min(92vw, 460px);
+      max-height: min(680px, 90vh);
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid #424a59;
+      border-radius: 8px;
+      padding: 18px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .close-button {
+      width: 40px;
+      min-width: 40px;
+      min-height: 40px;
+      background: var(--panel-soft);
+      color: var(--text);
+      border: 1px solid #4b5363;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .ranking-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .ranking-row {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+      background: #171a21;
+      border: 1px solid #343a47;
+      border-radius: 8px;
+    }
+
+    .rank-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .rank-score {
+      color: var(--accent);
+      font-weight: 800;
+    }
+
+    .empty-ranking {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    button:hover {
+      filter: brightness(1.06);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    .controls {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.8;
+    }
+
+    .controls kbd {
+      display: inline-block;
+      min-width: 78px;
+      margin-right: 8px;
+      padding: 2px 7px;
+      border: 1px solid #4b5363;
+      border-radius: 5px;
+      background: var(--panel-soft);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 0.82rem;
+      text-align: center;
+    }
+
+    @media (max-width: 680px) {
+      :root {
+        --cell-size: min(8.1vw, 28px);
+        --preview-cell-size: 22px;
+      }
+
+      body {
+        align-items: start;
+      }
+
+      .landing {
+        grid-template-columns: 1fr;
+        gap: 16px;
+        padding: 16px;
+      }
+
+      .landing-board {
+        width: min(100%, 340px);
+        justify-self: center;
+      }
+
+      .info-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .actions button,
+      .play-button {
+        width: 100%;
+      }
+
+      .game {
+        width: 100%;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 14px;
+        padding: 16px;
+      }
+
+      .sidebar {
+        width: min(100%, calc(var(--cell-size) * 10 + 26px));
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main id="landing-screen" class="screen landing">
+    <section class="hero">
+      <div>
+        <h1 class="hero-title">Tetris</h1>
+        <p class="hero-copy">
+          떨어지는 블록을 움직이고 회전해서 가로줄을 완성하세요.
+          완성된 줄은 사라지고 점수가 올라가며, 블록이 화면 위까지 쌓이면 게임이 끝납니다.
+        </p>
+      </div>
+
+      <section class="player-form" aria-label="플레이어 이름 입력">
+        <label for="player-name">플레이어 이름</label>
+        <input id="player-name" type="text" maxlength="16" autocomplete="nickname" placeholder="이름을 입력하세요">
+        <p id="name-message" class="form-message" aria-live="polite"></p>
+        <div class="actions">
+          <button id="play-button" class="play-button" type="button">Play</button>
+          <button class="secondary-button ranking-button" type="button">Ranking</button>
+        </div>
+      </section>
+
+      <section class="info-grid" aria-label="게임 정보">
+        <article class="panel">
+          <p class="panel-title">플레이 방법</p>
+          <ul class="info-list">
+            <li>왼쪽/오른쪽 방향키로 이동</li>
+            <li>위쪽 방향키로 회전</li>
+            <li>아래쪽 방향키로 빠른 하강</li>
+            <li>Space로 재시작</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <p class="panel-title">점수 계산</p>
+          <ul class="info-list">
+            <li>1줄: 100점</li>
+            <li>2줄: 300점</li>
+            <li>3줄: 500점</li>
+            <li>4줄: 800점</li>
+          </ul>
+        </article>
+      </section>
+    </section>
+
+    <section class="landing-board" aria-label="테트리스 블록 미리보기 장식">
+      <span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell cyan"></span><span class="landing-cell cyan"></span><span class="landing-cell cyan"></span><span class="landing-cell cyan"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell purple"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell yellow"></span><span class="landing-cell yellow"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell purple"></span><span class="landing-cell purple"></span><span class="landing-cell purple"></span><span class="landing-cell"></span><span class="landing-cell yellow"></span><span class="landing-cell yellow"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell green"></span><span class="landing-cell green"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell red"></span><span class="landing-cell red"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell green"></span><span class="landing-cell green"></span><span class="landing-cell red"></span><span class="landing-cell red"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span><span class="landing-cell"></span>
+      <span class="landing-cell cyan"></span><span class="landing-cell yellow"></span><span class="landing-cell yellow"></span><span class="landing-cell purple"></span><span class="landing-cell green"></span><span class="landing-cell green"></span><span class="landing-cell red"></span><span class="landing-cell red"></span>
+      <span class="landing-cell cyan"></span><span class="landing-cell cyan"></span><span class="landing-cell yellow"></span><span class="landing-cell purple"></span><span class="landing-cell purple"></span><span class="landing-cell green"></span><span class="landing-cell green"></span><span class="landing-cell red"></span>
+    </section>
+  </main>
+
+  <main id="game-screen" class="screen game hidden">
+    <section class="board-wrap" aria-label="테트리스 게임 보드">
+      <div id="board"></div>
+    </section>
+
+    <aside class="sidebar">
+      <section class="panel">
+        <h1>Tetris</h1>
+        <p class="score-label">Player</p>
+        <p id="current-player">-</p>
+        <p class="score-label">Score</p>
+        <p id="score">0</p>
+        <p id="status">Space 또는 버튼으로 시작</p>
+      </section>
+
+      <button id="start-button" type="button">Start</button>
+      <button class="secondary-button ranking-button" type="button">Ranking</button>
+
+      <section class="panel">
+        <p class="panel-title">Next</p>
+        <div id="next-preview" aria-label="다음 블록 미리보기"></div>
+      </section>
+
+      <section class="panel">
+        <ul class="controls" aria-label="조작키">
+          <li><kbd>←</kbd>왼쪽 이동</li>
+          <li><kbd>→</kbd>오른쪽 이동</li>
+          <li><kbd>↓</kbd>빠른 하강</li>
+          <li><kbd>↑</kbd>회전</li>
+          <li><kbd>Space</kbd>시작 / 재시작</li>
+        </ul>
+      </section>
+    </aside>
+  </main>
+
+  <section id="ranking-modal" class="modal-backdrop hidden" aria-modal="true" role="dialog" aria-labelledby="ranking-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="ranking-title">Ranking</h2>
+        <button id="close-ranking" class="close-button" type="button" aria-label="랭킹 닫기">×</button>
+      </div>
+      <ol id="ranking-list" class="ranking-list"></ol>
+      <p id="empty-ranking" class="empty-ranking">아직 저장된 점수가 없습니다.</p>
+    </div>
+  </section>
+
+  <script>
+    const COLS = 10;
+    const ROWS = 20;
+    const DROP_MS = 650;
+    const LINE_POINTS = [0, 100, 300, 500, 800];
+    const STORAGE_KEY = "tetrisRankings";
+
+    const SHAPES = [
+      [[1, 1, 1, 1]],
+      [[1, 1], [1, 1]],
+      [[0, 1, 0], [1, 1, 1]],
+      [[1, 0, 0], [1, 1, 1]],
+      [[0, 0, 1], [1, 1, 1]],
+      [[0, 1, 1], [1, 1, 0]],
+      [[1, 1, 0], [0, 1, 1]]
+    ];
+
+    const COLORS = [
+      "#22d3ee",
+      "#facc15",
+      "#a78bfa",
+      "#60a5fa",
+      "#fb923c",
+      "#4ade80",
+      "#f87171"
+    ];
+
+    const boardEl = document.querySelector("#board");
+    const landingScreen = document.querySelector("#landing-screen");
+    const gameScreen = document.querySelector("#game-screen");
+    const playButton = document.querySelector("#play-button");
+    const playerNameInput = document.querySelector("#player-name");
+    const nameMessageEl = document.querySelector("#name-message");
+    const currentPlayerEl = document.querySelector("#current-player");
+    const nextPreviewEl = document.querySelector("#next-preview");
+    const scoreEl = document.querySelector("#score");
+    const statusEl = document.querySelector("#status");
+    const startButton = document.querySelector("#start-button");
+    const rankingButtons = document.querySelectorAll(".ranking-button");
+    const rankingModal = document.querySelector("#ranking-modal");
+    const closeRankingButton = document.querySelector("#close-ranking");
+    const rankingListEl = document.querySelector("#ranking-list");
+    const emptyRankingEl = document.querySelector("#empty-ranking");
+
+    let cells = [];
+    let previewCells = [];
+    let board = createEmptyBoard();
+    let activePiece = null;
+    let nextPiece = null;
+    let score = 0;
+    let currentPlayer = "";
+    let dropTimer = null;
+    let isRunning = false;
+    let isGameOver = false;
+
+    function createEmptyBoard() {
+      return Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+    }
+
+    function buildBoard() {
+      boardEl.innerHTML = "";
+      cells = [];
+
+      for (let row = 0; row < ROWS; row += 1) {
+        cells[row] = [];
+        for (let col = 0; col < COLS; col += 1) {
+          const cell = document.createElement("div");
+          cell.className = "cell";
+          boardEl.appendChild(cell);
+          cells[row][col] = cell;
+        }
+      }
+    }
+
+    function buildNextPreview() {
+      nextPreviewEl.innerHTML = "";
+      previewCells = [];
+
+      for (let row = 0; row < 4; row += 1) {
+        previewCells[row] = [];
+        for (let col = 0; col < 4; col += 1) {
+          const cell = document.createElement("div");
+          cell.className = "preview-cell";
+          nextPreviewEl.appendChild(cell);
+          previewCells[row][col] = cell;
+        }
+      }
+    }
+
+    function randomPiece() {
+      const index = Math.floor(Math.random() * SHAPES.length);
+      const shape = SHAPES[index].map((row) => [...row]);
+
+      return {
+        shape,
+        color: COLORS[index],
+        row: 0,
+        col: Math.floor((COLS - shape[0].length) / 2)
+      };
+    }
+
+    function clonePiece(piece) {
+      return {
+        shape: piece.shape.map((row) => [...row]),
+        color: piece.color,
+        row: 0,
+        col: Math.floor((COLS - piece.shape[0].length) / 2)
+      };
+    }
+
+    function draw() {
+      const merged = board.map((row) => [...row]);
+
+      if (activePiece) {
+        activePiece.shape.forEach((row, r) => {
+          row.forEach((value, c) => {
+            if (value) {
+              const boardRow = activePiece.row + r;
+              const boardCol = activePiece.col + c;
+              if (boardRow >= 0 && boardRow < ROWS && boardCol >= 0 && boardCol < COLS) {
+                merged[boardRow][boardCol] = activePiece.color;
+              }
+            }
+          });
+        });
+      }
+
+      for (let row = 0; row < ROWS; row += 1) {
+        for (let col = 0; col < COLS; col += 1) {
+          const color = merged[row][col];
+          const cell = cells[row][col];
+          cell.style.backgroundColor = color || "";
+          cell.classList.toggle("filled", Boolean(color));
+        }
+      }
+    }
+
+    function drawNextPreview() {
+      for (let row = 0; row < 4; row += 1) {
+        for (let col = 0; col < 4; col += 1) {
+          const cell = previewCells[row][col];
+          cell.style.backgroundColor = "";
+          cell.classList.remove("filled");
+        }
+      }
+
+      if (!nextPiece) {
+        return;
+      }
+
+      const shape = nextPiece.shape;
+      const rowOffset = Math.floor((4 - shape.length) / 2);
+      const colOffset = Math.floor((4 - shape[0].length) / 2);
+
+      shape.forEach((shapeRow, r) => {
+        shapeRow.forEach((value, c) => {
+          if (!value) {
+            return;
+          }
+
+          const row = rowOffset + r;
+          const col = colOffset + c;
+          const cell = previewCells[row][col];
+          cell.style.backgroundColor = nextPiece.color;
+          cell.classList.add("filled");
+        });
+      });
+    }
+
+    function canMove(piece, nextRow, nextCol, nextShape = piece.shape) {
+      for (let row = 0; row < nextShape.length; row += 1) {
+        for (let col = 0; col < nextShape[row].length; col += 1) {
+          if (!nextShape[row][col]) {
+            continue;
+          }
+
+          const boardRow = nextRow + row;
+          const boardCol = nextCol + col;
+
+          if (boardCol < 0 || boardCol >= COLS || boardRow >= ROWS) {
+            return false;
+          }
+
+          if (boardRow >= 0 && board[boardRow][boardCol]) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    }
+
+    function rotateShape(shape) {
+      const rows = shape.length;
+      const cols = shape[0].length;
+      const rotated = [];
+
+      for (let col = 0; col < cols; col += 1) {
+        const nextRow = [];
+        for (let row = rows - 1; row >= 0; row -= 1) {
+          nextRow.push(shape[row][col]);
+        }
+        rotated.push(nextRow);
+      }
+
+      return rotated;
+    }
+
+    function movePiece(rowDelta, colDelta) {
+      if (!isRunning || !activePiece) {
+        return false;
+      }
+
+      const nextRow = activePiece.row + rowDelta;
+      const nextCol = activePiece.col + colDelta;
+
+      if (!canMove(activePiece, nextRow, nextCol)) {
+        return false;
+      }
+
+      activePiece.row = nextRow;
+      activePiece.col = nextCol;
+      draw();
+      return true;
+    }
+
+    function rotatePiece() {
+      if (!isRunning || !activePiece) {
+        return;
+      }
+
+      const rotated = rotateShape(activePiece.shape);
+      const offsets = [0, -1, 1, -2, 2];
+
+      for (const offset of offsets) {
+        if (canMove(activePiece, activePiece.row, activePiece.col + offset, rotated)) {
+          activePiece.shape = rotated;
+          activePiece.col += offset;
+          draw();
+          return;
+        }
+      }
+    }
+
+    function lockPiece() {
+      activePiece.shape.forEach((row, r) => {
+        row.forEach((value, c) => {
+          if (value) {
+            const boardRow = activePiece.row + r;
+            const boardCol = activePiece.col + c;
+            if (boardRow >= 0) {
+              board[boardRow][boardCol] = activePiece.color;
+            }
+          }
+        });
+      });
+
+      clearLines();
+      spawnPiece();
+    }
+
+    function clearLines() {
+      let cleared = 0;
+      board = board.filter((row) => {
+        if (row.every(Boolean)) {
+          cleared += 1;
+          return false;
+        }
+        return true;
+      });
+
+      while (board.length < ROWS) {
+        board.unshift(Array(COLS).fill(null));
+      }
+
+      if (cleared > 0) {
+        score += LINE_POINTS[cleared] || cleared * 200;
+        scoreEl.textContent = score;
+      }
+    }
+
+    function spawnPiece() {
+      activePiece = clonePiece(nextPiece);
+      nextPiece = randomPiece();
+      drawNextPreview();
+
+      if (!canMove(activePiece, activePiece.row, activePiece.col)) {
+        endGame();
+        return;
+      }
+
+      draw();
+    }
+
+    function tick() {
+      if (!movePiece(1, 0)) {
+        lockPiece();
+      }
+    }
+
+    function readRankings() {
+      try {
+        const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    }
+
+    function writeRankings(rankings) {
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(rankings));
+    }
+
+    function saveScore() {
+      const rankings = readRankings();
+      rankings.push({
+        name: currentPlayer || "Player",
+        score,
+        playedAt: new Date().toISOString()
+      });
+      rankings.sort((a, b) => b.score - a.score);
+      writeRankings(rankings.slice(0, 20));
+    }
+
+    function renderRankings() {
+      const rankings = readRankings().sort((a, b) => b.score - a.score);
+      rankingListEl.innerHTML = "";
+      emptyRankingEl.hidden = rankings.length > 0;
+
+      rankings.forEach((entry, index) => {
+        const row = document.createElement("li");
+        row.className = "ranking-row";
+
+        const rank = document.createElement("strong");
+        rank.textContent = `${index + 1}`;
+
+        const name = document.createElement("span");
+        name.className = "rank-name";
+        name.textContent = entry.name;
+
+        const rankScore = document.createElement("span");
+        rankScore.className = "rank-score";
+        rankScore.textContent = `${entry.score}점`;
+
+        row.append(rank, name, rankScore);
+        rankingListEl.appendChild(row);
+      });
+    }
+
+    function showRankings() {
+      renderRankings();
+      rankingModal.classList.remove("hidden");
+    }
+
+    function hideRankings() {
+      rankingModal.classList.add("hidden");
+    }
+
+    function getPlayerName() {
+      return playerNameInput.value.trim().slice(0, 16);
+    }
+
+    function startGame() {
+      window.clearInterval(dropTimer);
+      board = createEmptyBoard();
+      nextPiece = randomPiece();
+      score = 0;
+      scoreEl.textContent = "0";
+      currentPlayerEl.textContent = currentPlayer || "Player";
+      isRunning = true;
+      isGameOver = false;
+      statusEl.textContent = "게임 진행 중";
+      statusEl.classList.remove("game-over");
+      startButton.textContent = "Restart";
+      spawnPiece();
+      dropTimer = window.setInterval(tick, DROP_MS);
+    }
+
+    function showGame() {
+      const playerName = getPlayerName();
+      if (!playerName) {
+        nameMessageEl.textContent = "플레이어 이름을 입력하세요.";
+        playerNameInput.focus();
+        return;
+      }
+
+      currentPlayer = playerName;
+      nameMessageEl.textContent = "";
+      landingScreen.classList.add("hidden");
+      gameScreen.classList.remove("hidden");
+      startGame();
+    }
+
+    function endGame() {
+      isRunning = false;
+      isGameOver = true;
+      window.clearInterval(dropTimer);
+      saveScore();
+      statusEl.textContent = "Game Over";
+      statusEl.classList.add("game-over");
+      startButton.textContent = "Restart";
+      draw();
+    }
+
+    playButton.addEventListener("click", showGame);
+    startButton.addEventListener("click", startGame);
+    closeRankingButton.addEventListener("click", hideRankings);
+    rankingButtons.forEach((button) => {
+      button.addEventListener("click", showRankings);
+    });
+
+    rankingModal.addEventListener("click", (event) => {
+      if (event.target === rankingModal) {
+        hideRankings();
+      }
+    });
+
+    playerNameInput.addEventListener("input", () => {
+      if (getPlayerName()) {
+        nameMessageEl.textContent = "";
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.code === "Escape" && !rankingModal.classList.contains("hidden")) {
+        hideRankings();
+        return;
+      }
+
+      if (event.code === "Space") {
+        if (document.activeElement === playerNameInput) {
+          return;
+        }
+        event.preventDefault();
+        if (gameScreen.classList.contains("hidden")) {
+          showGame();
+        } else if (!isRunning || isGameOver) {
+          startGame();
+        }
+        return;
+      }
+
+      if (!isRunning) {
+        return;
+      }
+
+      if (["ArrowLeft", "ArrowRight", "ArrowDown", "ArrowUp"].includes(event.code)) {
+        event.preventDefault();
+      }
+
+      if (event.code === "ArrowLeft") {
+        movePiece(0, -1);
+      } else if (event.code === "ArrowRight") {
+        movePiece(0, 1);
+      } else if (event.code === "ArrowDown") {
+        tick();
+      } else if (event.code === "ArrowUp") {
+        rotatePiece();
+      }
+    });
+
+    buildBoard();
+    buildNextPreview();
+    drawNextPreview();
+    draw();
+  </script>
+</body>
+</html>
